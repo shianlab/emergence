@@ -1,0 +1,16 @@
+{
+  "source": "yongxian-handwritten-source.jpg",
+  "sourceSha256": "1a37db1375bdd3f1885e7b1dc1922c423c3f876e8c08883098af89fae13b395a",
+  "output": "yongxian-wordmark.png",
+  "preview": "yongxian-wordmark-preview.png",
+  "method": "Original photograph pixel mask; no generative redrawing",
+  "cropInSourcePixels": [328, 710, 3461, 1359],
+  "resize": false, "rotate": false, "dewarp": false, "repositionCharacters": false,
+  "luminanceThreshold": 116, "minimumComponentArea": 150,
+  "retainedInkComponentAreas": [552261, 28459, 502252, 24660, 78126, 178380],
+  "removedSpeckComponents": 5, "removedSpeckPixels": 53,
+  "edgeCleanup": "One 3x3 majority pass; 3x3 binomial alpha antialiasing; edge-only paper decontamination",
+  "contourCleanupChangedPixels": 986,
+  "cleanedMaskIntersectionOverUnion": 0.9992774571768801,
+  "runtimeIntegrated": false
+}

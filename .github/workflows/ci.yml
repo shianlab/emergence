@@ -1,0 +1,52 @@
+name: Windows source checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: emergence
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.13.0'
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14'
+          architecture: x64
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - name: Validate installer syntax
+        run: |
+          $files = @('../install.ps1', 'release/install.ps1', 'release/run-manager.ps1', 'release/uninstall.ps1', 'tests/release-bootstrap.ps1')
+          foreach ($file in $files) {
+            $parseErrors = $null
+            [Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$null, [ref]$parseErrors) | Out-Null
+            if ($parseErrors) { throw ($parseErrors | Out-String) }
+          }
+      - name: Initialize isolated data test runtime
+        run: |
+          python -m venv .data-venv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .data-venv/Scripts/python.exe -I -m pip install --require-hashes --only-binary=:all: -r src/domains/data/requirements-win32-py314.txt
+      - run: npm test
+      - run: npm run test:independent-windows:tui
+      - run: npm run inspect:security

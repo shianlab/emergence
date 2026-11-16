@@ -1,0 +1,47 @@
+import { stripVTControlCharacters } from 'node:util';
+const credentialNames = new Set<string>();
+export function registerSecretNames(names: readonly string[]) {
+  names.forEach((name) => credentialNames.add(name));
+}
+
+/** Diagnostics must not include environment values or credential-bearing URLs. */
+export function safeError(error: unknown): string {
+  let text = error instanceof Error ? error.message : String(error);
+  // On Windows every environment value lookup crosses the native boundary.
+  // Enumerate names first; only read possible credentials. Keep lookups live so
+  // newly configured or rotated credentials are redacted on the very next call.
+  for (const key of Object.keys(process.env)) {
+    if (!/(KEY|TOKEN|SECRET|PASSWORD)/i.test(key) && !credentialNames.has(key)) continue;
+    const value = process.env[key];
+    if (value && value.length >= 4) text = text.replaceAll(value, '[已隐藏]');
+  }
+  // Provider/MCP errors may contain credentials not present in this process environment.
+  text = text.replace(/https?:\/\/[^\s"'<>]+/gi, (value) => {
+    try {
+      const url = new URL(value);
+      let changed = false;
+      if (url.username || url.password) {
+        url.username = '';
+        url.password = '';
+        changed = true;
+      }
+      for (const name of [...url.searchParams.keys()]) {
+        if (
+          /^(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|secret|password|signature|sig|x-amz-signature)$/i.test(
+            name,
+          )
+        ) {
+          url.searchParams.set(name, '[已隐藏]');
+          changed = true;
+        }
+      }
+      return changed ? url.toString() : value;
+    } catch {
+      return value;
+    }
+  });
+  return stripVTControlCharacters(text.replace(/(Bearer|Basic)\s+[^\s"']+/gi, '$1 [已隐藏]')).replace(
+    /[\x00-\x08\x0b-\x1f\x7f-\x9f]/g,
+    '',
+  );
+}

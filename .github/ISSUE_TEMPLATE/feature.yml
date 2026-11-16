@@ -1,0 +1,11 @@
+name: Feature request / 功能建议
+description: Describe a use case and a concrete improvement / 描述场景与改进
+title: "[Feature] "
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Use case / 使用场景
+      description: What task is difficult today, and what behavior would help?
+    validations:
+      required: true

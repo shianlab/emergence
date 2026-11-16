@@ -1,0 +1,14 @@
+{
+  "source":"../yongxian-wordmark.png",
+  "method":"Square-grid area sampling of original alpha; terminal half-block encoding",
+  "coverageThreshold":0.42,
+  "foreground":"#e6e3dc",
+  "previewBackground":"#0c0e11",
+  "variants":[
+    {"id":"fine","columns":128,"pixelRows":52,"terminalRows":26,"pngPixelScale":9,"occupiedPixels":1931},
+    {"id":"balanced","columns":96,"pixelRows":38,"terminalRows":19,"pngPixelScale":12,"occupiedPixels":1096},
+    {"id":"bold","columns":72,"pixelRows":30,"terminalRows":15,"pngPixelScale":16,"occupiedPixels":628}
+  ],
+  "notes":"Preview PNGs use the same binary grid as the TXT assets. Terminal appearance depends on font cell ratio and line spacing. Original master is unchanged.",
+  "runtimeIntegrated":false
+}

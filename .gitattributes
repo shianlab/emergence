@@ -1,0 +1,19 @@
+* text=auto
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.cjs text eol=lf
+*.cs text eol=lf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary
+
+# Preserve upstream/license and brand asset bytes, including their original line endings.
+emergence/vendor/** -text
+emergence/src/domains/data/licenses/** -text
+emergence/release/licenses/** -text
+emergence/assets/** -text

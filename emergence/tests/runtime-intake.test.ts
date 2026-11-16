@@ -1,0 +1,269 @@
+import { propose } from './fixtures/plan-proposal.ts';
+import { ToolCallId, type StreamChunk } from '@deepseek-ai/dsh-llm';
+import { defineTool } from '@deepseek-ai/dsh-tools';
+import UserApproval from '@deepseek-ai/dsh-user-approval';
+import assert from 'node:assert/strict';
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { test } from 'node:test';
+import { runtimeIdentity } from '../src/app/runtime-identity.ts';
+import { planSchema } from '../src/core/domain/planning.ts';
+import { executionFixture, until } from './fixtures/core-execution.ts';
+
+for (const intent of ['discuss', 'clarify'] as const)
+  test(`${intent} analysis blocks effects and manual plan execution; subsequent execution input can proceed`, async () => {
+    const f = await executionFixture();
+    try {
+      f.w.current.controller!.setPermissionMode('auto');
+      let n = 0,
+        execute = false;
+      f.provider.stream = async function* (): AsyncIterable<StreamChunk> {
+        const step = n++;
+        if (step > 1) {
+          yield { type: 'finish', reason: { kind: 'stop' } };
+          return;
+        }
+        const name = step ? 'write' : 'emergence_analyze';
+        const args = step
+          ? { file_path: 'result.txt', content: 'approved followup' }
+          : {
+              objective: '整理欢迎语需求',
+              reason: '先确认用途再实施',
+              route: 'focused',
+              intent: execute ? 'execute' : intent,
+              constraints: ['仅当前文件'],
+              acceptance: ['中文欢迎语'],
+              questions: !execute && intent === 'clarify' ? ['面向哪类用户？'] : [],
+            };
+        const id = ToolCallId(`intent-${execute}-${step}`),
+          raw = JSON.stringify(args);
+        yield { type: 'block-start', index: 0, blockType: 'tool-call' };
+        yield { type: 'tool-call-delta', index: 0, id, name, argumentsDelta: raw };
+        yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
+        yield { type: 'finish', reason: { kind: 'tool-calls' } };
+      };
+      const c = f.w.current.controller!;
+      await f.w.send(f.w.focused, '先聊一聊欢迎语，暂时不要改文件');
+      await c.agent.whenIdle();
+      assert.equal(c.planning.intake()?.analysis?.intent, intent);
+      assert.equal(f.writes(), 0);
+      assert.match(c.planning.label, intent === 'discuss' ? /仅讨论，不执行/ : /等待关键补充/);
+      await assert.rejects(c.planning.readyPlan(), /仅讨论或存在待确认/);
+      n = 0;
+      execute = true;
+      await f.w.send(f.w.focused, '面向新用户，现在把欢迎语换成中文');
+      await c.agent.whenIdle();
+      assert.equal(c.planning.intake()?.analysis?.intent, 'execute');
+      assert.equal(f.writes(), 1);
+    } finally {
+      await f.close();
+    }
+  });
+
+test('live identity follows actual model and core switch; every normal input reaches native intake', async () => {
+  const f = await executionFixture();
+  try {
+    let request = '';
+    f.provider.stream = async function* (options): AsyncIterable<StreamChunk> {
+      request = JSON.stringify(options.messages);
+      yield { type: 'finish', reason: { kind: 'stop' } };
+    };
+    const c = f.w.current.controller!;
+    await f.w.send(f.w.focused, '你当前是什么模型，内置能力有哪些？');
+    await c.agent.whenIdle();
+    const facts = runtimeIdentity(c, c.agent);
+    assert.equal(facts.harness, 'Emergence Harness');
+    assert.equal(facts.model.requestedModel, c.model.model);
+    assert.ok(request.includes('Emergence Harness') && request.includes(c.model.model));
+    assert.ok(!request.includes('powered by DeepSeek Harness'));
+    assert.equal(facts.core.intake?.route, 'direct');
+    assert.match(c.planning.label, /已自动分流/);
+    await f.w.send(f.w.focused, '/core off');
+    assert.equal(runtimeIdentity(c, c.agent).core.enabled, false);
+    assert.match(c.planning.label, /已关闭/);
+  } finally {
+    await f.close();
+  }
+});
+
+test('semantic analysis upgrades an unrecognized task and enforces native plan admission before effects', async () => {
+  const f = await executionFixture();
+  try {
+    let n = 0;
+    f.provider.stream = async function* (): AsyncIterable<StreamChunk> {
+      const step = n++;
+      if (step > 1) {
+        yield { type: 'finish', reason: { kind: 'stop' } };
+        return;
+      }
+      const name = step ? 'write' : 'emergence_analyze';
+      const args = step
+        ? { file_path: 'result.txt', content: 'must not write before plan' }
+        : { objective: '梳理登录流程并校验交互', reason: '自然语言隐含多个改动与验证步骤', route: 'planned' };
+      const id = ToolCallId('analysis-' + step),
+        raw = JSON.stringify(args);
+      yield { type: 'block-start', index: 0, blockType: 'tool-call' };
+      yield { type: 'tool-call-delta', index: 0, id, name, argumentsDelta: raw };
+      yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
+      yield { type: 'finish', reason: { kind: 'tool-calls' } };
+    };
+    const c = f.w.current.controller!;
+    await f.w.send(f.w.focused, '把现有登录体验打磨得顺手些');
+    await c.agent.whenIdle();
+    assert.equal(c.planning.intake()?.route, 'planned');
+    assert.equal(f.writes(), 0);
+    assert.match(c.planning.label, /目标已分析/);
+    assert.ok(
+      c.agent.session.snapshotEvents().some((e) => e.type === 'tool/result' && e.data.message.isError),
+    );
+    assert.match(await c.planning.describe(), /梳理登录流程/);
+  } finally {
+    await f.close();
+  }
+});
+
+test('a task without routing keywords cannot perform a write before core analysis', async () => {
+  const f = await executionFixture();
+  try {
+    let n = 0;
+    f.provider.stream = async function* (): AsyncIterable<StreamChunk> {
+      if (n++) {
+        yield { type: 'finish', reason: { kind: 'stop' } };
+        return;
+      }
+      const id = ToolCallId('unclassified-write'),
+        name = 'write',
+        raw = JSON.stringify({ file_path: 'result.txt', content: 'must be blocked' });
+      yield { type: 'block-start', index: 0, blockType: 'tool-call' };
+      yield { type: 'tool-call-delta', index: 0, id, name, argumentsDelta: raw };
+      yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
+      yield { type: 'finish', reason: { kind: 'tool-calls' } };
+    };
+    await f.w.send(f.w.focused, '把欢迎语换成中文');
+    await f.w.current.controller!.agent.whenIdle();
+    assert.equal(
+      f.w.current.controller!.planning.intake()?.route,
+      'direct',
+      'regression exercises an unrecognized work request',
+    );
+    assert.equal(
+      f.writes(),
+      0,
+      'native core must intercept implementation even when keyword routing misses intent',
+    );
+  } finally {
+    await f.close();
+  }
+});
+
+test('selecting a master makes an ordinary task create and run a worker plan through native tools', async () => {
+  const f = await executionFixture();
+  f.config.core.planning.submission = 'whole';
+  f.w.current.controller!.launch.appConfig.core.planning.submission = 'whole';
+  await f.ctx.plugin(UserApproval);
+  try {
+    const main = f.w.current,
+      worker = await f.w.split('row');
+    await f.w.setMaster(main.id);
+    await writeFile(join(f.cwd, 'seed.txt'), 'source');
+    f.ctx.effect(() =>
+      f.ctx.tools.register(
+        defineTool({
+          name: 'read',
+          description: 'actual read',
+          parameters: { file_path: { type: 'string', required: true } },
+          output: { schema: { type: 'string' }, render: (_a, v) => [{ type: 'text', text: v }] },
+          execute: async (args) => readFile(join(f.cwd, args.file_path), 'utf8'),
+        }),
+      ),
+    );
+    const plan = planSchema.parse({
+      objective: '新增说明文件',
+      constraints: ['当前项目'],
+      acceptance: ['文件有内容'],
+      nonGoals: [],
+      unknowns: [],
+      assumptions: [],
+      options: [],
+      reason: '交给空闲执行窗口实现',
+      evidence: ['master-read'],
+      steps: [
+        {
+          id: 'write',
+          objective: '写入 result.txt 并报告',
+          window: worker.id,
+          session: worker.controller!.id,
+          project: f.cwd,
+          model: worker.modelId,
+          role: 'developer',
+          capabilities: ['tool:write'],
+          dependsOn: [],
+          scope: ['result.txt'],
+          acceptance: ['文件有内容'],
+        },
+      ],
+    });
+    const original = f.provider.stream.bind(f.provider);
+    let count = 0;
+    f.provider.stream = async function* (options): AsyncIterable<StreamChunk> {
+      if (
+        options.messages.some(
+          (m) =>
+            m.role === 'user' &&
+            m.content.some((b) => b.type === 'text' && b.text.startsWith('[Emergence task ')),
+        )
+      ) {
+        assert.ok(JSON.stringify(options.messages).includes('不要重复调用目标分析'));
+        yield* original(options);
+        return;
+      }
+      const n = count++;
+      if (n > 2) {
+        yield { type: 'finish', reason: { kind: 'stop' } };
+        return;
+      }
+      const name = ['emergence_analyze', 'read', 'emergence_plan_work'][n],
+        args =
+          n === 0
+            ? {
+                objective: plan.objective,
+                reason: plan.reason,
+                route: 'planned',
+                intent: 'execute',
+                constraints: plan.constraints,
+                acceptance: plan.acceptance,
+              }
+            : n === 1
+              ? { file_path: 'seed.txt' }
+              : {
+                  work: propose(
+                    {
+                      ...plan,
+                      steps: plan.steps.map(({ window, session, model, ...step }) => step),
+                    },
+                    main.controller!.planning.intake()!.requirements!,
+                  ),
+                },
+        id = ToolCallId(n === 1 ? 'master-read' : 'master-' + n),
+        raw = JSON.stringify(args);
+      yield { type: 'block-start', index: 0, blockType: 'tool-call' };
+      yield { type: 'tool-call-delta', index: 0, id, name, argumentsDelta: raw };
+      yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
+      yield { type: 'finish', reason: { kind: 'tool-calls' } };
+    };
+    await f.w.send(main.id, '帮我做一个说明文件');
+    await until(() => {
+      for (const p of f.w.panes.values()) p.controller?.pending?.respond('y');
+      return f.w.collaboration.state.tasks[0]?.status === 'needs_review';
+    });
+    const task = f.w.collaboration.state.tasks[0];
+    assert.equal(task.target, worker.id);
+    assert.equal(task.issuer, main.id);
+    assert.equal(f.writes(), 1);
+    assert.equal(await readFile(join(f.cwd, 'result.txt'), 'utf8'), 'persisted actual effect');
+    await assert.rejects(f.w.setMaster(worker.id), /完成或取消/);
+    await assert.rejects(f.w.clearMaster(), /完成或取消/);
+  } finally {
+    await f.close();
+  }
+});

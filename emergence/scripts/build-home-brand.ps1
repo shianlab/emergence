@@ -1,0 +1,117 @@
+param([string]$BrandDirectory = (Join-Path $PSScriptRoot '../assets/brand'))
+
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Drawing
+if (-not ('EmergenceBrand.HomeWordmark' -as [type])) {
+  $drawingReferences = @([System.Drawing.Bitmap].Assembly.Location, [System.Drawing.Color].Assembly.Location, 'System.Collections')
+  $drawingReferences += [System.Drawing.Bitmap].GetInterfaces() | ForEach-Object { $_.Assembly.Location } | Where-Object { $_ -notmatch 'System.Private.CoreLib' }
+  Add-Type -ReferencedAssemblies ($drawingReferences | Select-Object -Unique) -TypeDefinition @'
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using System.Text;
+namespace EmergenceBrand {
+  public static class HomeWordmark {
+    public static string Sample(string path, int columns) {
+      using (var source = new Bitmap(path)) {
+        int sw = source.Width, sh = source.Height;
+        byte[] pixels = new byte[sw * sh * 4];
+        var locked = source.LockBits(new Rectangle(0, 0, sw, sh), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+        try {
+          if (locked.Stride != sw * 4) throw new InvalidOperationException("Unexpected bitmap stride.");
+          Marshal.Copy(locked.Scan0, pixels, 0, pixels.Length);
+        } finally { source.UnlockBits(locked); }
+        double step = (double)sw / columns;
+        int rows = (int)Math.Ceiling(sh / step); if (rows % 2 != 0) rows++;
+        bool[,] grid = new bool[rows, columns * 2];
+        // Two horizontal samples per cell; cell height is twice its width.
+        // Quadrant blocks double horizontal detail without enlarging the wordmark.
+        // Same source alpha and 0.42 coverage as the original pixel assets.
+        // The source master is unchanged; the explicitly requested cell correction follows sampling.
+        for (int y = 0; y < rows; y++) for (int x = 0; x < columns * 2; x++) {
+          double x0 = x * step / 2, x1 = (x + 1) * step / 2, y0 = y * step, y1 = (y + 1) * step, sum = 0;
+          for (int yy = (int)y0; yy < Math.Min(sh, (int)Math.Ceiling(y1)); yy++) {
+            double dy = Math.Min(yy + 1, y1) - Math.Max(yy, y0);
+            for (int xx = (int)x0; xx < Math.Min(sw, (int)Math.Ceiling(x1)); xx++) {
+              double dx = Math.Min(xx + 1, x1) - Math.Max(xx, x0);
+              sum += pixels[(yy * sw + xx) * 4 + 3] * dx * dy;
+            }
+          }
+          grid[y, x] = sum / (255 * step * step / 2) >= 0.42;
+        }
+        // User-marked correction (2026-10-29), 48-column version of 现:
+        // move the isolated protruding pixel up into the gap, retaining the ink count.
+        if (columns == 48) {
+          if (!grid[10, 55] || grid[8, 55]) throw new InvalidOperationException("The marked pixel correction no longer matches the source sampling.");
+          grid[10, 55] = false;
+          grid[8, 55] = true;
+          // Latest user-marked refinements to 涌: trim the first dot's short tail,
+          // keep the notch empty and retain the raised block, extending it two pixels right.
+          if (!grid[3, 11]) throw new InvalidOperationException("The marked water-dot tail no longer matches the source sampling.");
+          grid[3, 11] = false;
+          for (int i = 0; i < 3; i++) {
+            if (!grid[1, 28 + i] || grid[2, 19 + i]) throw new InvalidOperationException("The marked top-stroke move no longer matches the source sampling.");
+          }
+          for (int x = 31; x <= 32; x++) {
+            if (grid[1, x]) throw new InvalidOperationException("The top-stroke extension is already occupied in the source sampling.");
+            grid[1, x] = true;
+          }
+        }
+        // User-marked thin spurs above 涌 in the 56-column version.
+        // Preserve the previously approved, wider top block in the 48-column version.
+        if (columns == 56) {
+          if (!grid[2, 21] || !grid[1, 34]) throw new InvalidOperationException("The marked upper spurs no longer match the source sampling.");
+          grid[2, 21] = false;
+          grid[1, 34] = false;
+          // 2026-10-30: remove the marked single-pixel spur above 现's left stroke.
+          if (!grid[4, 64]) throw new InvalidOperationException("The marked 现 spur no longer matches the source sampling.");
+          grid[4, 64] = false;
+        }
+        var text = new StringBuilder();
+        for (int y = 0; y < rows; y += 2) {
+          if (y > 0) text.Append('\n');
+          const string blocks = " ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█";
+          for (int x = 0; x < columns; x++) {
+            int mask = (grid[y, x * 2] ? 1 : 0) | (grid[y, x * 2 + 1] ? 2 : 0)
+              | (grid[y + 1, x * 2] ? 4 : 0) | (grid[y + 1, x * 2 + 1] ? 8 : 0);
+            text.Append(blocks[mask]);
+          }
+        }
+        return text.ToString();
+      }
+    }
+  }
+}
+'@
+}
+
+$brandPath = [System.IO.Path]::GetFullPath($BrandDirectory)
+$output = Join-Path $PSScriptRoot '../src/app/tui/home-logo-data.ts'
+$source = "// Generated by scripts/build-home-brand.ps1 from the unchanged handwritten alpha master.`n"
+foreach ($variant in @(@{Name='homeLogo'; Columns=56}, @{Name='smallHomeLogo'; Columns=48}, @{Name='tinyHomeLogo'; Columns=40})) {
+  $text = [EmergenceBrand.HomeWordmark]::Sample((Join-Path $brandPath 'yongxian-wordmark.png'), $variant.Columns)
+  [System.IO.File]::WriteAllText((Join-Path $brandPath "pixel/yongxian-home-$($variant.Columns).txt"), $text)
+  $source += "export const $($variant.Name) = $(ConvertTo-Json -InputObject $text -Compress);`n"
+}
+
+# A small, fixed bitmap alphabet, encoded with the same terminal half-block cells.
+$font = @{
+  E=@('111','100','110','100','111'); M=@('10001','11011','10101','10001','10001')
+  R=@('110','101','110','101','101'); G=@('111','100','101','101','111')
+  N=@('1001','1101','1011','1001','1001'); C=@('111','100','100','100','111')
+}
+$word = 'EMERGENCE'
+$rows = for ($y=0; $y -lt 5; $y++) { ($word.ToCharArray() | ForEach-Object { $font[[string]$_][$y] }) -join '0' }
+$rows += '0' * $rows[0].Length
+$letters = for ($y=0; $y -lt 6; $y+=2) {
+  $line = for ($x=0; $x -lt $rows[0].Length; $x++) {
+    if ($rows[$y][$x] -eq '1') { if ($rows[$y+1][$x] -eq '1') { '█' } else { '▀' } }
+    elseif ($rows[$y+1][$x] -eq '1') { '▄' } else { ' ' }
+  }
+  $line -join ''
+}
+$english = $letters -join "`n"
+[System.IO.File]::WriteAllText((Join-Path $brandPath 'pixel/emergence-home.txt'), $english)
+$source += "export const englishWordmark = $(ConvertTo-Json -InputObject $english -Compress);`n"
+[System.IO.File]::WriteAllText([System.IO.Path]::GetFullPath($output), $source)

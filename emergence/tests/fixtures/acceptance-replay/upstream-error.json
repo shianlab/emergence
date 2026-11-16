@@ -1,0 +1,27 @@
+{
+  "source": "..\\artifacts\\iteration-20261112-phase3e\\matrix-9\\deepseek-same-2\\live-team.json",
+  "sourceHash": "da3110f6fac31cdf3babf4c7606801d9d9bc01480b622a61613cb9e50d304bde",
+  "runs": [
+    {
+      "id": "460f4bfc-b663-4d32-8e61-c6438d9b8b59",
+      "session": "bcd9489e-0dc6-488a-98c0-757992524b3f",
+      "task": "048efa8e-106",
+      "startedAt": 1794631334709,
+      "at": 1794631396927,
+      "endedAt": 1794631396927,
+      "phase": "host",
+      "durations": {
+        "host": 324,
+        "model-wait": 4468,
+        "model-output": 39868,
+        "tool": 567,
+        "approval": 16991,
+        "resource": 0
+      },
+      "requests": 3,
+      "lastOutputAt": 1794631378760,
+      "outcome": "error",
+      "reason": "500: {\"code\":\"1234\",\"message\":\"网络错误，错误id 20261114124315589692e123664a9c ，请稍后重试。\"}"
+    }
+  ]
+}

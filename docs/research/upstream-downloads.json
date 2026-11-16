@@ -1,0 +1,14 @@
+[
+  {
+    "name": "deepseek-harness-master.zip",
+    "bytes": 51520495,
+    "sha256": "050376fc9c846b24d4b13560e59b1e76a179c35d7fbbd5073731b547e39924e9",
+    "disposition": "Removed as redundant research download on 2026-10-30"
+  },
+  {
+    "name": "dsh-TUI-main.zip",
+    "bytes": 25198221,
+    "sha256": "b5964555e8ed8b56c0e058bee4e5710adb302d647d0182f546c9f14ff81c4c83",
+    "disposition": "Removed as redundant research download on 2026-10-30"
+  }
+]

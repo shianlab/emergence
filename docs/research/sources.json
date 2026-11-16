@@ -1,0 +1,198 @@
+{
+  "date": "2026-10-29",
+  "timezone": "Asia/Shanghai",
+  "method": "Official documentation and selected source inspection; no installed application or performance testing.",
+  "repositories": [
+    {
+      "repo": "anomalyco/opencode",
+      "branch": "dev",
+      "sha": "c1b5f1b416c2bff799a4be6a75d640e9ba28d42f",
+      "files": [
+        {
+          "path": "packages/tui/src/app.tsx",
+          "url": "https://github.com/anomalyco/opencode/blob/c1b5f1b416c2bff799a4be6a75d640e9ba28d42f/packages/tui/src/app.tsx",
+          "read": true,
+          "lineCount": 1486
+        },
+        {
+          "path": "packages/tui/src/runtime.tsx",
+          "url": "https://github.com/anomalyco/opencode/blob/c1b5f1b416c2bff799a4be6a75d640e9ba28d42f/packages/tui/src/runtime.tsx",
+          "read": true,
+          "lineCount": 2
+        },
+        {
+          "path": "packages/tui/package.json",
+          "url": "https://github.com/anomalyco/opencode/blob/c1b5f1b416c2bff799a4be6a75d640e9ba28d42f/packages/tui/package.json",
+          "read": true,
+          "lineCount": 80
+        },
+        {
+          "path": "packages/tui/src/context/session-tabs.tsx",
+          "url": "https://github.com/anomalyco/opencode/blob/c1b5f1b416c2bff799a4be6a75d640e9ba28d42f/packages/tui/src/context/session-tabs.tsx",
+          "read": true,
+          "lineCount": 499
+        },
+        {
+          "path": "packages/tui/src/context/session-tabs-model.ts",
+          "url": "https://github.com/anomalyco/opencode/blob/c1b5f1b416c2bff799a4be6a75d640e9ba28d42f/packages/tui/src/context/session-tabs-model.ts",
+          "read": true,
+          "lineCount": 262
+        },
+        {
+          "path": "packages/tui/src/context/client.tsx",
+          "url": "https://github.com/anomalyco/opencode/blob/c1b5f1b416c2bff799a4be6a75d640e9ba28d42f/packages/tui/src/context/client.tsx",
+          "read": true,
+          "lineCount": 70
+        },
+        {
+          "path": "packages/tui/src/ui/pane-resize.ts",
+          "url": "https://github.com/anomalyco/opencode/blob/c1b5f1b416c2bff799a4be6a75d640e9ba28d42f/packages/tui/src/ui/pane-resize.ts",
+          "read": true,
+          "lineCount": 77
+        }
+      ]
+    },
+    {
+      "repo": "anomalyco/opentui",
+      "branch": "main",
+      "sha": "1e041e9676400fe1dab84c61d4da43ec1485864e",
+      "files": [
+        {
+          "path": "packages/core/README.md",
+          "url": "https://github.com/anomalyco/opentui/blob/1e041e9676400fe1dab84c61d4da43ec1485864e/packages/core/README.md",
+          "read": true,
+          "lineCount": 75
+        },
+        {
+          "path": "packages/core/package.json",
+          "url": "https://github.com/anomalyco/opentui/blob/1e041e9676400fe1dab84c61d4da43ec1485864e/packages/core/package.json",
+          "read": true,
+          "lineCount": 140
+        }
+      ]
+    },
+    {
+      "repo": "earendil-works/pi",
+      "branch": "main",
+      "sha": "e65b3b88c08412bb8ffbd21fb5dc5756064a6e5a",
+      "files": [
+        {
+          "path": "packages/coding-agent/docs/sdk.md",
+          "url": "https://github.com/earendil-works/pi/blob/e65b3b88c08412bb8ffbd21fb5dc5756064a6e5a/packages/coding-agent/docs/sdk.md",
+          "read": true,
+          "lineCount": 148
+        },
+        {
+          "path": "packages/coding-agent/docs/extensions.md",
+          "url": "https://github.com/earendil-works/pi/blob/e65b3b88c08412bb8ffbd21fb5dc5756064a6e5a/packages/coding-agent/docs/extensions.md",
+          "read": true,
+          "lineCount": 3334
+        },
+        {
+          "path": "packages/tui/README.md",
+          "url": "https://github.com/earendil-works/pi/blob/e65b3b88c08412bb8ffbd21fb5dc5756064a6e5a/packages/tui/README.md",
+          "read": true,
+          "lineCount": 952
+        }
+      ]
+    },
+    {
+      "repo": "charmbracelet/crush",
+      "branch": "main",
+      "sha": "a945ccf9c17a59d98a9e07107011a88ded0ac513",
+      "files": [
+        {
+          "path": "internal/ui/model/ui.go",
+          "url": "https://github.com/charmbracelet/crush/blob/a945ccf9c17a59d98a9e07107011a88ded0ac513/internal/ui/model/ui.go",
+          "read": true,
+          "lineCount": 6393
+        }
+      ]
+    },
+    {
+      "repo": "openai/codex",
+      "branch": "main",
+      "sha": "23934d31b15b1127c83535f84854e5009f7cd51d",
+      "files": [
+        {
+          "path": "codex-rs/tui/src/tui.rs",
+          "url": "https://github.com/openai/codex/blob/23934d31b15b1127c83535f84854e5009f7cd51d/codex-rs/tui/src/tui.rs",
+          "read": true,
+          "lineCount": 1613
+        },
+        {
+          "path": "codex-rs/tui/Cargo.toml",
+          "url": "https://github.com/openai/codex/blob/23934d31b15b1127c83535f84854e5009f7cd51d/codex-rs/tui/Cargo.toml",
+          "read": true,
+          "lineCount": 193
+        }
+      ]
+    },
+    {
+      "repo": "asheshgoplani/agent-deck",
+      "branch": "main",
+      "sha": "967e2faf2b98b30da61206baaeff6bf998709f1b",
+      "files": [
+        {
+          "path": "docs/conductor/README.md",
+          "url": "https://github.com/asheshgoplani/agent-deck/blob/967e2faf2b98b30da61206baaeff6bf998709f1b/docs/conductor/README.md",
+          "read": true,
+          "lineCount": 348
+        }
+      ]
+    },
+    {
+      "repo": "zellij-org/zellij",
+      "branch": "main",
+      "sha": "1f3df933978e00c246553070310175c392fcfe4f",
+      "files": [
+        {
+          "path": "zellij-server/src/tab/mod.rs",
+          "url": "https://github.com/zellij-org/zellij/blob/1f3df933978e00c246553070310175c392fcfe4f/zellij-server/src/tab/mod.rs",
+          "read": true,
+          "lineCount": 9572
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/zellij-org/zellij/blob/1f3df933978e00c246553070310175c392fcfe4f/README.md",
+          "read": true,
+          "lineCount": 119
+        }
+      ]
+    },
+    {
+      "repo": "jesseduffield/lazygit",
+      "branch": "master",
+      "sha": "4e1eebe278790f257a875da6633234391a5a85b3",
+      "files": [
+        {
+          "path": "docs/dev/Codebase_Guide.md",
+          "url": "https://github.com/jesseduffield/lazygit/blob/4e1eebe278790f257a875da6633234391a5a85b3/docs/dev/Codebase_Guide.md",
+          "read": true,
+          "lineCount": 100
+        }
+      ]
+    }
+  ],
+  "localArchives": [
+    {
+      "path": "deepseek-harness-master.zip",
+      "sha256": "050376FC9C846B24D4B13560E59B1E76A179C35D7FBBD5073731B547E39924E9",
+      "rootPackageVersion": "0.2.2-alpha.2"
+    },
+    {
+      "path": "dsh-TUI-main.zip",
+      "sha256": "B5964555E8ED8B56C0E058BEE4E5710ADB302D647D0182F546C9F14FF81C4C83",
+      "rootPackageVersion": "0.17.0",
+      "documentedPrimaryHarnessVersion": "0.2.1-rc.3"
+    }
+  ],
+  "additionalDocuments": [
+    "https://opencode.ai/docs/server/",
+    "https://github.com/anomalyco/opentui",
+    "https://github.com/charmbracelet/crush/blob/main/internal/ui/AGENTS.md",
+    "https://openai.com/index/unlocking-the-codex-harness/",
+    "https://github.com/asheshgoplani/agent-deck",
+    "https://zellij.dev/documentation/layouts.html"
+  ]
+}

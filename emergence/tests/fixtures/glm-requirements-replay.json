@@ -1,0 +1,22 @@
+{
+  "provenance": "artifacts/iteration-20261112-phase3/live-cross-project-2/live-team.json; analysis only, revisions in test are simulated, not a live model rerun",
+  "analysis": {
+    "objective": "分别修改两个项目目录中的 notes.txt：把 Welcome 改为 欢迎使用涌现，保留末尾换行；两个项目分别读回并用各自 verify.cjs 验证；verify.cjs 保持 SHA256 071d30376ef603ddd7fe36389c0f3a449e48faa27b802df24fcdd198c0ef0c3f 不变。",
+    "reason": "用户明确要求实施；目标、改动范围、精确验证命令与验收标准均已明确定义，无阻塞未知，两个目录改动互不依赖。",
+    "intent": "execute",
+    "constraints": [
+      "仅修改各目录 notes.txt，不得改动 verify.cjs 或新增文件",
+      "verify.cjs SHA256 必须保持 071d30376ef603ddd7fe36389c0f3a449e48faa27b802df24fcdd198c0ef0c3f",
+      "仅把 Welcome 替换为 欢迎使用涌现，保留末尾换行",
+      "两个项目都必须修改并分别读回验证，不能只改一个",
+      "验证仅用精确命令：& 'M:/涌现TUI/emergence/node_modules/node/bin/node.exe' './verify.cjs'，工作目录为对应项目，命令前后不追加语句",
+      "Windows PowerShell，命令工具为 pwsh，不使用 bash；不访问外部服务"
+    ],
+    "acceptance": [
+      "两个 notes.txt 均含 欢迎使用涌现 且不再含 Welcome，末尾换行保留",
+      "两个目录的 verify.cjs SHA256 仍为 071d30376ef603ddd7fe36389c0f3a449e48faa27b802df24fcdd198c0ef0c3f",
+      "在各自项目目录运行精确验证命令退出码为 0",
+      "两目录均仍只有 notes.txt 与 verify.cjs，无其他文件变更"
+    ]
+  }
+}

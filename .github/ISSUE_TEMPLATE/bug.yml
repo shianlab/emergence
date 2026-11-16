@@ -1,0 +1,33 @@
+name: Bug report / 问题反馈
+description: Report a reproducible problem / 提交可复现的问题
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "请勿附上 API 密钥、私有项目或真实会话。安全漏洞请使用仓库私密报告入口。 / Do not include keys or private data."
+  - type: input
+    id: version
+    attributes:
+      label: Version / 版本
+      description: Output of emergence --version
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 环境
+      description: Windows version, terminal and installation method
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce / 复现步骤
+      description: Include the expected and actual behavior, with a minimal example.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted diagnostics / 脱敏诊断
+      render: text

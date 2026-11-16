@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "python": "3.14",
+  "platform": "win32",
+  "arch": "x64",
+  "packages": [
+    {
+      "name": "duckdb",
+      "version": "1.4.3",
+      "wheel": "duckdb-1.4.3-cp314-cp314-win_amd64.whl",
+      "sha256": "23b12854032c1a58d0452e2b212afa908d4ce64171862f3792ba9a596ba7c765"
+    },
+    {
+      "name": "openpyxl",
+      "version": "3.1.5",
+      "wheel": "openpyxl-3.1.5-py2.py3-none-any.whl",
+      "sha256": "5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2"
+    },
+    {
+      "name": "et-xmlfile",
+      "version": "2.0.0",
+      "wheel": "et_xmlfile-2.0.0-py3-none-any.whl",
+      "sha256": "7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa"
+    },
+    {
+      "name": "scipy",
+      "version": "1.17.0",
+      "wheel": "scipy-1.17.0-cp314-cp314-win_amd64.whl",
+      "sha256": "3625c631a7acd7cfd929e4e31d2582cf00f42fcf06011f59281271746d77e061"
+    },
+    {
+      "name": "numpy",
+      "version": "2.4.1",
+      "wheel": "numpy-2.4.1-cp314-cp314-win_amd64.whl",
+      "sha256": "7d5d7999df434a038d75a748275cd6c0094b0ecdb0837342b332a82defc4dc4d"
+    }
+  ]
+}

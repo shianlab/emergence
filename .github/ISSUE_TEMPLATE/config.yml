@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability / 私密安全报告
+    url: https://github.com/shianlab/emergence/security/advisories/new
+    about: Please report security-sensitive issues privately.

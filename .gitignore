@@ -1,0 +1,42 @@
+# Dependencies and reproducible build output.
+**/node_modules/
+**/dist/
+**/.data-venv/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/acceptance-dist-*/
+/涌现模型配置.exe
+/涌现模型配置.exe.config
+
+# Local evidence and research stay on disk; reviewed summaries belong in docs.
+/artifacts/
+/references/
+/参考/
+
+# Local runtime state and secrets, including an explicitly relocated app home.
+.env
+.env.*
+!.env.example
+**/.emergence/
+**/.meta-kim/
+**/credentials*.json
+**/key.txt
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.p12
+**/*.sqlite
+**/*.sqlite-wal
+**/*.sqlite-shm
+**/*.log
+**/*.tmp
+
+# Local guidance, editor/analysis caches and OS-generated metadata.
+**/EMERGENCE.local.md
+**/emergence.local.md
+**/.ruff_cache/
+**/coverage/
+**/*.tsbuildinfo
+.DS_Store
+Thumbs.db

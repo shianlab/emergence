@@ -1,0 +1,83 @@
+{
+  "direction": "monochrome-editorial",
+  "directionRequestedDate": "2026-10-29",
+  "designApproval": "approved",
+  "approvedDate": "2026-10-29",
+  "scope": "Emergence logo, TUI and related visual design",
+  "supersedes": "mist-sage-moss",
+  "palette": {
+    "ink": "#111111",
+    "charcoal": "#181818",
+    "graphite": "#303030",
+    "silver": "#a3a3a3",
+    "paper": "#e5e5e5"
+  },
+  "terminal": {
+    "background": "#111111",
+    "surface": "#181818",
+    "input": "#1c1c1c",
+    "foreground": "#dedede",
+    "accent": "#e5e5e5",
+    "muted": "#a3a3a3",
+    "border": "#303030",
+    "attention": "#bbbbbb",
+    "logoGradient": [
+      "#eeeeee",
+      "#e3e3e3",
+      "#d7d7d7",
+      "#c9c9c9",
+      "#b4b4b4"
+    ],
+    "headerLogo": {
+      "palette": {
+        "toolSatellite": "#d3c19e",
+        "body": "#e6e6e6",
+        "errorSatellite": "#c47a6f"
+      },
+      "fallback": "Text brand when space is insufficient; dark glyph on light theme; reduced motion and NO_COLOR supported",
+      "sizes": [
+        "8x3"
+      ],
+      "source": "User-selected aggregate reference, 2026-10-31; replaces volcano in conversation header",
+      "rendering": "Native quadrant blocks, 16x6 mask in 8x3 terminal cells; stable fused body and animated upper-right satellite"
+    },
+    "messages": {
+      "user": {
+        "surface": "#333333",
+        "foreground": "#a3a3a3",
+        "rule": "#a3a3a3"
+      },
+      "assistant": {
+        "surface": "#111111",
+        "foreground": "#dedede",
+        "label": "#e5e5e5"
+      },
+      "themeAdaptation": "User surface blends input with 12% foreground, with a left rule and one row of vertical padding. Assistant uses a bold ruled role label, a blank line before the brighter body, and muted metadata. Collapsed context and tools use muted text; expanded details remain readable."
+    }
+  },
+  "motion": {
+    "reveal": "Soft gradual reveal with the original pixel mask fixed",
+    "idle": "Subtle grayscale lightness drift",
+    "finish": "Settle into a static white-gray logo after the short introduction"
+  },
+  "implementation": {
+    "phases": [
+      "Home and layout",
+      "Messages and tools",
+      "Composer and feedback",
+      "Multi-session polish"
+    ],
+    "startAfterUserApprovesDesign": true,
+    "authorizedPhase": 4,
+    "implementedPhase": 4
+  },
+  "avoid": [
+    "green-tinted main surfaces",
+    "saturated rainbows",
+    "fluorescent neon",
+    "flashing",
+    "rewriting the calligraphy"
+  ],
+  "runtimeIntegrated": true,
+  "runtimeScope": "Phases 1–4: approved home and logo; messages and tools; growing composer and runtime feedback; session navigation, focus hierarchy and responsive task inspection"
+}
