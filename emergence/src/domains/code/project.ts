@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { rgPath } from '@vscode/ripgrep';
 import { access, lstat, opendir, realpath } from 'node:fs/promises';
 import { basename, delimiter, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { boundedText, digest, inside } from '../../app/instruction-files.ts';
@@ -130,6 +131,7 @@ export async function hostProcess(
 }
 
 export async function readSource(root: string, path: string): Promise<SourceFile> {
+  root = await realpath(root);
   const absolute = resolve(root, path),
     info = await lstat(absolute),
     physical = await realpath(absolute);
@@ -190,7 +192,12 @@ export async function scanProject(
   let files: string[],
     scanner = 'rg',
     limited = false;
-  const rg = await hostExecutable('rg', root);
+  // Use the pinned application dependency on clean machines too. PATH lookup
+  // remains a fallback; project-local executables are never discovered through it.
+  const rg = await access(rgPath).then(
+    () => rgPath,
+    () => hostExecutable('rg', root),
+  );
   try {
     if (!rg) throw new Error('rg unavailable');
     const output = await hostProcess(

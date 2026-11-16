@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { realpathSync } from 'node:fs';
 import { lstat, mkdir, realpath, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { z } from 'zod';
@@ -67,15 +68,20 @@ const criteria = (snapshot: ProjectSnapshot) =>
 
 /** Per-session bounded artifacts. Task lifecycle and acceptance remain owned by KIM's existing ledger. */
 export class CodeWorkflow {
+  readonly root: string;
   run?: CodeRun;
   private loaded = false;
   private freshChecks = new Set<string>();
   constructor(
     readonly home: string,
-    readonly root: string,
+    root: string,
     readonly session: string,
     private canRead: (path: string) => boolean = () => true,
-  ) {}
+  ) {
+    // One physical root for paths, check receipts and durable records, including
+    // Windows 8.3 aliases. Descendant links still pass the normal containment checks.
+    this.root = realpathSync(root);
+  }
 
   private async location(create: boolean) {
     let directory = await realpath(this.home);

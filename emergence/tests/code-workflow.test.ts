@@ -6,7 +6,7 @@ import Subprocess from '@deepseek-ai/dsh-subprocess-local';
 import * as FileTools from '@deepseek-ai/dsh-tool-fs';
 import * as PwshTools from '@deepseek-ai/dsh-tool-pwsh';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
@@ -16,6 +16,7 @@ import { resolvedEvidenceCurrent } from '../src/core/application/task-failures.t
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { diagnostics, discoverChecks } from '../src/domains/code/checks.ts';
 import { CodeWorkflow } from '../src/domains/code/workflow.ts';
+import { readSource } from '../src/domains/code/project.ts';
 import { ExecutionProvider, until } from './fixtures/core-execution.ts';
 import { harness } from './fixtures/harness.ts';
 
@@ -36,6 +37,25 @@ async function fixture() {
   return { home, root, work: new CodeWorkflow(home, root, 'fixture') };
 }
 const signal = () => AbortSignal.timeout(15000);
+
+test('project aliases share physical check paths and retain descendant escape protection', async () => {
+  const f = await fixture();
+  const alias = join(f.home, 'project-alias');
+  await symlink(f.root, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const work = new CodeWorkflow(f.home, alias, 'alias-fixture');
+  assert.equal(work.root, await realpath(f.root));
+  assert.equal((await readSource(alias, '计算.js')).relative, '计算.js');
+  const input = await work.beforeCheck('npm run test', signal(), alias);
+  assert.equal(input?.invocation.cwd, await realpath(f.root));
+  assert.equal((await work.beforeEdit('计算.js')).change.path, '计算.js');
+  assert.equal((await work.beforeEdit('new.js')).change.path, 'new.js');
+  const outside = join(f.home, 'outside');
+  await mkdir(outside);
+  await writeFile(join(outside, 'secret.js'), 'private');
+  await symlink(outside, join(f.root, 'escape'), process.platform === 'win32' ? 'junction' : 'dir');
+  await assert.rejects(work.beforeEdit('escape/secret.js'), /项目内普通文件/);
+  await assert.rejects(work.beforeEdit('escape/new.js'), /父目录超出项目/);
+});
 async function check(work: CodeWorkflow, id: string, exitCode: number, value: object = {}) {
   const input = await work.beforeCheck('npm run test', signal());
   assert.ok(input);

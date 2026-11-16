@@ -165,10 +165,7 @@ export function registerPlanningTools(host: Host, target: Agent) {
           if (r.value.executions?.length)
             throw new Error('执行图已提交；请等待任务结果，不重置正在执行的目标');
           if (r.value.analysis) throw new Error('本次请求已有目标分析；请使用计划修订承接后续发现');
-          const { route: requestedRoute, ...parsedAnalysis } = parseProtocol(
-            analysisRequestSchema,
-            JSON.parse(safeError(JSON.stringify(args))),
-          );
+          const { route: requestedRoute, ...parsedAnalysis } = parseProtocol(analysisRequestSchema, args);
           const ranks = { direct: 0, focused: 1, planned: 2 };
           const env = host.environment?.();
           const route =

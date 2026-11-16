@@ -42,6 +42,26 @@ async function seed(root: string) {
 }
 const signal = () => new AbortController().signal;
 
+test('bundled ignore-aware scanner works without PATH tools or a Git repository', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'emergence-bundled-scan-'));
+  const previous = process.env.PATH;
+  try {
+    await seed(root);
+    await writeFile(join(root, '.gitignore'), 'private.ts\n');
+    await writeFile(join(root, 'private.ts'), 'secret');
+    process.env.PATH = '';
+    const snapshot = await scanProject(root, signal());
+    assert.equal(snapshot.scanner, 'rg');
+    assert.equal(snapshot.truncated, false);
+    assert.ok(snapshot.paths.includes('src/main.ts'));
+    assert.ok(!snapshot.paths.includes('private.ts'));
+  } finally {
+    if (previous === undefined) delete process.env.PATH;
+    else process.env.PATH = previous;
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('project profile observes configuration, workspace, guidance and actual dirty Git status without running scripts', async () => {
   const root = await mkdtemp(join(tmpdir(), 'emergence-code-profile-'));
   try {

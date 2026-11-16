@@ -289,10 +289,11 @@ export class Collaboration extends EventEmitter {
       })
       .parse({ requestKey, objective, dependsOn });
     input.dependsOn = [...new Set(input.dependsOn)];
-    let contract =
-      contractInput === undefined
-        ? undefined
-        : contractSchema.parse(JSON.parse(bounded(JSON.stringify(contractInput), 60000)));
+    // Execution data must retain its exact paths, identifiers and criteria. Diagnostic
+    // redaction can change both JSON keys and valid values when a secret is a common word.
+    let contract = contractInput === undefined ? undefined : contractSchema.parse(contractInput);
+    if (contract && JSON.stringify(contract).length > 60000)
+      throw new Error('任务契约超过 60000 字符预算，请缩小任务范围');
     if (contract && !contract.binding && destination?.controller)
       contract = {
         ...contract,

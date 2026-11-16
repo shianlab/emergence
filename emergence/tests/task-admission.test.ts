@@ -8,6 +8,8 @@ import {
 } from '../src/core/application/task-admission.ts';
 import { planSchema, type TaskPlan } from '../src/core/domain/planning.ts';
 import { executionFixture, until } from './fixtures/core-execution.ts';
+import { safeError } from '../src/core/adapters/redaction.ts';
+import { pathIdentity } from '../src/app/instruction-files.ts';
 
 function planFor(f: Awaited<ReturnType<typeof executionFixture>>, count = 1): TaskPlan {
   const pane = f.w.current;
@@ -36,6 +38,28 @@ function planFor(f: Awaited<ReturnType<typeof executionFixture>>, count = 1): Ta
     })),
   });
 }
+
+test('credential words redact diagnostics without rewriting executable contract keys or role values', async () => {
+  const f = await executionFixture();
+  const credentials = { ADMISSION_TEST_PASSWORD: 'root', ADMISSION_TEST_SECRET: 'developer' };
+  const previous = Object.fromEntries(Object.keys(credentials).map((key) => [key, process.env[key]]));
+  Object.assign(process.env, credentials);
+  try {
+    const plan = planFor(f);
+    const tasks = await f.w.collaboration.executePlan(f.w.focused, plan);
+    await until(() => tasks[0].status === 'needs_review');
+    assert.equal(tasks[0].contract?.binding?.project.root, pathIdentity(f.w.current.cwd));
+    assert.equal(tasks[0].contract?.role, 'developer');
+    assert.equal(f.writes(), 1);
+    assert.equal(safeError('root developer'), '[已隐藏] [已隐藏]');
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    await f.close();
+  }
+});
 
 test('final admission handles twelve steps and rejects expanded path budgets before any execution', async () => {
   const f = await executionFixture();

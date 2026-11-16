@@ -10,7 +10,7 @@ import { defineTool } from '@deepseek-ai/dsh-tools';
 import UserApproval from '@deepseek-ai/dsh-user-approval';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { access, mkdir, mkdtemp, readFile, symlink, unlink, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, realpath, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -30,7 +30,7 @@ import { instructionsSchema } from '../src/core/domain/instructions.ts';
 import { harness } from './fixtures/harness.ts';
 
 async function directories() {
-  const root = await mkdtemp(join(tmpdir(), 'emergence-e3-')),
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'emergence-e3-'))),
     home = join(root, 'home'),
     a = join(root, 'project-a'),
     b = join(root, 'project-b');
