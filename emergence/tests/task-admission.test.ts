@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { realpath } from 'node:fs/promises';
 import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import {
@@ -48,7 +49,7 @@ test('credential words redact diagnostics without rewriting executable contract 
     const plan = planFor(f);
     const tasks = await f.w.collaboration.executePlan(f.w.focused, plan);
     await until(() => tasks[0].status === 'needs_review');
-    assert.equal(tasks[0].contract?.binding?.project.root, pathIdentity(f.w.current.cwd));
+    assert.equal(tasks[0].contract?.binding?.project.root, pathIdentity(await realpath(f.w.current.cwd)));
     assert.equal(tasks[0].contract?.role, 'developer');
     assert.equal(f.writes(), 1);
     assert.equal(safeError('root developer'), '[已隐藏] [已隐藏]');

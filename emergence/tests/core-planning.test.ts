@@ -3,7 +3,7 @@ import Skills from '@deepseek-ai/dsh-skill';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
@@ -636,7 +636,7 @@ test('a working-directory change preserves the goal but invalidates old project 
     assert.deepEqual(f.calls, ['read']);
     assert.ok((await f.c.planning.describe()).includes('目录已变化'));
     await f.c.planning.settle();
-    const s = await new PlanStore(f.home).read(planScope(f.c.id!, other));
+    const s = await new PlanStore(f.home).read(planScope(f.c.id!, await realpath(other)));
     assert.equal(s!.status, 'blocked');
     assert.equal(s!.plan!.objective, '修复项目并验证');
     assert.deepEqual(s!.receipts, []);

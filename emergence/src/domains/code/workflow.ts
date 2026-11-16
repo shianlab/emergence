@@ -80,7 +80,7 @@ export class CodeWorkflow {
   ) {
     // One physical root for paths, check receipts and durable records, including
     // Windows 8.3 aliases. Descendant links still pass the normal containment checks.
-    this.root = realpathSync(root);
+    this.root = realpathSync.native(root);
   }
 
   private async location(create: boolean) {
