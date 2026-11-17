@@ -1,8 +1,8 @@
-﻿# Emergence 1.00 bootstrap. Downloads only this repository's versioned release.
+﻿# Emergence 1.01 bootstrap. Downloads only this repository's versioned release.
 # Review this file before running: https://github.com/shianlab/emergence/blob/main/install.ps1
 [CmdletBinding()]
 param(
-    [string]$Version = '1.0.0',
+    [string]$Version = '1.0.1',
     [string]$InstallRoot = (Join-Path $env:LOCALAPPDATA 'Emergence'),
     [switch]$NoPath
 )
@@ -11,7 +11,7 @@ param(
     $ErrorActionPreference = 'Stop'
     Set-StrictMode -Version 2.0
     if ($env:OS -ne 'Windows_NT' -or ![Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -eq 'ARM64' -or $env:PROCESSOR_ARCHITEW6432 -eq 'ARM64') {
-        throw 'Emergence 1.00 requires Windows x64. ARM64, macOS and Linux releases are not available yet.'
+        throw 'Emergence 1.01 requires Windows x64. ARM64, macOS and Linux releases are not available yet.'
     }
     if ($PSVersionTable.PSVersion -lt [version]'5.1') {
         throw 'PowerShell 5.1 or newer is required.'

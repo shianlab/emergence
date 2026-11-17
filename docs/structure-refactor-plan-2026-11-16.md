@@ -1,6 +1,6 @@
 # Emergence 结构整理方案
 
-状态：第一至第六阶段已完成，见 [第一阶段报告](structure/phase1/report.md)、[第二阶段报告](structure/phase2-report.md)、[第三阶段报告](structure/phase3-report.md)、[第四阶段报告](structure/phase4-report.md)、[第五阶段报告](structure/phase5-report.md) 与 [第六阶段报告](structure/phase6-report.md)。[第七阶段](structure/phase7-report.md)的结构复审和自动验收已完成，本地候选为 1.0.1-rc.1；原生配置窗口手动验收待确认，尚未标记全部验收完成，也未发布。
+状态：第一至第六阶段已完成，见 [第一阶段报告](structure/phase1/report.md)、[第二阶段报告](structure/phase2-report.md)、[第三阶段报告](structure/phase3-report.md)、[第四阶段报告](structure/phase4-report.md)、[第五阶段报告](structure/phase5-report.md) 与 [第六阶段报告](structure/phase6-report.md)。[第七阶段](structure/phase7-report.md)的结构复审和自动验收已完成，本地候选为 1.0.1-rc.1；用户已确认原生配置窗口正常使用，七阶段已验收完成；后续正式发布见 1.01 发布记录。
 
 本轮目标：在保持当前产品行为的基础上，明确模块职责、状态归属和依赖方向，降低修改、测试与排障的成本。以已发布的 Emergence 1.00（程序版本 1.0.0）为行为参考；本方案不直接改动发行物。
 

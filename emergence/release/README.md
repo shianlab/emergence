@@ -1,4 +1,4 @@
-# 涌现 · Emergence 1.00
+# 涌现 · Emergence 1.01
 
 Windows x64 发行包，内含 Node 26.13.0 与锁定生产依赖。无需预装 Node/npm。推荐 Windows 11 + Windows Terminal；原生模型配置需要 .NET Framework 4.8。发行仓库：https://github.com/shianlab/emergence
 

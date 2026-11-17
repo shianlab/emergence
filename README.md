@@ -1,11 +1,11 @@
-<p align="center"><img src="docs/media/emergence-1.00-cover.png" alt="Emergence 1.00 — Code. Data. Your terminal." width="100%"></p>
+<p align="center"><img src="docs/media/emergence-1.00-cover.png" alt="Emergence 1.01 — Code. Data. Your terminal." width="100%"></p>
 
 <h1 align="center">涌现 · Emergence</h1>
 <p align="center"><strong>在终端里，把想法变成代码，把数据变成答案。</strong></p>
 <p align="center">面向编程与数据分析的开源 CLI Agent，拥有独立 Harness、中文 TUI 和原生模型配置工具。</p>
 
 <p align="center">
-  <a href="https://github.com/shianlab/emergence/releases/tag/v1.0.0"><img alt="Release 1.00" src="https://img.shields.io/badge/release-1.00-e5e5e5?style=flat-square&labelColor=181818"></a>
+  <a href="https://github.com/shianlab/emergence/releases/tag/v1.0.1"><img alt="Release 1.01" src="https://img.shields.io/badge/release-1.01-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="docs/installation.md"><img alt="Windows x64" src="https://img.shields.io/badge/platform-Windows_x64-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml"><img alt="Windows CI" src="https://github.com/shianlab/emergence/actions/workflows/ci.yml/badge.svg"></a>
@@ -41,7 +41,7 @@ emergence
 2. 保存后选择模型，输入你要完成的任务。
 3. 输入 `/` 查看中文命令；用 `Shift+Tab` 切换执行权限。
 
-> 1.00 首发支持 Windows x64，推荐 Windows 11 + Windows Terminal；模型配置工具需要 .NET Framework 4.8。模型服务和 API 额度由用户自行提供。数据分析另需 Python 3.14 x64。程序版本为 `1.0.0`，发布名称为 **1.00**。
+> 1.01 支持 Windows x64，推荐 Windows 11 + Windows Terminal；模型配置工具需要 .NET Framework 4.8。模型服务和 API 额度由用户自行提供。数据分析另需 Python 3.14 x64。程序版本为 `1.0.1`，发布名称为 **1.01**。
 
 ## 界面一览
 
@@ -100,7 +100,7 @@ emergence data-init --python "C:\Python314\python.exe"
 
 `F2` 左右分屏，`F3` 上下分屏，`Tab` 切换，`F6` 关闭。窗口可以使用同一项目，也可以使用不同项目和模型。
 
-1.00 的窗口相互独立，**不提供主窗口控制、跨窗口派活或自动协作**。同一项目中的并行编辑需自行协调；需要隔离修改时使用 Git worktree。
+1.01 的窗口相互独立，**不提供主窗口控制、跨窗口派活或自动协作**。同一项目中的并行编辑需自行协调；需要隔离修改时使用 Git worktree。
 
 ## 你掌握执行权限
 
@@ -151,9 +151,9 @@ npm run inspect:full   # Harness、TUI、ConPTY 完整本机矩阵
 
 ## 版本与支持
 
-- **1.00**：Windows x64 首个公开版本。macOS、Linux、ARM64 尚无正式发行物。
+- **1.01**：Windows x64 维护更新，整理核心结构与界面职责，修正输入性能。macOS、Linux、ARM64 尚无正式发行物。
 - 下载、校验、更新、卸载与故障排查：[安装指南](docs/installation.md)。
-- 变更与已知限制：[CHANGELOG.md](CHANGELOG.md) · [1.00 发布说明](docs/releases/1.0.0.md)。
+- 变更与已知限制：[CHANGELOG.md](CHANGELOG.md) · [1.01 发布说明](docs/releases/1.0.1.md)。
 - 问题反馈：[GitHub Issues](https://github.com/shianlab/emergence/issues)；安全问题请使用[私密报告流程](SECURITY.md)。
 
 欢迎复现问题、改进文档和提交聚焦的 PR。请勿把 API 密钥、真实会话或私有项目内容附到公开 issue 中。

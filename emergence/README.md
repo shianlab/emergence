@@ -2,7 +2,7 @@
 
 源码安装入口见[根目录快速开始](../README.md)。当前有效验收入口为 `npm run inspect:full`、`npm run check` 与 `npm run inspect:security`；带阶段编号的报告只记录当时实现，失效的历史命令已退出。
 
-当前版本为 **1.00（程序版本 1.0.0）**，使用 OpenTUI 与 DeepSeek Harness 的真实 profile、工具和会话服务。首次安装、升级与卸载见[安装指南](../docs/installation.md)，源码开发见[根目录 README](../README.md)。本文保留详细配置与使用说明；阶段报告中的旧产品范围以当前独立窗口行为为准。
+当前版本为 **1.01（程序版本 1.0.1）**，使用 OpenTUI 与 DeepSeek Harness 的真实 profile、工具和会话服务。首次安装、升级与卸载见[安装指南](../docs/installation.md)，源码开发见[根目录 README](../README.md)。本文保留详细配置与使用说明；阶段报告中的旧产品范围以当前独立窗口行为为准。
 
 应用运行层为 **Emergence Harness**，整合 DeepSeek 开源执行底座、原生 TUI、多窗口独立会话、权限与 Meta_Kim 治理方法。2026-11-16 起取消主控及跨窗口协同：各窗口分别接收任务，可使用不同项目和模型；不自动派活、不相互控制。单会话 KIM、编程、数据分析、记忆、Skills/MCP 和原生子代理保持可用。
 

@@ -1,6 +1,6 @@
 # 安装、升级与卸载 / Installation
 
-Emergence 1.00 的发行物为 Windows x64。推荐 Windows 11、Windows Terminal、PowerShell 5.1 或更新版本；原生模型配置工具需要 .NET Framework 4.8。发行包自带 Node 26.13.0 和生产依赖，不需要 Node/npm 或管理员权限。Git 仅在使用 Git 相关功能时需要。
+Emergence 1.01 的发行物为 Windows x64。推荐 Windows 11、Windows Terminal、PowerShell 5.1 或更新版本；原生模型配置工具需要 .NET Framework 4.8。发行包自带 Node 26.13.0 和生产依赖，不需要 Node/npm 或管理员权限。Git 仅在使用 Git 相关功能时需要。
 
 ## 一行安装
 
@@ -25,18 +25,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install-emergence.ps1
 `ExecutionPolicy Bypass` 仅作用于该子进程，不修改系统执行策略。指定版本、目录或跳过 PATH：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\install-emergence.ps1 -Version 1.0.0 -InstallRoot "D:\Apps\Emergence" -NoPath
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install-emergence.ps1 -Version 1.0.1 -InstallRoot "D:\Apps\Emergence" -NoPath
 ```
 
 `-NoPath` 时通过 `D:\Apps\Emergence\bin\emergence.cmd` 启动。
 
 ## 手动与离线安装
 
-1. 在 [v1.0.0 Release](https://github.com/shianlab/emergence/releases/tag/v1.0.0) 下载 **Emergence-1.0.0-win32-x64.zip** 和同名 `.sha256` 文件。GitHub 自动提供的 Source code ZIP 是源码，不是可直接运行的发行包。
+1. 在 [v1.0.1 Release](https://github.com/shianlab/emergence/releases/tag/v1.0.1) 下载 **Emergence-1.0.1-win32-x64.zip** 和同名 `.sha256` 文件。GitHub 自动提供的 Source code ZIP 是源码，不是可直接运行的发行包。
 2. 计算 ZIP 哈希，和 `.sha256` 中的值比较：
 
    ```powershell
-   Get-FileHash .\Emergence-1.0.0-win32-x64.zip -Algorithm SHA256
+   Get-FileHash .\Emergence-1.0.1-win32-x64.zip -Algorithm SHA256
    ```
 
 3. 用 Windows 自带 `tar -xf` 解压，在发行目录运行：
@@ -47,7 +47,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install-emergence.ps1 -Ver
 
 也可直接运行发行目录中的 `emergence.cmd`，不修改 PATH。`runtime`、`app`、清单及许可证须保持完整。离线安装不需要下载 npm 包；调用远程模型仍需网络。
 
-SHA-256 用于完整性检查，不是发布者数字签名。1.00 原生 EXE/脚本尚未做商业代码签名，Windows 可能显示来源提示。请核对仓库和校验结果，不建议关闭系统防护。
+SHA-256 用于完整性检查，不是发布者数字签名。1.01 原生 EXE/脚本尚未做商业代码签名，Windows 可能显示来源提示。请核对仓库和校验结果，不建议关闭系统防护。
 
 ## 数据分析环境
 
