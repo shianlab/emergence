@@ -19,7 +19,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { loadConfig, saveConfig, updateConfig } from '../src/app/config.ts';
 import { SessionController } from '../src/app/controller.ts';
 import { WorkspaceController } from '../src/app/workspace.ts';
-import { registerSecretNames, safeError } from '../src/core/adapters/redaction.ts';
+import { createRedactor, registerSecretNames, safeError } from '../src/core/adapters/redaction.ts';
+import { fitCells, sessionFooter } from '../src/app/tui/workspace-chrome.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { acquireLease } from '../src/core/storage/lease.ts';
 import { harness } from './fixtures/harness.ts';
@@ -106,6 +107,24 @@ test('redaction observes newly added and rotated credentials immediately without
   } finally {
     delete process.env[key];
     delete process.env[custom];
+  }
+});
+test('presentation passes redact all fields and pick up credential rotation on the next pass', () => {
+  const key = 'AUDIT_PRESENTATION_TOKEN_' + randomUUID().replaceAll('-', '');
+  try {
+    for (const value of ['presentation-first-fixture', 'presentation-rotated-fixture']) {
+      process.env[key] = value;
+      const redact = createRedactor();
+      assert.equal(fitCells(value, 40, false, redact), '[已隐藏]');
+      assert.equal(sessionFooter(value, 'Tokens 12', 40, redact), '[已隐藏] · Tokens 12');
+      assert.equal(redact(new Error(value + '\x1b]52;c;YQ==\x07')), '[已隐藏]');
+      assert.ok(!redact('https://user:password@example.test/?token=private').includes('private'));
+      assert.equal(redact('Bearer fixture-auth'), 'Bearer [已隐藏]');
+    }
+    process.env[key] = 'presentation-independent-fixture';
+    assert.equal(safeError(process.env[key]), '[已隐藏]');
+  } finally {
+    delete process.env[key];
   }
 });
 test('OS lease rejects a second owner and releases for the next owner', async () => {

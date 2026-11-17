@@ -29,6 +29,7 @@ export function composerStatus(
   en: boolean,
   restoreError?: string,
   ui = controller?.launch.appConfig.ui,
+  redact = safeError,
 ) {
   if (restoreError) return en ? '× Session unavailable · /retry' : '× 会话不可用 · /retry 重试';
   if (!controller) return en ? '○ Opening session' : '○ 正在打开会话';
@@ -69,7 +70,7 @@ export function composerStatus(
       process.env.NO_COLOR !== undefined ||
       process.env.TERM === 'dumb';
     const icon = motion ? '●' : ['◐', '◓', '◑', '◒'][seconds % 4];
-    return safeError(
+    return redact(
       `${icon} ${tool && !en ? '涌现正在调用 · ' : ''}${detail}${activity.tools.length > 1 ? ` (+${activity.tools.length - 1})` : ''}${time}${quiet}${queued}`,
     );
   }

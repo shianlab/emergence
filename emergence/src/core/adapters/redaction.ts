@@ -6,15 +6,26 @@ export function registerSecretNames(names: readonly string[]) {
 
 /** Diagnostics must not include environment values or credential-bearing URLs. */
 export function safeError(error: unknown): string {
-  let text = error instanceof Error ? error.message : String(error);
+  return createRedactor()(error);
+}
+
+/** One synchronous presentation pass only; never retain across events or awaits. */
+export function createRedactor(): typeof safeError {
+  const secrets: string[] = [];
   // On Windows every environment value lookup crosses the native boundary.
-  // Enumerate names first; only read possible credentials. Keep lookups live so
-  // newly configured or rotated credentials are redacted on the very next call.
+  // Enumerate once per pass, reading only possible credentials. Independent
+  // safeError calls and subsequent passes always observe current credentials.
   for (const key of Object.keys(process.env)) {
     if (!/(KEY|TOKEN|SECRET|PASSWORD)/i.test(key) && !credentialNames.has(key)) continue;
     const value = process.env[key];
-    if (value && value.length >= 4) text = text.replaceAll(value, '[已隐藏]');
+    if (value && value.length >= 4) secrets.push(value);
   }
+  return (error) => redact(error, secrets);
+}
+
+function redact(error: unknown, secrets: readonly string[]): string {
+  let text = error instanceof Error ? error.message : String(error);
+  for (const value of secrets) text = text.replaceAll(value, '[已隐藏]');
   // Provider/MCP errors may contain credentials not present in this process environment.
   text = text.replace(/https?:\/\/[^\s"'<>]+/gi, (value) => {
     try {

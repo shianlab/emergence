@@ -1,6 +1,6 @@
 import { TextAttributes } from '@opentui/core';
 import stringWidth from 'string-width';
-import { safeError } from '../../core/adapters/redaction.ts';
+import { createRedactor } from '../../core/adapters/redaction.ts';
 import { palette } from '../../core/domain/ui-preferences.ts';
 import type { PaneState, WorkspaceController } from '../workspace.ts';
 import { auxiliaryInfo } from './auxiliary-info.ts';
@@ -11,6 +11,7 @@ export function renderPaneNotice(
   workspace: Pick<WorkspaceController, 'launch' | 'panes' | 'focused' | 'notice'>,
   pane: PaneState,
   view: View,
+  redact = createRedactor(),
 ) {
   const ui = workspace.launch.appConfig.ui,
     en = ui.language === 'en',
@@ -35,7 +36,7 @@ export function renderPaneNotice(
     view.receiptClock,
   );
   view.receiptClock = info.clock;
-  view.notice.content = safeError(info.persistent);
+  view.notice.content = redact(info.persistent);
   view.notice.visible = Boolean(info.persistent);
   view.notice.fg = colors.foreground;
   view.notice.attributes = pane.error || controller?.lastError ? TextAttributes.BOLD : 0;
@@ -61,12 +62,11 @@ export function renderPaneNotice(
     );
   view.status.attributes =
     controller?.pending || controller?.lastError || pane.error ? TextAttributes.BOLD : 0;
-  view.status.content = info.receipt || composerStatus(controller, en, pane.error, ui);
+  view.status.content = info.receipt || composerStatus(controller, en, pane.error, ui, redact);
   if (controller?.pending || controller?.lastError || pane.error) view.status.fg = colors.foreground;
   else if (info.receipt) view.status.fg = colors.muted;
 }
-export function paneFooter(pane: PaneState, width: number, en: boolean) {
+export function paneFooter(pane: PaneState, width: number, en: boolean, redact = createRedactor()) {
   const usage = pane.controller?.tokenUsage()?.label(en) ?? 'Tokens —';
-  const path = safeError(pane.controller?.cwd ?? pane.cwd);
-  return sessionFooter(path, usage, width);
+  return sessionFooter(pane.controller?.cwd ?? pane.cwd, usage, width, redact);
 }

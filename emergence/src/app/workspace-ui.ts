@@ -11,7 +11,7 @@ import {
   type CliRenderer,
 } from '@opentui/core';
 import stringWidth from 'string-width';
-import { safeError } from '../core/adapters/redaction.ts';
+import { createRedactor, safeError } from '../core/adapters/redaction.ts';
 import { permissionLabels, permissionModes } from '../core/domain/permissions.ts';
 import { palette } from '../core/domain/ui-preferences.ts';
 import { slashSuggestions, workspaceCommands, type CommandItem } from './commands.ts';
@@ -383,7 +383,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     }
     if (value) runCommand(value.startsWith('/') ? value : '/' + value);
   }
-  function renderComposer(pane: PaneState, view: View) {
+  function renderComposer(pane: PaneState, view: View, redact = createRedactor()) {
     const ui = workspace.launch.appConfig.ui,
       en = ui.language === 'en',
       colors = palette(ui),
@@ -393,8 +393,8 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       ui,
       Boolean(controller?.busy || controller?.pending || controller?.lastError),
     );
-    view.status.content = composerStatus(controller, en, pane.error, ui);
-    renderNotice(pane, view);
+    view.status.content = composerStatus(controller, en, pane.error, ui, redact);
+    renderNotice(pane, view, redact);
     const query = view.input.plainText;
     view.commands.box.visible =
       pane.id === workspace.focused &&
@@ -416,8 +416,9 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       );
   }
 
-  const renderNotice = (pane: PaneState, view: View) => renderPaneNotice(workspace, pane, view);
-  const renderPane = (pane: PaneState, view: View) => {
+  const renderNotice = (pane: PaneState, view: View, redact = createRedactor()) =>
+    renderPaneNotice(workspace, pane, view, redact);
+  const renderPane = (pane: PaneState, view: View, redact = createRedactor()) => {
     const controller = pane.controller;
     if (view.binding !== controller?.id) {
       view.binding = controller?.id;
@@ -502,15 +503,15 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     const actualModel = model ? `${model.provider}/${model.model}` : pane.modelId;
     const metaWidth = Math.max(10, view.columns - (en ? 5 : 4));
     const modelWidth = Math.min(stringWidth(actualModel), Math.max(12, Math.floor(metaWidth * 0.65)));
-    view.title.content = safeError(
+    view.title.content = redact(
       `${active ? '›' : ' '} ${paneNumber(workspace, pane.id)} ${role} · ${paneState(pane, en)} · ${controller ? permissionLabels[controller.permissionMode] + (controller.permissionTransitioning ? '…' : '') : ''}\n` +
-        fitCells(actualModel, modelWidth) +
+        fitCells(actualModel, modelWidth, false, redact) +
         ' · ' +
-        fitCells(controller?.cwd ?? pane.cwd, Math.max(1, metaWidth - modelWidth - 3), true),
+        fitCells(controller?.cwd ?? pane.cwd, Math.max(1, metaWidth - modelWidth - 3), true, redact),
     );
     view.box.bottomTitle =
       active && workspace.taskEngine.current(pane.id)
-        ? fitCells(workspace.taskEngine.current(pane.id)!.id, Math.max(8, view.columns - 3))
+        ? fitCells(workspace.taskEngine.current(pane.id)!.id, Math.max(8, view.columns - 3), false, redact)
         : undefined;
     const overlay = pane.id === workspace.focused && workspace.overlay;
     view.scroll.stickyScroll = !overlay;
@@ -543,7 +544,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       (pane.error
         ? `恢复失败：${pane.error}\n/retry 重试 · /project "目录" 新建 · /panes 查看其他会话`
         : controller?.pending
-          ? safeError(controller.pending.title)
+          ? redact(controller.pending.title)
           : '');
     view.text.visible = Boolean(text);
     if (view.lastText !== text) {
@@ -552,8 +553,8 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     }
     view.meta.visible = !single && ui.statusBar.visible;
     view.meta.fg = colors.muted;
-    view.meta.content = paneFooter(pane, view.columns - 2, en);
-    renderComposer(pane, view);
+    view.meta.content = paneFooter(pane, view.columns - 2, en, redact);
+    renderComposer(pane, view, redact);
     // The live editor owns its contents. Only a new session binding or explicit submit/error changes it.
   };
   const createView = paneViewFactory(renderer, body, workspace, views, {
@@ -569,7 +570,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     savedScroll,
     error,
   });
-  const refreshHeader = () => {
+  const refreshHeader = (redact = createRedactor()) => {
     const ui = workspace.launch.appConfig.ui,
       en = ui.language === 'en',
       colors = palette(ui);
@@ -649,7 +650,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     header.content = brand.columns
       ? new StyledText([
           fg(colors.accent)(bold('\n'.repeat(Math.max(0, Math.floor((brand.rows - 3) / 2))) + 'Emergence')),
-          fg(colors.muted)(`\n${fitCells(mode + maximized, headerColumns)}\n${shortCounts}`),
+          fg(colors.muted)(`\n${fitCells(mode + maximized, headerColumns, false, redact)}\n${shortCounts}`),
         ])
       : new StyledText([
           fg(colors.accent)(bold('涌现 · Emergence')),
@@ -709,7 +710,10 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       const status = pane.controller?.pending ? ' ◇' : pane.controller?.busy ? ' ●' : '';
       const suffix = hidden ? (en ? ' hidden' : ' 后台') : folded ? (en ? ' folded' : ' 折叠') : '';
       const name = `${active ? '›' : ' '} ${paneNumber(workspace, pane.id)} ${en ? 'Session' : '会话'} · ${projectName(pane.cwd)}`;
-      const label = fitCells(name, Math.max(5, available - stringWidth(status + suffix))) + status + suffix;
+      const label =
+        fitCells(name, Math.max(5, available - stringWidth(status + suffix)), false, redact) +
+        status +
+        suffix;
       tab.content = label;
       tab.width = Math.max(1, Math.min(available, stringWidth(label)));
       tab.fg = active ? colors.accent : colors.muted;
@@ -719,9 +723,9 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     const single = workspace.visible().length === 1;
     footer.visible = single && ui.statusBar.visible;
     footer.height = footer.visible ? 1 : 0;
-    footer.content = paneFooter(workspace.current, renderer.width, en);
+    footer.content = paneFooter(workspace.current, renderer.width, en, redact);
     const currentView = views.get(workspace.focused);
-    if (currentView) renderNotice(workspace.current, currentView);
+    if (currentView) renderNotice(workspace.current, currentView, redact);
   };
   const refresh = () => {
     if (disposed || refreshing) return;
@@ -734,6 +738,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     )
       closeCommands();
     refreshing = true;
+    const redact = createRedactor();
     try {
       for (const [id, view] of views)
         if (!workspace.panes.has(id)) {
@@ -783,7 +788,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
           );
         }
         if (id !== workspace.focused) view.input.blur();
-        renderPane(workspace.panes.get(id)!, view);
+        renderPane(workspace.panes.get(id)!, view, redact);
       }
       for (const [id, divider] of dividers)
         if (!layout.splits.has(id)) {
@@ -819,12 +824,13 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
         divider.width = split.divider.width;
         divider.height = split.divider.height;
       }
-      refreshHeader();
+      refreshHeader(redact);
     } finally {
       refreshing = false;
     }
   };
   const sessionChanged = (id: string) => {
+    const redact = createRedactor();
     if (
       modal.navigation &&
       modal.navigation.kind !== 'approvals' &&
@@ -836,9 +842,9 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     }
     const pane = workspace.panes.get(id),
       view = views.get(id);
-    if (pane && view) renderPane(pane, view);
+    if (pane && view) renderPane(pane, view, redact);
     if (inspector.opened) inspector.sync(Math.max(1, body.width), Math.max(1, body.height));
-    refreshHeader();
+    refreshHeader(redact);
   };
   const frame = () => {
     if (disposed) return;

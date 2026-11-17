@@ -4,8 +4,8 @@ import type { TaskRecord } from '../../core/domain/task.ts';
 import type { PaneState, WorkspaceController } from '../workspace.ts';
 
 const segmenter = new Intl.Segmenter('zh-CN', { granularity: 'grapheme' });
-export function fitCells(value: string, width: number, tail = false) {
-  const text = safeError(value).replace(/\s+/g, ' ');
+export function fitCells(value: string, width: number, tail = false, redact = safeError) {
+  const text = redact(value).replace(/\s+/g, ' ');
   if (stringWidth(text) <= width) return text;
   if (width <= 1) return width ? '…' : '';
   const parts = [...segmenter.segment(text)].map((part) => part.segment);
@@ -28,11 +28,11 @@ export function projectName(cwd: string) {
   );
 }
 /** Prefer the usage value over its explanatory suffix when a pane gets narrow. */
-export function sessionFooter(path: string, usage: string, width: number) {
+export function sessionFooter(path: string, usage: string, width: number, redact = safeError) {
   const available = Math.max(0, width);
   const label = stringWidth(usage) + 7 > available ? usage.replace(/(?:（| \().*$/, '') : usage;
-  if (stringWidth(label) + 4 > available) return fitCells(label, available);
-  return fitCells(path, available - stringWidth(label) - 3, true) + ' · ' + label;
+  if (stringWidth(label) + 4 > available) return fitCells(label, available, false, redact);
+  return fitCells(path, available - stringWidth(label) - 3, true, redact) + ' · ' + label;
 }
 export function paneNumber(workspace: WorkspaceController, id: string) {
   return [...workspace.panes.keys()].indexOf(id) + 1;
