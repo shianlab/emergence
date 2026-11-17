@@ -1,3 +1,4 @@
+import { ExecutionJournal } from '../src/core/storage/execution-journal.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
@@ -9,7 +10,7 @@ import { WorkspaceController } from '../src/app/workspace.ts';
 import { commandHelp, workspaceCommands } from '../src/app/commands.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { harness } from './fixtures/harness.ts';
-import { HistoricalOrchestrationWorkspace } from './fixtures/historical-orchestration.ts';
+import { taskSchema } from '../src/core/domain/task.ts';
 import { ExecutionProvider, until } from './fixtures/core-execution.ts';
 
 class ConversationProvider extends LlmAdapter {
@@ -70,7 +71,7 @@ test('shipped multi-window sessions keep projects/models and conversation input 
   try {
     const first = f.w.current,
       second = await f.w.split('row', f.b, 'two');
-    assert.equal(f.w.executionScope, 'session');
+    assert.equal('team' in f.w, false);
     assert.equal(f.w.panes.size, 2);
     await Promise.all([f.w.send(first.id, '你好，独立甲'), f.w.send(second.id, '你好，独立乙')]);
     await Promise.all([first.controller!.agent.whenIdle(), second.controller!.agent.whenIdle()]);
@@ -126,16 +127,16 @@ test('retired window control fails at commands and runtime before any cross-wind
     assert.ok(commands.every((item) => !retired.includes(item.command.split(' ')[0])));
     assert.doesNotMatch(commandHelp(commands, f.config.ui), /设为主控|\/assign|\/mode collaborate/);
     for (const command of retired) await assert.rejects(f.w.send(first.id, command), /已移除/);
-    await assert.rejects(f.w.setMaster(first.id), /已移除/);
-    assert.throws(() => f.w.collaboration.configure(first.id, [second.id]), /已移除/);
-    await assert.rejects(f.w.collaboration.enqueue(first.id, second.id, 'cross', '不应写入'), /已移除/);
-    await assert.rejects(f.w.collaboration.assurance.request('old-task', 'verify', first.id), /已移除/);
+    assert.equal('setMaster' in f.w, false);
+    assert.equal('configure' in f.w.taskEngine, false);
+    await assert.rejects(f.w.taskEngine.enqueue(first.id, second.id, 'cross', '不应写入'), /已移除/);
+    assert.equal('request' in f.w.taskEngine.assurance, false);
     await assert.rejects(
-      f.w.collaboration.executePlan(first.id, { steps: [{ window: second.id }] } as never),
+      f.w.taskEngine.executePlan(first.id, { steps: [{ window: second.id }] } as never),
       /已移除/,
     );
     assert.equal(provider.calls.length, 0);
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     assert.equal(f.w.panes.size, 2);
   } finally {
     await f.close();
@@ -164,7 +165,7 @@ test('single-window execution still runs through the real Harness and produces i
       }),
     );
     const pane = f.w.current;
-    const task = await f.w.collaboration.enqueue(
+    const task = await f.w.taskEngine.enqueue(
       pane.id,
       pane.id,
       'local',
@@ -172,12 +173,12 @@ test('single-window execution still runs through the real Harness and produces i
       [],
       undefined,
       undefined,
-      { local: true },
+      {},
     );
     await until(() => task.status === 'succeeded');
     assert.equal(await readFile(join(f.a, 'result.txt'), 'utf8'), 'persisted actual effect');
     assert.equal(f.w.panes.size, 1);
-    assert.equal(f.w.collaboration.state.master, undefined);
+    assert.equal('master' in f.w.taskEngine.state, false);
   } finally {
     await f.close();
   }
@@ -189,32 +190,62 @@ test('old workspace/journal and role templates restore history without restoring
   let legacy: WorkspaceController | undefined, restored: WorkspaceController | undefined;
   try {
     await f.w.close();
-    legacy = new HistoricalOrchestrationWorkspace(f.ctx, f.launch);
+    legacy = new WorkspaceController(f.ctx, f.launch);
     await legacy.initialize();
     const first = legacy.current,
       second = await legacy.split('row', f.b, 'two');
     legacy.updateView(first.id, '保留这个未发送草稿', 0);
-    legacy.collaboration.configure(first.id, [second.id], true);
-    legacy.collaboration.scheduler.pump = async () => {};
-    const task = await legacy.collaboration.enqueue(first.id, second.id, 'old', '保留旧任务事实');
-    legacy.collaboration.pause(true);
-    await legacy.save();
+    const task = taskSchema.parse({
+      id: 'legacy-task',
+      requestKey: 'old',
+      objective: '保留旧任务事实',
+      issuer: first.id,
+      issuerSession: first.controller!.id,
+      target: second.id,
+      targetSession: second.controller!.id,
+      cwd: second.cwd,
+      modelId: second.modelId,
+      dependsOn: [],
+      status: 'queued',
+      progress: 'old queued work',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    // Write the old wire format directly; never re-enable a historical runtime to create fixtures.
+    const legacyPayload = {
+      version: 1,
+      mode: 'collaborate',
+      paused: false,
+      master: first.id,
+      workers: [second.id],
+      owned: [],
+      autoWorkers: true,
+      tasks: [task],
+    };
     const sessions = [...legacy.panes.values()].map((pane) => pane.sessionId);
     await legacy.close();
+    const journal = new ExecutionJournal(f.home, process.platform === 'win32' ? f.a.toLowerCase() : f.a);
+    await journal.open();
+    journal.commit(legacyPayload);
+    await journal.close();
     restored = new WorkspaceController(f.ctx, f.launch);
     await restored.initialize();
-    assert.equal(restored.collaboration.state.mode, 'independent');
-    assert.equal(restored.collaboration.state.master, undefined);
-    assert.deepEqual(restored.collaboration.state.workers, []);
+    assert.equal(restored.taskEngine.state.history?.master, first.id);
+    assert.equal('master' in restored.taskEngine.state, false);
+    assert.equal('workers' in restored.taskEngine.state, false);
     assert.deepEqual(
       [...restored.panes.values()].map((pane) => pane.sessionId),
       sessions,
     );
     assert.equal(restored.panes.get(first.id)?.draft, '保留这个未发送草稿');
     assert.ok(
-      restored.collaboration.state.tasks.some((item) => item.id === task.id && item.status !== 'running'),
+      restored.taskEngine.state.tasks.some((item) => item.id === task.id && item.status !== 'running'),
     );
     assert.equal(provider.calls.length, 0);
+    await assert.rejects(
+      restored.taskEngine.recover(task.id, first.id, '不得恢复历史跨窗任务'),
+      /历史跨窗口/,
+    );
     await restored.applyTemplate({
       version: 1,
       name: 'old-roles',
@@ -233,8 +264,8 @@ test('old workspace/journal and role templates restore history without restoring
       ],
       roles: { master: 'a', workers: ['b'] },
     });
-    assert.equal(restored.collaboration.state.master, undefined);
-    assert.deepEqual(restored.collaboration.state.workers, []);
+    assert.equal('master' in restored.taskEngine.state, false);
+    assert.equal('workers' in restored.taskEngine.state, false);
     assert.equal(restored.panes.size, 2);
     assert.equal(provider.calls.length, 0);
   } finally {

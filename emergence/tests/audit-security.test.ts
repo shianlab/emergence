@@ -18,7 +18,7 @@ import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { loadConfig, saveConfig, updateConfig } from '../src/app/config.ts';
 import { SessionController } from '../src/app/controller.ts';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { registerSecretNames, safeError } from '../src/core/adapters/redaction.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { acquireLease } from '../src/core/storage/lease.ts';
@@ -315,7 +315,7 @@ test('a delayed task receipt cannot wake a replacement master session', async ()
   const originalSave = workspace.save.bind(workspace);
   workspace.save = async () => {
     await originalSave();
-    if (!intercepted && workspace.collaboration.state.tasks.some((t) => t.notified)) {
+    if (!intercepted && workspace.taskEngine.state.tasks.some((t) => t.result)) {
       intercepted = true;
       reached();
       await blocked;
@@ -325,14 +325,13 @@ test('a delayed task receipt cannot wake a replacement master session', async ()
     await workspace.initialize();
     const master = workspace.current,
       worker = await workspace.split('row', home, 'worker');
-    workspace.collaboration.configure(master.id, [worker.id]);
-    await workspace.collaboration.enqueue(master.id, worker.id, 'delayed-receipt', 'report a result');
+    await workspace.taskEngine.enqueue(worker.id, worker.id, 'delayed-receipt', 'report a result');
     await ready;
     const oldId = master.controller!.id;
     await workspace.send(master.id, '/new');
     assert.notEqual(master.controller!.id, oldId);
     unblock();
-    await until(() => !workspace.collaboration.current(worker.id));
+    await until(() => !workspace.taskEngine.current(worker.id));
     await delay(50);
     assert.equal(provider.rootCalls, 0);
     assert.ok(
@@ -426,11 +425,9 @@ test('a child command failure cannot be hidden by a successful parent task repor
   const workspace = new WorkspaceController(ctx, { home, cwd: home, modelId: 'master', appConfig });
   try {
     await workspace.initialize();
-    const master = workspace.current,
-      worker = await workspace.split('row', home, 'worker');
-    workspace.collaboration.configure(master.id, [worker.id]);
-    const task = await workspace.collaboration.enqueue(
-      master.id,
+    const worker = await workspace.split('row', home, 'worker');
+    const task = await workspace.taskEngine.enqueue(
+      worker.id,
       worker.id,
       'child-failed',
       'run a child and report',

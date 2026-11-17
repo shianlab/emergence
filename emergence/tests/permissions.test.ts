@@ -17,7 +17,7 @@ import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { loadConfig, migrateConfig } from '../src/app/config.ts';
 import { SessionController } from '../src/app/controller.ts';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import {
   callFingerprint,
   evaluatePermission,
@@ -25,8 +25,40 @@ import {
 } from '../src/core/adapters/permissions.ts';
 import { configSchema, defaultConfig } from '../src/core/domain/configuration.ts';
 import { type PermissionSnapshot } from '../src/core/domain/permissions.ts';
+import { toolContract } from '../src/core/domain/tool-contract.ts';
 import { effectiveKeys, keyAction, uiSchema } from '../src/core/domain/ui-preferences.ts';
 import { harness } from './fixtures/harness.ts';
+
+test('retired tool names cannot grant read authority; legacy dispatch rules still restrict plan execution', () => {
+  const policy: PermissionSnapshot = { mode: 'edit', root: process.cwd(), rules: [], deny: [], confirm: [] };
+  for (const name of [
+    'emergence_team',
+    'emergence_decide',
+    'emergence_plan_work',
+    'emergence_plan_step',
+    'emergence_assess',
+    'emergence_dispatch',
+    'emergence_audit',
+  ]) {
+    assert.equal(toolContract(name).authority, 'unknown');
+    assert.equal(
+      evaluatePermission(policy, { name, arguments: {}, cwd: policy.root, actor: 'test' }).effect,
+      'ask',
+    );
+  }
+  for (const effect of ['deny', 'ask'] as const) {
+    const restricted = { ...policy, rules: [{ tool: 'emergence_dispatch', effect }] };
+    assert.equal(
+      evaluatePermission(restricted, {
+        name: 'emergence_execute_plan',
+        arguments: {},
+        cwd: policy.root,
+        actor: 'test',
+      }).effect,
+      effect,
+    );
+  }
+});
 
 class Provider extends LlmAdapter {
   async resolveModel(provider: string, model: string) {
@@ -321,7 +353,7 @@ test('owned children inherit plan and an allow middleware cannot bypass the fina
   }
 });
 
-test('dispatch captures permission ceiling, source changes cancel worker approval, pane modes survive restore', async () => {
+test('tasks capture session permission ceiling, changes revoke own and child approval, pane modes survive restore', async () => {
   const f = await fixture();
   await f.controller.close();
   let w = new WorkspaceController(f.ctx, {
@@ -335,12 +367,11 @@ test('dispatch captures permission ceiling, source changes cancel worker approva
     await w.initialize();
     const a = w.current,
       b = await w.split('row');
-    a.controller!.setPermissionMode('plan');
-    b.controller!.setPermissionMode('auto');
-    w.collaboration.configure(a.id, [b.id]);
-    await assert.rejects(w.collaboration.enqueue(a.id, b.id, 'plan', 'work'), /计划模式/);
-    a.controller!.setPermissionMode('ask');
-    const task = await w.collaboration.enqueue(a.id, b.id, 'ask', callText('write', { file_path: 'x' }));
+    a.controller!.setPermissionMode('auto');
+    b.controller!.setPermissionMode('plan');
+    await assert.rejects(w.taskEngine.enqueue(b.id, b.id, 'plan', 'work'), /计划模式/);
+    b.controller!.setPermissionMode('ask');
+    const task = await w.taskEngine.enqueue(b.id, b.id, 'ask', callText('write', { file_path: 'x' }));
     assert.equal(task.permission!.mode, 'ask');
     await until(() => !!b.controller!.pending);
     assert.equal(f.calls.length, 0);
@@ -351,7 +382,7 @@ test('dispatch captures permission ceiling, source changes cancel worker approva
       agentOptions: { provider: 'deepseek', model: 'deepseek-flash' },
     });
     const stale = b.controller!.pending!;
-    a.controller!.setPermissionMode('plan');
+    b.controller!.setPermissionMode('plan');
     await b.controller!.agent.whenIdle();
     assert.equal(b.controller!.pending, undefined);
     assert.throws(() => stale.respond('y'), /过期/);
@@ -364,7 +395,7 @@ test('dispatch captures permission ceiling, source changes cancel worker approva
     const saved = JSON.parse(await readFile(w.path, 'utf8'));
     assert.deepEqual(
       saved.panes.map((p: { permissionMode: string }) => p.permissionMode),
-      ['plan', 'auto'],
+      ['auto', 'plan'],
     );
     await w.close();
     w = new WorkspaceController(f.ctx, {
@@ -376,7 +407,7 @@ test('dispatch captures permission ceiling, source changes cancel worker approva
     await w.initialize();
     assert.deepEqual(
       [...w.panes.values()].map((p) => p.controller?.permissionMode),
-      ['plan', 'auto'],
+      ['auto', 'plan'],
     );
   } finally {
     await w.close();

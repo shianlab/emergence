@@ -1,10 +1,9 @@
 import { safeError } from '../../core/adapters/redaction.ts';
-import { roles } from '../../core/domain/orchestration.ts';
 import { taskLabels } from '../../core/domain/task.ts';
 import type { CommandItem } from '../commands.ts';
 import type { WorkspaceController } from '../workspace.ts';
 
-export type NavigationKind = 'history' | 'models' | 'roles' | 'tasks' | 'workers' | 'approvals';
+export type NavigationKind = 'history' | 'models' | 'tasks' | 'approvals';
 export interface NavigationItem extends CommandItem {
   value: string;
 }
@@ -47,21 +46,7 @@ export function navigationItems(
       description: `${m.provider}/${m.model}${workspace.panes.get(pane)?.modelId === m.id ? ' · 当前 / current' : ''}`,
       value: m.id,
     }));
-  if (kind === 'roles')
-    return roles(workspace.launch.appConfig.orchestration).map((r) => ({
-      command: r.id,
-      description: `${r.description} · ${r.mode}${r.modelId ? ' · ' + r.modelId : ''}`,
-      value: r.id,
-    }));
-  if (kind === 'workers')
-    return workspace.collaboration.state.workers
-      .filter((id) => workspace.panes.has(id) && !workspace.collaboration.state.owned.includes(id))
-      .map((id) => ({
-        command: id,
-        description: `${workspace.panes.get(id)!.cwd} · ${workspace.panes.get(id)!.modelId}`,
-        value: id,
-      }));
-  return workspace.collaboration.state.tasks
+  return workspace.taskEngine.state.tasks
     .slice(-100)
     .reverse()
     .map((t) => ({
@@ -77,7 +62,5 @@ export const navigationLabels: Record<NavigationKind, [string, string]> = {
   ],
   history: ['输入历史 · Enter 回填，不发送', 'Input history · Enter restores draft'],
   models: ['选择当前窗口模型', 'Select pane model'],
-  roles: ['选择派发角色', 'Select assignment role'],
   tasks: ['任务 · Enter 详情 · → 执行窗口', 'Tasks · Enter details · → worker'],
-  workers: ['选择执行窗口 · 回填派发草稿', 'Select worker · prepare assignment'],
 };

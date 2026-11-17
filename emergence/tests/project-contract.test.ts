@@ -10,11 +10,7 @@ import { taskSchema } from '../src/core/domain/task.ts';
 import { establishRequirements } from '../src/core/domain/requirements.ts';
 import { materializeProposal, workProposalSchema } from '../src/core/domain/plan-proposal.ts';
 import { planSchema } from '../src/core/domain/planning.ts';
-import {
-  assertPlanAdmission,
-  planTaskContract,
-  auditTaskContract,
-} from '../src/core/application/task-admission.ts';
+import { assertPlanAdmission, planTaskContract } from '../src/core/application/task-admission.ts';
 import {
   bindProjectContract,
   projectRef,
@@ -145,10 +141,7 @@ test('R2 global criteria are preserved once and localized contributions cannot d
       step.localCriteria!.map((c) => c.text),
     );
     assert.equal(JSON.parse(contract.context).acceptance, undefined);
-    assert.deepEqual(
-      auditTaskContract(task(step.project, contract), 'verify').acceptance,
-      contract.acceptance,
-    );
+    assert.deepEqual(task(step.project, contract).contract!.acceptance, contract.acceptance);
   }
   const omitted = structuredClone(plan);
   omitted.goalContract!.criteria[0].contributors.pop();
@@ -386,8 +379,8 @@ test('R2 inspection uses native bytes/listing and obeys ordinary read denial in 
       true,
       'Native verification also obeys read deny',
     );
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
-    assert.equal(f.w.collaboration.state.mode, 'independent');
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
+    assert.equal('master' in f.w.taskEngine.state, false);
   } finally {
     await f.close();
   }

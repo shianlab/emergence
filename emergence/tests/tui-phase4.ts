@@ -153,7 +153,7 @@ try {
       report: { outcome: 'success', summary: 'WORKER_CLAIM_ONLY', artifacts: [] },
       result: { summary: 'RECEIPT_READY', errors: [], artifacts: ['src/ui.ts'], fromSeq: 10, toSeq: 18 },
     });
-  workspace.collaboration.state.tasks.push(record);
+  workspace.taskEngine.state.tasks.push(record);
   workspace.changed();
   await workspace.send(main.id, '/task show ' + record.id);
   await flush();

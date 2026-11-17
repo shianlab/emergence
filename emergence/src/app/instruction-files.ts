@@ -1,6 +1,8 @@
-import { createHash } from 'node:crypto';
-import { open, realpath, stat } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { digest } from '../platform/content-hash.ts';
+import { inside, pathIdentity } from '../platform/path-policy.ts';
+import { boundedText } from '../platform/text-file.ts';
+import { realpath, stat } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
 
 import type { InstructionOptions } from '../core/domain/instructions.ts';
 export type InstructionSource = {
@@ -20,34 +22,6 @@ export type InstructionSnapshot = {
   text: string;
   fingerprint: string;
 };
-export const pathIdentity = (path: string) => (process.platform === 'win32' ? path.toLowerCase() : path);
-export function inside(root: string, target: string) {
-  const r = relative(pathIdentity(root), pathIdentity(target));
-  return !r || (!isAbsolute(r) && r !== '..' && !r.startsWith('..' + sep));
-}
-export const digest = (text: string | Buffer) => createHash('sha256').update(text).digest('hex');
-export async function boundedText(path: string, maxBytes: number, preserveBOM = false): Promise<string> {
-  const handle = await open(path, 'r');
-  try {
-    const info = await handle.stat();
-    if (!info.isFile()) throw new Error('不是普通文件');
-    if (info.size > maxBytes) throw new Error(`文件超过 ${maxBytes} 字节上限`);
-    const buffer = Buffer.alloc(maxBytes + 1);
-    let length = 0;
-    while (length <= maxBytes) {
-      const { bytesRead } = await handle.read(buffer, length, buffer.length - length, null);
-      if (!bytesRead) break;
-      length += bytesRead;
-    }
-    if (length > maxBytes) throw new Error(`文件超过 ${maxBytes} 字节上限`);
-    const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(
-      buffer.subarray(0, length),
-    );
-    return preserveBOM ? text : text.replace(/^\uFEFF/, '');
-  } finally {
-    await handle.close();
-  }
-}
 export async function instructionRoot(cwd: string, mode: InstructionOptions['rootMode']) {
   const start = await realpath(cwd);
   if (mode === 'launch') return start;

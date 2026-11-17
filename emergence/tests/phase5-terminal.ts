@@ -231,7 +231,7 @@ try {
       [b, 'two'],
     ],
   );
-  assert.equal((await state())!.collaboration.mode, 'independent');
+  assert.equal('master' in (await state())!.collaboration, false);
   checks.multiProjectModelTemplate = true;
   await ui.send('/theme amber');
   await ui.send('/bind close F10');

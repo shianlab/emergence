@@ -50,8 +50,7 @@ const test = await createTestRenderer({ width: 160, height: 42, kittyKeyboard: t
 const ui = mountWorkspaceUI(test.renderer, workspace, () => {}),
   main = workspace.current,
   worker = await workspace.split('row', workerDirectory);
-workspace.collaboration.configure(main.id, [worker.id]);
-workspace.collaboration.pause(true);
+workspace.taskEngine.pause(true);
 workspace.focus(main.id);
 const escape = (value: string) =>
   value.replace(
@@ -121,7 +120,7 @@ try {
       toSeq: 18,
     },
   });
-  workspace.collaboration.state.tasks.push(
+  workspace.taskEngine.state.tasks.push(
     review,
     taskSchema.parse({
       ...base,

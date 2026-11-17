@@ -7,12 +7,12 @@ import { canonicalPermissionPath } from '../core/adapters/permissions.ts';
 import type { SessionController } from './controller.ts';
 import {
   describeInstructions,
-  digest,
   directoryChain,
-  inside,
   instructionRoot,
   loadInstructionSnapshot,
 } from './instruction-files.ts';
+import { digest } from '../platform/content-hash.ts';
+import { inside } from '../platform/path-policy.ts';
 import { prepareInstructionDraft, writeInstructionDraft, type InitDraft } from './instruction-init.ts';
 
 declare module '@deepseek-ai/dsh-llm' {

@@ -102,10 +102,10 @@ try {
   await flush();
   assert.equal(ui.commandInput.visible, false);
   assert.equal(view.input.plainText, roleDraft);
-  assert.equal(w.collaboration.state.tasks.length, 0);
+  assert.equal(w.taskEngine.state.tasks.length, 0);
   checks.rolesAreInformationalWithoutDispatch = true;
   await delay(400);
-  const task = await w.collaboration.enqueue(
+  const task = await w.taskEngine.enqueue(
     a.id,
     a.id,
     'nav',
@@ -113,9 +113,7 @@ try {
     [],
     undefined,
     undefined,
-    {
-      local: true,
-    },
+    {},
   );
   await w.send(a.id, '/tasks');
   await flush();

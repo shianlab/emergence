@@ -1,5 +1,7 @@
 # 编排维护约定
 
+> 历史文档：主控窗口与跨窗口控制已于 2026-11-16 退役。下文解释旧实现，不作为恢复功能的要求。当前维护以 [结构维护入口](structure/README.md)、[职责与状态](structure/phase1/architecture.md) 和 [退役清单](structure/phase1/retirement.md) 为准；共享执行与兼容读取仍须保留。
+
 适用范围：Emergence Harness 的主控规划、任务派发、审查与预算。保留现有 TUI 视觉、单一调度队列和持久化任务 ID。
 
 2026-11-15 规划/存储维护边界：全局工具使用允许集合，作用域工具在各自 when 激活入口检查当前角色；原生限制不影响当前作用域注册，不能假定全局过滤已覆盖所有工具。需求理解完成后再暴露完整工作图 schema，有效方案用原生 concludeTurn 交还既有派发入口。max-tokens 根据本轮原生提交记录识别，禁止将截断当普通提前结束反复续写。JSON 状态文件统一使用 core/storage/safe-json-file.ts，调用方仍保留租约、写队列、schema 和恢复语义；只重试同一次替换，不删目标、不重放业务。代码与剩余真实稳定性边界见 [专项报告](iteration-20261108/r5-planning-report-20261115.md)。

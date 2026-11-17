@@ -6,11 +6,11 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { evaluatePermission } from '../src/core/adapters/permissions.ts';
 import { CoreAssurance } from '../src/core/application/assurance.ts';
 import { allocationViolation } from '../src/core/application/task-allocation.ts';
-import type { Collaboration } from '../src/core/application/task-coordinator.ts';
+import type { TaskEngine } from '../src/core/application/task-engine.ts';
 import { TaskLifecycle } from '../src/core/application/task-lifecycle.ts';
 import { captureToolEvidence, evidenceIsCurrent } from '../src/core/application/tool-evidence.ts';
 import { receiptSchema, type EvidenceReceipt } from '../src/core/domain/assurance.ts';
@@ -245,10 +245,8 @@ test('real Harness persists manifests in existing journal and enforces allocated
   const f = await executionFixture();
   let restored: WorkspaceController | undefined;
   try {
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'manifest', 'fixture:write', [], {
+    const worker = await f.w.split('row');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'manifest', 'fixture:write', [], {
       role: 'developer',
       scope: ['result.txt'],
       acceptance: ['actual file'],
@@ -266,8 +264,8 @@ test('real Harness persists manifests in existing journal and enforces allocated
     await f.w.close();
     restored = new WorkspaceController(f.ctx, f.launch);
     await restored.initialize();
-    assert.deepEqual(restored.collaboration.task(task.id).receipts, task.receipts);
-    assert.equal(await evidenceIsCurrent(restored.collaboration.task(task.id).receipts[0]), true);
+    assert.deepEqual(restored.taskEngine.task(task.id).receipts, task.receipts);
+    assert.equal(await evidenceIsCurrent(restored.taskEngine.task(task.id).receipts[0]), true);
   } finally {
     await restored?.close();
     await f.close();
@@ -306,10 +304,8 @@ test('real Harness no longer exempts arbitrary emergence-prefixed execution from
       yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name: tool, arguments: raw } };
       yield { type: 'finish', reason: { kind: 'tool-calls' } };
     };
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'external', 'fixture:extension', [], {
+    const worker = await f.w.split('row');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'external', 'fixture:extension', [], {
       role: 'developer',
       scope: ['.'],
       acceptance: ['external result observed'],
@@ -379,7 +375,7 @@ test('evidence budget reserves in-flight slots before concurrent effects start',
         saves++;
       },
     },
-  } as unknown as Collaboration;
+  } as unknown as TaskEngine;
   new CoreAssurance(collaboration).mount();
   const exec = {
     name: 'emergence_external',

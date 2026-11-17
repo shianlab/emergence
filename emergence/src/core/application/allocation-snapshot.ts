@@ -1,5 +1,5 @@
 import { digest } from '../storage/execution-journal.ts';
-import type { PlanningEnvironment } from './planning-service.ts';
+import type { PlanningEnvironment } from './planning-ports.ts';
 
 /** Ephemeral v1 observation: never an execution authorization or a persisted task binding. */
 export function allocationRevision(environment: PlanningEnvironment) {
@@ -7,9 +7,8 @@ export function allocationRevision(environment: PlanningEnvironment) {
     version: 1,
     mode: environment.mode,
     current: environment.currentWindow,
-    coordinating: environment.coordinating,
     windows: environment.windows
-      .map(({ id, controller: c, profile, dispatchable }) => ({
+      .map(({ id, controller: c, dispatchable }) => ({
         id,
         session: c.id,
         project: c.cwd,
@@ -21,7 +20,6 @@ export function allocationRevision(environment: PlanningEnvironment) {
           .definitions(c.agent)
           .map((tool) => tool.name)
           .sort(),
-        profile,
         dispatchable,
       }))
       .sort((a, b) => a.id.localeCompare(b.id)),

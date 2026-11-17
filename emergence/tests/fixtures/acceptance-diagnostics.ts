@@ -1,6 +1,6 @@
 import type { RunDiagnostic } from '../../src/core/domain/run-diagnostics.ts';
 import type { TaskRecord } from '../../src/core/domain/task.ts';
-import type { CoordinationRecord } from '../../src/core/domain/team.ts';
+import type { CoordinationRecord } from '../../src/core/domain/legacy-coordination.ts';
 import type { NativeJournal } from './native-evidence.ts';
 import { approvalEvents } from './approval-events.ts';
 

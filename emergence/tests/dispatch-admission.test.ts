@@ -9,9 +9,7 @@ import { digest } from '../src/core/storage/execution-journal.ts';
 async function setup() {
   const f = await executionFixture(),
     master = f.w.current,
-    worker = await f.w.split('row');
-  await f.w.setMaster(master.id);
-  f.w.team.followthrough.advance = async () => {};
+    worker = master;
   const plan = (count = 1) =>
     planSchema.parse({
       objective: '实际写文件',
@@ -45,24 +43,24 @@ test('concurrent graph submissions share one approval and durable graph; present
   try {
     await f.ctx.plugin(UserApproval);
     const c = f.master.controller!;
-    c.launch.appConfig.permissions.rules.push({ tool: 'emergence_dispatch', effect: 'ask' });
-    const first = f.w.collaboration.executePlan(f.master.id, f.plan());
+    c.launch.appConfig.permissions.rules.push({ tool: 'emergence_execute_plan', effect: 'ask' });
+    const first = f.w.taskEngine.executePlan(f.master.id, f.plan());
     await until(() => !!c.pending);
     const approval = c.pending!.id;
-    const second = f.w.collaboration.executePlan(f.master.id, { ...f.plan(), reason: '同图换种说明' });
+    const second = f.w.taskEngine.executePlan(f.master.id, { ...f.plan(), reason: '同图换种说明' });
     assert.equal(c.pending!.id, approval);
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     c.pending!.respond('y');
     const [a, b] = await Promise.all([first, second]);
     assert.equal(a[0].id, b[0].id);
     await until(() => a[0].status === 'needs_review');
-    const repeat = await f.w.collaboration.executePlan(f.master.id, f.plan());
+    const repeat = await f.w.taskEngine.executePlan(f.master.id, f.plan());
     assert.equal(repeat[0].id, a[0].id);
     assert.equal(f.writes(), 1);
-    assert.equal(f.w.collaboration.state.tasks.length, 1);
+    assert.equal(f.w.taskEngine.state.tasks.length, 1);
     Object.assign(a[0], { requestKey: `plan-${digest(f.plan()).slice(0, 20)}-step0` });
     await f.w.save();
-    assert.equal((await f.w.collaboration.executePlan(f.master.id, f.plan()))[0].id, a[0].id);
+    assert.equal((await f.w.taskEngine.executePlan(f.master.id, f.plan()))[0].id, a[0].id);
     assert.equal(f.writes(), 1, 'legacy request keys remain idempotent');
   } finally {
     await f.close();
@@ -75,20 +73,20 @@ test('worker permissions changed during approval cannot be admitted using the ol
     await f.ctx.plugin(UserApproval);
     const c = f.master.controller!;
     c.launch.appConfig.permissions.rules.push({ tool: 'emergence_dispatch', effect: 'ask' });
-    const operation = f.w.collaboration.executePlan(f.master.id, f.plan());
-    const failed = assert.rejects(operation, /UNAVAILABLE|STALE_ALLOCATION/);
+    const operation = f.w.taskEngine.executePlan(f.master.id, f.plan());
     await until(() => !!c.pending);
+    const stale = c.pending!;
     f.worker.controller!.setPermissionMode('plan');
-    c.pending!.respond('y');
-    await failed;
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    assert.throws(() => stale.respond('y'), /过期/);
+    assert.deepEqual(await operation, []);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     assert.equal(f.writes(), 0);
   } finally {
     await f.close();
   }
 });
 
-test('capability lookup discards a mixed snapshot when worker ownership changes mid-query', async () => {
+test('capability lookup discards a mixed snapshot when session permission changes mid-query', async () => {
   const f = await setup();
   const resolve = f.ctx.tools.resolve.bind(f.ctx.tools);
   try {
@@ -97,7 +95,7 @@ test('capability lookup discards a mixed snapshot when worker ownership changes 
       const result = await resolve(input);
       if (!changed) {
         changed = true;
-        await f.w.collaboration.takeover(f.worker.id);
+        f.worker.controller!.setPermissionMode('plan');
       }
       return result;
     };
@@ -113,7 +111,7 @@ test('capability lookup discards a mixed snapshot when worker ownership changes 
 
 test('a partially staged graph is absent from checkpoints and cannot be pumped', async () => {
   const f = await setup(),
-    collaboration = f.w.collaboration;
+    collaboration = f.w.taskEngine;
   const enqueue = collaboration.enqueue.bind(collaboration);
   let release!: () => void;
   const held = new Promise<void>((resolve) => {
@@ -152,15 +150,15 @@ test('failed graph persistence rolls back every task and allows one clean retry'
     f.w.save = async () => {
       throw new Error('injected write failure');
     };
-    await assert.rejects(f.w.collaboration.executePlan(f.master.id, f.plan(2)), /injected write failure/);
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    await assert.rejects(f.w.taskEngine.executePlan(f.master.id, f.plan(2)), /injected write failure/);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     assert.equal(f.writes(), 0);
-    assert.equal((f.w.collaboration.journal.load() as { tasks: unknown[] }).tasks.length, 0);
+    assert.equal((f.w.taskEngine.journal.load() as { tasks: unknown[] }).tasks.length, 0);
     f.w.save = save;
-    const tasks = await f.w.collaboration.executePlan(f.master.id, f.plan(2));
+    const tasks = await f.w.taskEngine.executePlan(f.master.id, f.plan(2));
     await until(() => tasks[0].status === 'needs_review');
     assert.equal(f.writes(), 1);
-    assert.equal(f.w.collaboration.state.tasks.length, 2);
+    assert.equal(f.w.taskEngine.state.tasks.length, 2);
   } finally {
     f.w.save = save;
     await f.close();
@@ -172,14 +170,14 @@ test('manual admission rejects duplicate step IDs, cycles and missing dependenci
   try {
     const duplicate = f.plan(2);
     duplicate.steps[1].id = duplicate.steps[0].id;
-    await assert.rejects(f.w.collaboration.executePlan(f.master.id, duplicate), /步骤 ID 重复/);
+    await assert.rejects(f.w.taskEngine.executePlan(f.master.id, duplicate), /步骤 ID 重复/);
     const cyclic = f.plan(2);
     cyclic.steps[0].dependsOn = ['step1'];
-    await assert.rejects(f.w.collaboration.executePlan(f.master.id, cyclic), /成环/);
+    await assert.rejects(f.w.taskEngine.executePlan(f.master.id, cyclic), /成环/);
     const missing = f.plan();
     missing.steps[0].dependsOn = ['missing'];
-    await assert.rejects(f.w.collaboration.executePlan(f.master.id, missing), /依赖步骤不存在/);
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    await assert.rejects(f.w.taskEngine.executePlan(f.master.id, missing), /依赖步骤不存在/);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     assert.equal(f.writes(), 0);
   } finally {
     await f.close();
@@ -198,22 +196,22 @@ test('cancellation while saving rolls back the committed intent before any tool 
     let entered = false;
     f.w.save = async () => {
       await save();
-      if (f.w.collaboration.batching) {
+      if (f.w.taskEngine.batching) {
         entered = true;
         await held;
       }
     };
-    const operation = f.w.collaboration.executePlan(f.master.id, f.plan(), false, abort.signal);
+    const operation = f.w.taskEngine.executePlan(f.master.id, f.plan(), false, abort.signal);
     const failed = assert.rejects(operation, /cancel graph/);
     await until(() => entered);
-    await f.w.collaboration.pump();
+    await f.w.taskEngine.pump();
     abort.abort(new Error('cancel graph'));
     release();
     await failed;
     await delay(20);
     assert.equal(f.writes(), 0);
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
-    assert.equal((f.w.collaboration.journal.load() as { tasks: unknown[] }).tasks.length, 0);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
+    assert.equal((f.w.taskEngine.journal.load() as { tasks: unknown[] }).tasks.length, 0);
   } finally {
     release();
     f.w.save = save;
@@ -230,11 +228,11 @@ test('concurrent recovery shares one decision and returns the same durable retry
     release = resolve;
   });
   try {
-    const task = await f.w.collaboration.enqueue(f.master.id, f.worker.id, 'recover-source', 'fixture:write');
-    f.w.collaboration.pause(true);
+    const task = await f.w.taskEngine.enqueue(f.worker.id, f.worker.id, 'recover-source', 'fixture:write');
+    f.w.taskEngine.pause(true);
     await until(() => task.status === 'queued');
-    f.w.collaboration.lifecycle.transition(task, 'interrupted');
-    f.w.collaboration.pause(false);
+    f.w.taskEngine.lifecycle.transition(task, 'interrupted');
+    f.w.taskEngine.pause(false);
     let decisions = 0;
     c.confirmDecision = async () => {
       decisions++;
@@ -242,17 +240,17 @@ test('concurrent recovery shares one decision and returns the same durable retry
       return true;
     };
     const note = '已经核对记录，没有执行副作用，恢复原任务';
-    const first = f.w.collaboration.recover(task.id, f.master.id, note);
+    const first = f.w.taskEngine.recover(task.id, f.master.id, note);
     await until(() => decisions === 1);
-    const second = f.w.collaboration.recover(task.id, f.master.id, note);
+    const second = f.w.taskEngine.recover(task.id, f.master.id, note);
     release();
     const [a, b] = await Promise.all([first, second]);
     assert.equal(a!.id, b!.id);
     assert.equal(decisions, 1);
-    assert.equal((await f.w.collaboration.recover(task.id, f.master.id, note))!.id, a!.id);
+    assert.equal((await f.w.taskEngine.recover(task.id, f.master.id, note))!.id, a!.id);
     await until(() => a!.status === 'succeeded');
     assert.equal(f.writes(), 1);
-    assert.equal(f.w.collaboration.state.tasks.filter((t) => t.recoveryOf === task.id).length, 1);
+    assert.equal(f.w.taskEngine.state.tasks.filter((t) => t.recoveryOf === task.id).length, 1);
   } finally {
     release();
     c.confirmDecision = confirm;

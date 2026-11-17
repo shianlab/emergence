@@ -80,7 +80,7 @@ try {
   checks.backgroundDoesNotStealFocus = true;
   w.focus(a.id);
   await ready();
-  assert.ok(native.captureCharFrame().includes('允许本次'));
+  await native.waitForFrame((frame) => frame.includes('允许本次'));
   await native.mockInput.pasteBracketedText('y\n/exit');
   await flush();
   assert.ok(a.controller!.pending);
@@ -242,6 +242,10 @@ try {
   await w.closePane(b.id);
   assert.equal(await closing, 'cancelled');
   checks.closingPaneSettlesApproval = true;
+  await flush();
+  // Read the final native buffer only after rendering and output have settled.
+  native.renderer.pause();
+  await native.renderer.idle();
   await writeFile(
     join(dir, 'native.json'),
     JSON.stringify(
@@ -255,7 +259,7 @@ try {
   await writeFile(
     join(dir, 'native.json'),
     JSON.stringify(
-      { passed: false, error: String(error), checks, root, frame: native.captureCharFrame() },
+      { passed: false, error: error instanceof Error ? error.stack : String(error), checks, root },
       null,
       2,
     ),

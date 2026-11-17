@@ -131,7 +131,7 @@ test('real Harness exposes native data profile in Plan mode with genuine source 
       yield { type: 'finish', reason: { kind: 'tool-calls' } };
     };
     const c = f.w.current.controller!;
-    c.permissionMode = 'plan';
+    c.setPermissionMode('plan');
     await f.w.send(f.w.focused, '查看数据的行数');
     await c.agent.whenIdle();
     const results = c.agent.session.snapshotEvents().filter((e) => e.type === 'tool/result');

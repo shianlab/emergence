@@ -1,0 +1,337 @@
+{
+  "scope": "Stage 3 frozen source compared with Stage 4; no retired coordination restored. Source/test text changes, not runtime coverage measurements.",
+  "ownership": [
+    {
+      "from": "src/app/controller.ts: LaunchConfig and assertModelHistory",
+      "to": [
+        "src/app/session-config.ts",
+        "src/app/session-model.ts"
+      ],
+      "callers": "Controller, plugin, workspace, native configuration runtime, TUI entry/home and tests now import the defining modules; no forwarding alias."
+    },
+    {
+      "from": "SessionController handles, root/child leases, switch/cancel/close",
+      "to": [
+        "src/app/session-lifecycle.ts"
+      ],
+      "state": "SessionLifecycle alone owns handles, leases and in-flight transition promises; controller composes resource settlement callbacks."
+    },
+    {
+      "from": "SessionController permissions and approval/tool hooks",
+      "to": [
+        "src/app/session-permissions.ts",
+        "src/app/session-questions.ts"
+      ],
+      "state": "SessionPermissions owns epoch, grants, call identities and transitions; one controller InteractionQueue owns all answers. Questions preserve clarification callback binding."
+    },
+    {
+      "from": "SessionController event rendering and stream activity",
+      "to": [
+        "src/app/session-presentation.ts"
+      ],
+      "state": "Owns only derived transcript/message/usage/activity caches; diagnostics and Harness remain authoritative."
+    },
+    {
+      "from": "CorePlanning.states/proposed/state/save and adapter writes",
+      "to": [
+        "src/core/application/planning-requests.ts"
+      ],
+      "state": "Private WeakMaps and serialized PlanStore writes; admission, analysis, claims, budgets and receipts mutate here. Public snapshots are detached. Input-bound leases fence async commits."
+    },
+    {
+      "from": "CorePlanning inventory, admission, policy and context",
+      "to": [
+        "src/core/application/planning-inventory.ts",
+        "src/core/application/planning-admission.ts",
+        "src/core/application/planning-policy.ts",
+        "src/core/application/planning-presentation.ts",
+        "src/core/application/planning-ports.ts"
+      ],
+      "state": "Inventory is observation; admission validates detached drafts; policy/projections are pure; narrow contracts replace whole runtime-controller types."
+    }
+  ],
+  "verification": {
+    "retained": [
+      "tests/permissions.test.ts",
+      "tests/interactions.test.ts",
+      "tests/core-planning.test.ts",
+      "tests/planning-clarification.test.ts",
+      "tests/core-execution.test.ts",
+      "tests/core-acceptance.test.ts",
+      "tests/code-data-integration.test.ts",
+      "tests/workspace.test.ts",
+      "tests/independent-windows.test.ts"
+    ],
+    "added": [
+      "tests/session-lifecycle.test.ts",
+      "tests/planning-state.test.ts"
+    ],
+    "testMigration": "Existing internal-state readers now use detached snapshots. Integrity rejection remains asserted on a corrupt detached plan, and readyPlan proves external mutation cannot alter the authoritative plan. No test files removed or cases skipped."
+  },
+  "changes": [
+    {
+      "file": "src/app/controller.ts",
+      "disposition": "changed",
+      "beforeHash": "d9bd37df10ff20e3612416641587370c10e821e1b4162e5c73e8b9f6b812e594",
+      "afterHash": "e91ec1e9f8f28b62f207126ab36d255726f24bd318e35ddbb855ff0b76413e03",
+      "beforeLines": 1174,
+      "afterLines": 447
+    },
+    {
+      "file": "src/app/model-config-runtime.ts",
+      "disposition": "changed",
+      "beforeHash": "c73349c25b8079498634a07b92136d07cc71f4164d676443f0cbafe91d6c6f38",
+      "afterHash": "54594c728983d9dc45bd1d7499c8ad360b299aeecd447a66cb8e73efe1ddacfb",
+      "beforeLines": 180,
+      "afterLines": 180
+    },
+    {
+      "file": "src/app/plugin.ts",
+      "disposition": "changed",
+      "beforeHash": "c73b45e8317a62d473fc22a51c85e8b8ea4318601cf89a71c1cff1b0a02c57a4",
+      "afterHash": "2f52812481dcc54d76c120751f50f879ac14d2d63b8cae265b0c0f8378647575",
+      "beforeLines": 227,
+      "afterLines": 228
+    },
+    {
+      "file": "src/app/session-config.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "64b5f8698751b000c6338a2253762545a4c64b80d343ce091a958c9ca91a184f",
+      "beforeLines": 0,
+      "afterLines": 17
+    },
+    {
+      "file": "src/app/session-lifecycle.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "b380598ba17340e247a06b082bea8f447e896eb7c410449ae7d0f2caa48f25f9",
+      "beforeLines": 0,
+      "afterLines": 297
+    },
+    {
+      "file": "src/app/session-model.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "457c2d796b35702b618b0bd262a992ba81c2b5350e5189966fe00b2d3dcf60d3",
+      "beforeLines": 0,
+      "afterLines": 35
+    },
+    {
+      "file": "src/app/session-permissions.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "4fe5aa9b2e583d373637d8db98b1098ce061a7aa564b7c5fc1e55230d25fb716",
+      "beforeLines": 0,
+      "afterLines": 503
+    },
+    {
+      "file": "src/app/session-presentation.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "bf59cb7986082246ddaa61e18fcdf94bdbe04cf606b4901e64ad488dc8e0559f",
+      "beforeLines": 0,
+      "afterLines": 257
+    },
+    {
+      "file": "src/app/session-questions.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "ba75dade8ea0f95f3ac6a3b3e89194403826095185dd9be2a93a5c730a29e969",
+      "beforeLines": 0,
+      "afterLines": 68
+    },
+    {
+      "file": "src/app/tui/entry.ts",
+      "disposition": "changed",
+      "beforeHash": "c44b6c9c5abd091cef06150742c6d8a1d5d82960f2e7c5aa87caa9373088c70b",
+      "afterHash": "368bdb7aac949b37afb6826fe6ccc101c57134c6fc7f4296b111298182636267",
+      "beforeLines": 106,
+      "afterLines": 106
+    },
+    {
+      "file": "src/app/tui/home-state.ts",
+      "disposition": "changed",
+      "beforeHash": "8c326fe5bd8610bf8d7a18ef4596e8a823be5cd343498ded0598813926b63e78",
+      "afterHash": "52e5d2f79cc9615431a2a9a74763b2866b7d3f8b6d088d335a74a34acbb60d7e",
+      "beforeLines": 78,
+      "afterLines": 78
+    },
+    {
+      "file": "src/app/tui/home.ts",
+      "disposition": "changed",
+      "beforeHash": "8c29cd490faf7c1dfa0d999775f44feb10918d8e369737de3071b184acdf9607",
+      "afterHash": "2f4a5f5c866433d901af7af0b9954f99d909451347917a1700cde2271c60f6f3",
+      "beforeLines": 685,
+      "afterLines": 685
+    },
+    {
+      "file": "src/app/workspace.ts",
+      "disposition": "changed",
+      "beforeHash": "7506297e47b9a3c9c10998222f541fe6eea2cc7ade6dfb45c5b6f5b3748e3f75",
+      "afterHash": "871996f2a1b6efca048c587c8bc0de3dab34aae025cb30e1818e6467a94be224",
+      "beforeLines": 670,
+      "afterLines": 671
+    },
+    {
+      "file": "src/core/adapters/planning.ts",
+      "disposition": "changed",
+      "beforeHash": "26cf0922efbb02c1a55237b6437a5e47dd4c1c4382d83787085673cc54dd3260",
+      "afterHash": "052732f59b4b27edd075bd2363f85cd0bd59b497cded91eeaaefc0207e3090a2",
+      "beforeLines": 231,
+      "afterLines": 183
+    },
+    {
+      "file": "src/core/application/allocation-snapshot.ts",
+      "disposition": "changed",
+      "beforeHash": "32204b610693d993d7b857a93a515ea26b79e2b0ba08305e23cbcfa3a67e5758",
+      "afterHash": "18824611c15faa22698b0b4451c5db4fb3cfa4bb2b2a5d5a6d75bef1c1dadb6f",
+      "beforeLines": 28,
+      "afterLines": 28
+    },
+    {
+      "file": "src/core/application/planning-admission.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "89875a2c6e247f0bf536084561bdafb8be9220bc7ad1ea7c9db1eca192f4f358",
+      "beforeLines": 0,
+      "afterLines": 97
+    },
+    {
+      "file": "src/core/application/planning-inventory.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "48cef57f7e4d19e4c256dbf738621071491697a23649371e136c0f611ab63c63",
+      "beforeLines": 0,
+      "afterLines": 189
+    },
+    {
+      "file": "src/core/application/planning-policy.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "ba932db1aa4bedfda3f027e6f351087adbb62e16badbe7dbc58c43165aed2fce",
+      "beforeLines": 0,
+      "afterLines": 80
+    },
+    {
+      "file": "src/core/application/planning-ports.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "771f199722c4f2483650921de448fb79d7f8b40187905f5fd8e30e5d46abe521",
+      "beforeLines": 0,
+      "afterLines": 34
+    },
+    {
+      "file": "src/core/application/planning-presentation.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "8e0e54d32fa3ceb96a1232666ebb9d8c719c703b4e5fe3ae0a5b8a7e59727a58",
+      "beforeLines": 0,
+      "afterLines": 155
+    },
+    {
+      "file": "src/core/application/planning-requests.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "531c648c25502f21d9338fb15da9ad1d735624b35300f60a7a54385d2f81ed35",
+      "beforeLines": 0,
+      "afterLines": 457
+    },
+    {
+      "file": "src/core/application/planning-service.ts",
+      "disposition": "changed",
+      "beforeHash": "358faee8e5e6739b0524f2a00c48e41a2761e55b7340387891521b8a997de6b5",
+      "afterHash": "c0a8dc23492279c413bb993b733eb0ca9061060db0c7e49552b2f15ba0603b25",
+      "beforeLines": 753,
+      "afterLines": 177
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "disposition": "changed",
+      "beforeHash": "6386b291335bb6901f2703e613251db24584d6a8ad42c5aaa28860ede39bc368",
+      "afterHash": "a2e341333f9dae98f968128561c9244469740ac21f1bd764b4089f949f2e8438",
+      "beforeLines": 338,
+      "afterLines": 338
+    },
+    {
+      "file": "tests/code-data-integration.test.ts",
+      "disposition": "changed",
+      "beforeHash": "8abcc7d11f223e1036b4f8fc304b1b2f491ad03bc24464d734046b16b59f72a2",
+      "afterHash": "f2f9eb1138f49849839961adc0910493e099d1a3e24ac96625b4bf77663acb59",
+      "beforeLines": 277,
+      "afterLines": 277
+    },
+    {
+      "file": "tests/core-acceptance.test.ts",
+      "disposition": "changed",
+      "beforeHash": "e4becc797108ddc7462e56748a145dd8ce33daa207fe86984cb6114f9bb9c731",
+      "afterHash": "f896c8815e3d3538a87d6255eb962cbb0b100f1894dae49f75991fd0b7d3627a",
+      "beforeLines": 245,
+      "afterLines": 243
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "disposition": "changed",
+      "beforeHash": "a3cb09315280396b8f281842cc829e071c401f79e4b59816f3bcc87783f0cc93",
+      "afterHash": "4108563bf0c6e624e3881103fcc0e5fc4adf3c622f3ac78871295a1293dbb27a",
+      "beforeLines": 353,
+      "afterLines": 353
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "disposition": "changed",
+      "beforeHash": "4b845c82aa8f63f71e73922c9b8622aa250a73b703db5962117ee68a449ea8bb",
+      "afterHash": "1521e87128d330f0307e7ff64f7708ccae4e4809dbe56b0f772ecaaaca33e0a7",
+      "beforeLines": 614,
+      "afterLines": 621
+    },
+    {
+      "file": "tests/data-foundation.test.ts",
+      "disposition": "changed",
+      "beforeHash": "dbc5f1c70318ff9fd0b480dd29b188aa00ecc1d30928a9e3a88f88e5a5935ad1",
+      "afterHash": "66e05dea46f54ee531f0ba70fa0d075fb6cd4efeed510274bd572fb480a1d7e4",
+      "beforeLines": 163,
+      "afterLines": 163
+    },
+    {
+      "file": "tests/experience-e1-ui.ts",
+      "disposition": "changed",
+      "beforeHash": "c44d0b68416f97213be3a39071ec089b332ea7ec95807638f21ee503bd2d1554",
+      "afterHash": "2f93f3da89f2df440867b0a40ccf803f2d34c8d918b5318e15738920e5052f68",
+      "beforeLines": 271,
+      "afterLines": 275
+    },
+    {
+      "file": "tests/planning-clarification.test.ts",
+      "disposition": "changed",
+      "beforeHash": "5050e4c08c0b0259cd0b3b5217f63818a693d40636a8bbf07e32ad95dc66074d",
+      "afterHash": "84b79496a1b34a33d522c82d66f0b2f1ccdfc480ddfca053052b285433730131",
+      "beforeLines": 215,
+      "afterLines": 215
+    },
+    {
+      "file": "tests/planning-state.test.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "59e5f29bee977f8a2a36aca5e9f8255188cb79174b24527774fbd7eff56a642c",
+      "beforeLines": 0,
+      "afterLines": 158
+    },
+    {
+      "file": "tests/session-lifecycle.test.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "7852bbf04a67efb7bee94b7b6811c85eebb14c9b10606aa7a808ccd9600f946f",
+      "beforeLines": 0,
+      "afterLines": 211
+    },
+    {
+      "file": "tests/tui-phase1.ts",
+      "disposition": "changed",
+      "beforeHash": "b00e421e3673f1bf36ee2dac8eac7634a1f930ab5d531eb78e3b104049388b6c",
+      "afterHash": "db3def0dacac82e8d982c5acc74d3ff21c92386caa15eba569965fa8ee5668ed",
+      "beforeLines": 243,
+      "afterLines": 243
+    }
+  ]
+}

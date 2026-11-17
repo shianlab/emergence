@@ -11,18 +11,17 @@ await mkdir(dir, { recursive: true });
 const f = await executionFixture(),
   w = f.w,
   master = w.current,
-  worker = await w.split('row');
-w.collaboration.configure(master.id, [worker.id]);
-const blocker = await w.collaboration.enqueue(master.id, worker.id, 'native-blocker', 'fixture:write', [], {
+  worker = master;
+const blocker = await w.taskEngine.enqueue(worker.id, worker.id, 'native-blocker', 'fixture:write', [], {
   role: 'developer',
   scope: ['result.txt'],
   acceptance: ['核对内容'],
 });
 await until(() => blocker.status === 'needs_review');
-const task = await w.collaboration.enqueue(master.id, worker.id, 'native-pending', 'fixture:write', [
+const task = await w.taskEngine.enqueue(worker.id, worker.id, 'native-pending', 'fixture:write', [
   blocker.id,
 ]);
-w.collaboration.pause(true);
+w.taskEngine.pause(true);
 Object.assign(task, { status: 'interrupted' });
 await w.save();
 w.focused = master.id;
@@ -49,16 +48,16 @@ try {
   native.mockInput.pressEnter();
   await native.flush();
   await decision.command;
-  assert.equal(w.collaboration.state.tasks.length, 2);
+  assert.equal(w.taskEngine.state.tasks.length, 2);
   checks.enterCancelsByDefault = true;
   decision = await open();
   native.mockInput.pressEscape();
   await delay(100);
   await native.flush();
   await decision.command;
-  assert.equal(w.collaboration.state.tasks.length, 2);
+  assert.equal(w.taskEngine.state.tasks.length, 2);
   checks.escapeCancels = true;
-  w.collaboration.pause(false);
+  w.taskEngine.pause(false);
   decision = await open();
   native.resize(60, 24);
   await native.flush();
@@ -69,9 +68,9 @@ try {
   native.mockInput.pressEnter();
   await native.flush();
   await decision.command;
-  assert.equal(w.collaboration.state.tasks.length, 3);
-  assert.equal(w.collaboration.state.tasks[2].recoveryOf, task.id);
-  assert.equal(w.collaboration.state.tasks[2].status, 'queued');
+  assert.equal(w.taskEngine.state.tasks.length, 3);
+  assert.equal(w.taskEngine.state.tasks[2].recoveryOf, task.id);
+  assert.equal(w.taskEngine.state.tasks[2].status, 'queued');
   assert.equal(f.writes(), 1);
   checks.arrowAndEnterCreateOneAttemptWithDependencies = true;
   checks.chineseMenuAndNarrowDialog = true;

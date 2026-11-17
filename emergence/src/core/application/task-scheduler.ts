@@ -1,9 +1,9 @@
 import { taskLabels, settledTaskStatuses as terminal, type TaskRecord } from '../domain/task.ts';
 import { tasksConflict } from './task-allocation.ts';
-import type { Collaboration } from './task-coordinator.ts';
+import type { TaskEngine } from './task-engine.ts';
 
 type Host = Pick<
-  Collaboration,
+  TaskEngine,
   | 'budgets'
   | 'stopped'
   | 'batching'
@@ -42,15 +42,9 @@ export class TaskScheduler {
   }
   olderConflictingTask(task: TaskRecord) {
     return this.host.state.tasks.slice(0, this.host.state.tasks.indexOf(task)).find((older) => {
-      if (
-        older.status !== 'queued' ||
-        this.host.admitting.has(older) ||
-        !this.host.workspace.team.followthrough.allows(older.id)
-      )
-        return false;
-      if (!older.local && (this.host.state.mode !== 'collaborate' || this.host.state.paused)) return false;
-      if (this.host.state.owned.includes(older.target) || !this.host.workspace.available(older.target))
-        return false;
+      if (older.status !== 'queued' || this.host.admitting.has(older)) return false;
+      if (this.host.state.paused) return false;
+      if (!this.host.workspace.available(older.target)) return false;
       return (
         older.dependsOn.every((id) => this.host.dependency(id).status === 'succeeded') &&
         tasksConflict(older, task)
@@ -61,15 +55,10 @@ export class TaskScheduler {
     if (this.pumping || this.host.stopped || this.host.batching) return;
     this.pumping = true;
     try {
-      await this.host.workspace.team.followthrough.advance();
       if (this.host.stopped || this.host.batching) return;
       for (const task of this.host.state.tasks) {
         if (this.host.batching || this.host.stopped) return;
         if (task.status !== 'queued' || this.host.admitting.has(task)) continue;
-        if (!this.host.workspace.team.followthrough.allows(task.id)) {
-          this.waiting(task, '等待总任务恢复协调');
-          continue;
-        }
         const pendingReview = task.dependsOn.some((id) => {
           const d = this.host.dependency(id);
           return (
@@ -91,8 +80,8 @@ export class TaskScheduler {
           );
           continue;
         }
-        if (!task.local && (this.host.state.mode !== 'collaborate' || this.host.state.paused)) {
-          this.waiting(task, '协作已暂停，等待恢复');
+        if (this.host.state.paused) {
+          this.waiting(task, '任务队列已暂停，等待恢复');
           continue;
         }
         if (!this.host.workspace.available(task.target) || !this.host.workspace.available(task.issuer)) {
@@ -103,11 +92,12 @@ export class TaskScheduler {
           this.waiting(task, '等待依赖任务完成');
           continue;
         }
-        if (this.active.has(task.target) || this.host.state.owned.includes(task.target)) {
-          this.waiting(
-            task,
-            this.host.state.owned.includes(task.target) ? '窗口已由用户接管' : '等待目标窗口完成当前任务',
-          );
+        if (task.assessment || task.issuer !== task.target || task.issuerSession !== task.targetSession) {
+          await this.host.finishWithoutTurn(task, 'blocked', '历史跨窗口任务不能进入执行队列');
+          continue;
+        }
+        if (this.active.has(task.target)) {
+          this.waiting(task, '等待当前会话完成任务');
           continue;
         }
         if ([...this.active.values()].some((other) => tasksConflict(other, task))) {

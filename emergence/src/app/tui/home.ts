@@ -11,7 +11,7 @@ import stringWidth from 'string-width';
 import { safeError } from '../../core/adapters/redaction.ts';
 import { palette } from '../../core/domain/ui-preferences.ts';
 import { commandHelp, homeCommands, normalizeHelp, slashSuggestions, type CommandItem } from '../commands.ts';
-import type { LaunchConfig } from '../controller.ts';
+import type { LaunchConfig } from '../session-config.ts';
 import { diagnose, formatDiagnosis } from '../doctor.ts';
 import { modelConfigurationIntent } from '../model-configuration.ts';
 import { terminalActions } from '../terminal-actions.ts';

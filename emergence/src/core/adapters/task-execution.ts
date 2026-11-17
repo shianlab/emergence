@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileFingerprint, sideEffectTool } from '../application/execution-evidence.ts';
 import { allocationViolation } from '../application/task-allocation.ts';
-import type { Collaboration } from '../application/task-coordinator.ts';
+import type { TaskEngine } from '../application/task-engine.ts';
 import {
   isReadOnlyTask,
   taskLabels,
@@ -20,7 +20,7 @@ const now = () => new Date().toISOString();
 const bounded = (value: unknown, length = 1000) => safeError(value).slice(0, length);
 
 type Host = Pick<
-  Collaboration,
+  TaskEngine,
   | 'lifecycle'
   | 'dependency'
   | 'assurance'
@@ -70,6 +70,8 @@ export class TaskExecution {
           return '依赖产物已变化或无法读取，旧验收不能用于本次执行';
   }
   async start(task: TaskRecord) {
+    if (task.assessment || task.issuer !== task.target || task.issuerSession !== task.targetSession)
+      throw new Error('历史跨窗口任务只能查看，不能重新执行');
     if (
       this.host.stopped ||
       task.cancelReason ||
@@ -133,14 +135,7 @@ export class TaskExecution {
         task.fence !== this.host.journal.epoch
       )
         throw new Error('派发前执行窗口或租约已变化，未启动任务');
-      if (
-        (!task.local &&
-          (this.host.state.mode !== 'collaborate' ||
-            this.host.state.paused ||
-            this.host.state.owned.includes(task.target))) ||
-        controller.busy ||
-        !this.host.workspace.available(task.target)
-      ) {
+      if (this.host.state.paused || controller.busy || !this.host.workspace.available(task.target)) {
         this.host.active.delete(task.target);
         this.host.lifecycle.transition(task, 'queued');
         this.host.update(task, '派发暂停或窗口忙碌，尚未执行');
@@ -149,7 +144,7 @@ export class TaskExecution {
       if (!process.env[controller.model.apiKeyEnv])
         throw new Error(`模型密钥未配置：${controller.model.apiKeyEnv}`);
       controller.lastError = undefined;
-      if (task.assessment?.kind === 'review' || isReadOnlyTask(task)) {
+      if (isReadOnlyTask(task)) {
         // The read-only audit menu must agree with its inherited permission policy.
         // Native guards still reject forged/hidden calls; no failed receipt is discarded.
         const deny = this.host.workspace.ctx.tools
@@ -161,7 +156,7 @@ export class TaskExecution {
           .map((tool) => tool.name);
         if (deny.length) this.readOnlyToolMasks.set(task, controller.agent.ctx.tools.restrict({ deny }));
       }
-      controller.notice = `执行协作任务 ${task.id}`;
+      controller.notice = `执行计划任务 ${task.id}`;
       controller.changed();
       if (!this.dispatching(task)) return;
       controller.agent.followup(message);
@@ -205,40 +200,14 @@ export class TaskExecution {
       const repairedChecks = new Map<string, string>();
       let codeResult: NonNullable<TaskRecord['result']>['code'] | undefined;
       try {
-        const codeWork = controller ? await controller.codeWork.get(controller.agent) : undefined;
-        const resolvedChecks = await codeWork?.resolvedFailures(AbortSignal.timeout(10000));
-        for (const id of resolvedChecks ?? []) {
-          const failed = codeWork!.run!.checks.find((check) => check.callId === id);
-          const success = codeWork!.run!.checks.findLast(
-            (check) => check.id === failed?.id && check.status === 'succeeded',
+        const evidence = controller ? await controller.codeWork.evidence(controller.agent) : undefined;
+        for (const [failed, succeeded] of evidence?.repairedChecks ?? [])
+          repairedChecks.set(failed, succeeded);
+        codeResult = evidence?.result;
+        if (evidence?.unverifiedChanges)
+          additionalErrors.push(
+            '代码变更尚缺当前版本的成功检查或测试口径发生变化；请查看 emergence_code_work status',
           );
-          if (success) repairedChecks.set(id, success.callId);
-        }
-        if (codeWork?.run) {
-          const codeStatus = await codeWork.status(AbortSignal.timeout(10000));
-          codeResult = {
-            runId: codeWork.run.id,
-            verified: codeStatus.verified,
-            criteriaChanged: codeStatus.criteriaChanged,
-            paths: codeStatus.changes.map((change) => change.path.slice(0, 1000)),
-            checks: codeWork.run.checks.slice(-16).map((check) => ({
-              callId: check.callId,
-              command: check.command.slice(0, 1000),
-              exitCode: check.exitCode,
-              status: check.status,
-              version: check.version,
-            })),
-          };
-          if (
-            codeWork.run.changes.some(
-              (change) => change.beforeHash !== change.afterHash || change.uncertain,
-            ) &&
-            !codeStatus.verified
-          )
-            additionalErrors.push(
-              '代码变更尚缺当前版本的成功检查或测试口径发生变化；请查看 emergence_code_work status',
-            );
-        }
       } catch {
         additionalErrors.push('无法核对代码检查记录；不得将未知状态视为通过');
       }
@@ -289,12 +258,7 @@ export class TaskExecution {
         toSeq: event.seq,
         ...(codeResult ? { code: codeResult } : {}),
       };
-      if (
-        task.contract &&
-        status === 'succeeded' &&
-        !(task.assessment?.checks?.length && task.assessment.checks.every((c) => c.passed))
-      )
-        status = 'needs_review';
+      if (task.contract && status === 'succeeded') status = 'needs_review';
       const files = [
         ...new Set(
           this.host.journal.effects(task.id).flatMap((effect) => (effect.file ? [effect.file] : [])),
@@ -349,38 +313,6 @@ export class TaskExecution {
     try {
       await this.host.workspace.ctx.sessionPersistence.flush();
       await this.host.workspace.save();
-      const issuer = this.host.workspace.panes.get(task.issuer)?.controller;
-      if (
-        !task.local &&
-        !this.host.workspace.team.followthrough.manages(task.id) &&
-        issuer?.id === task.issuerSession &&
-        !task.notified &&
-        !this.host.stopped &&
-        this.host.workspace.available(task.issuer)
-      ) {
-        // Persist before injection: after a crash the ledger remains authoritative; never replay a notification as work.
-        this.host.lifecycle.amend(task, { notified: true });
-        await this.host.workspace.save();
-        if (
-          this.host.stopped ||
-          !this.host.workspace.available(task.issuer) ||
-          this.host.workspace.panes.get(task.issuer)?.controller !== issuer ||
-          issuer.id !== task.issuerSession
-        )
-          return;
-        const receipt = createUserMessage({
-          source: { kind: 'emergence-receipt', taskId: task.id },
-          content: [
-            {
-              type: 'text',
-              text: `任务实际回执：${JSON.stringify(this.host.view(task))}\n请汇报实际状态；收到回执本身不授权新增任务。`,
-            },
-          ],
-        });
-        if (this.host.state.mode === 'collaborate' && !this.host.state.paused && !issuer.busy)
-          issuer.agent.followup(receipt);
-        else issuer.agent.inject(receipt);
-      }
     } finally {
       this.readOnlyToolMasks.get(task)?.();
       this.readOnlyToolMasks.delete(task);
@@ -416,13 +348,6 @@ export class TaskExecution {
     );
     disposers.push(
       ctx.tools.guard((exec) => {
-        const id = (exec.arguments as { task_id?: string })?.task_id;
-        if (
-          id &&
-          ['emergence_audit', 'emergence_review', 'emergence_repair'].includes(exec.name) &&
-          workspace.team.followthrough.manages(id)
-        )
-          return '此总任务由宿主持久协调器自动审查、验证和修复；请用 emergence_team / emergence_tasks 查询，不创建竞争流程。';
         const pane = [...workspace.panes.values()].find((p) => p.controller?.owns(exec.agent)),
           task = pane && this.host.current(pane.id);
         return (
@@ -497,14 +422,12 @@ export class TaskExecution {
     );
     disposers.push(
       ctx.on('agent/pre-step', async ({ agent }, next) => {
-        workspace.team.followthrough.summaryStep(agent.session.id);
         const bound = this.childTasks.get(agent);
         if (bound && (this.host.current(bound.target) !== bound || this.host.stopped))
           throw new Error('子代理所属任务已失效');
         const pane = [...workspace.panes.values()].find((p) => p.controller?.owns(agent));
         const task = pane && this.host.current(pane.id);
         if (task?.contract) {
-          workspace.team.followthrough.assertStep(task);
           if (task.steps >= task.contract.maxSteps) throw new Error('任务模型步数预算已耗尽');
           this.host.lifecycle.amend(task, { steps: task.steps + 1 });
           this.host.changed();
@@ -514,7 +437,6 @@ export class TaskExecution {
     );
     disposers.push(
       ctx.on('agent/inbox/claimed', ({ agent, message, turn }) => {
-        workspace.team.followthrough.claimed(agent.session.id, message.source);
         const task = [...this.host.active.values()].find(
           (t) => t.targetSession === agent.session.id && t.messageId === message.id,
         );
@@ -625,7 +547,6 @@ export class TaskExecution {
             if (queued.status === 'queued') this.host.budgets.account(queued);
         }
       }
-      workspace.team.followthrough.clockChanged();
       this.host.kick();
     };
     workspace.on('session-change', changed);

@@ -1,0 +1,2 @@
+# Developer-only formatter/linter, Windows x64 wheel. No application runtime dependency.
+ruff==0.14.10 --hash=sha256:466297bd73638c6bdf06485683e812db1c00c7ac96d4ddd0294a338c62fdc154

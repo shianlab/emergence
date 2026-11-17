@@ -16,8 +16,8 @@ import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { saveConfig } from '../src/app/config.ts';
-import { assertModelHistory } from '../src/app/controller.ts';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { assertModelHistory } from '../src/app/session-model.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { harness } from './fixtures/harness.ts';
 
@@ -133,16 +133,14 @@ test('a slow MCP configuration change excludes new work and structural changes i
 test('template loading keeps focus but retires saved team roles', async () => {
   const f = await fixture();
   try {
-    const first = f.w.focused;
     await f.w.split('row', f.b, 'two');
     const second = f.w.focused;
-    f.w.collaboration.configure(first, [second]);
     await f.w.send(second, '/template save roles');
     await f.w.send(second, '/template load roles');
     assert.equal(f.w.focused, second);
     await assert.rejects(f.w.send(second, '/mode collaborate'), /已移除/);
-    assert.equal(f.w.collaboration.state.master, undefined);
-    assert.deepEqual(f.w.collaboration.state.workers, []);
+    assert.equal('master' in f.w.taskEngine.state, false);
+    assert.equal('workers' in f.w.taskEngine.state, false);
   } finally {
     await f.close();
   }

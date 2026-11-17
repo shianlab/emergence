@@ -116,9 +116,7 @@ export function composerHint(
         ? `↑↓ select · Enter confirm${state.multiChoice ? ' · Space toggle' : ''} · Esc cancel`
         : `↑↓ 选择 · Enter 确认${state.multiChoice ? ' · Space 多选' : ''} · Esc 取消`;
   if (state.ownedTask)
-    return en
-      ? `${escapeKey} stop task · /task note · /takeover`
-      : `${escapeKey} 停止任务 · /task note 补充 · /takeover 接管`;
+    return en ? `${escapeKey} stop task · /task note` : `${escapeKey} 停止任务 · /task note 补充`;
   const submit = state.busy ? (en ? 'Enter queue' : 'Enter 排队') : en ? 'Enter send' : 'Enter 发送';
   const escape = state.overlay
     ? en

@@ -9,9 +9,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { type TaskPlan } from '../src/core/domain/planning.ts';
-import { collaborationSchema } from '../src/core/domain/task.ts';
+import { taskStateSchema } from '../src/core/domain/task-state.ts';
 import { ExecutionJournal, digest } from '../src/core/storage/execution-journal.ts';
 import { executionFixture, until } from './fixtures/core-execution.ts';
 
@@ -75,20 +75,20 @@ test('one-window execution graph is durable, deduplicated and advances dependenc
   try {
     const id = f.w.focused,
       plan = planFor(f.w, [id, id]),
-      tasks = await f.w.collaboration.executePlan(id, plan);
+      tasks = await f.w.taskEngine.executePlan(id, plan);
     assert.equal(tasks.length, 2);
     await until(() => tasks[0].status === 'needs_review');
     assert.equal(tasks[1].status, 'queued');
     assert.equal(f.writes(), 1);
-    await f.w.collaboration.review(tasks[0].id, true, '读取实际文件并确认内容正确');
+    await f.w.taskEngine.review(tasks[0].id, true, '读取实际文件并确认内容正确');
     await until(() => tasks[1].status === 'needs_review');
     assert.equal(f.writes(), 2);
-    assert.equal((await f.w.collaboration.executePlan(id, plan))[0].id, tasks[0].id);
-    assert.equal(f.w.collaboration.state.tasks.length, 2);
-    assert.equal(f.w.collaboration.journal.effects(tasks[0].id)[0].state, 'returned');
+    assert.equal((await f.w.taskEngine.executePlan(id, plan))[0].id, tasks[0].id);
+    assert.equal(f.w.taskEngine.state.tasks.length, 2);
+    assert.equal(f.w.taskEngine.journal.effects(tasks[0].id)[0].state, 'returned');
     await writeFile(join(f.cwd, 'result.txt'), 'external modification');
-    await assert.rejects(f.w.collaboration.review(tasks[1].id, true, 'old proof'), /产物.*修改/);
-    assert.ok(f.w.collaboration.journal.events().length);
+    await assert.rejects(f.w.taskEngine.review(tasks[1].id, true, 'old proof'), /产物.*修改/);
+    assert.ok(f.w.taskEngine.journal.events().length);
     assert.equal(tasks[0].workflow?.stage, 'Execution');
   } finally {
     await f.close();
@@ -100,13 +100,13 @@ test('invalid graph rolls back all tasks; cyclic durable snapshots cannot be loa
   try {
     const p = planFor(f.w, [f.w.focused, f.w.focused]);
     p.steps[1].session = 'stale';
-    await assert.rejects(f.w.collaboration.executePlan(f.w.focused, p), /绑定已变化/);
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    await assert.rejects(f.w.taskEngine.executePlan(f.w.focused, p), /绑定已变化/);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     assert.equal(f.writes(), 0);
-    const tasks = await f.w.collaboration.executePlan(f.w.focused, planFor(f.w, [f.w.focused, f.w.focused]));
-    const saved = structuredClone(f.w.collaboration.state);
+    const tasks = await f.w.taskEngine.executePlan(f.w.focused, planFor(f.w, [f.w.focused, f.w.focused]));
+    const saved = structuredClone(f.w.taskEngine.state);
     Object.assign(saved.tasks[0], { dependsOn: [tasks[1].id] });
-    assert.equal(collaborationSchema.safeParse(saved).success, false);
+    assert.equal(taskStateSchema.safeParse(saved).success, false);
   } finally {
     await f.close();
   }
@@ -115,27 +115,25 @@ test('invalid graph rolls back all tasks; cyclic durable snapshots cannot be loa
 test('same-project attempts serialize; queued recovery needs a native decision and cannot reuse stale permission approval', async () => {
   const f = await executionFixture();
   try {
-    const master = f.w.current,
-      a = await f.w.split('row'),
+    const a = await f.w.split('row'),
       b = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [a.id, b.id]);
-    const one = await f.w.collaboration.enqueue(master.id, a.id, 'one', 'fixture:write');
-    const two = await f.w.collaboration.enqueue(master.id, b.id, 'two', 'fixture:write');
+    const one = await f.w.taskEngine.enqueue(a.id, a.id, 'one', 'fixture:write');
+    const two = await f.w.taskEngine.enqueue(b.id, b.id, 'two', 'fixture:write');
     await until(() => one.status === 'succeeded' && two.status === 'succeeded');
     assert.ok(two.startedAt! >= one.endedAt!);
-    const stalled = await f.w.collaboration.enqueue(master.id, a.id, 'pending', 'fixture:write', [two.id]);
-    f.w.collaboration.pause(true);
+    const stalled = await f.w.taskEngine.enqueue(b.id, b.id, 'pending', 'fixture:write', [two.id]);
+    f.w.taskEngine.pause(true);
     await until(() => stalled.status === 'queued');
     Object.assign(stalled, { status: 'interrupted' });
     await f.w.save();
-    const recovery = f.w.collaboration.recover(stalled.id, master.id, '已确认原任务没有发生副作用');
-    await until(() => !!master.controller!.pending);
-    assert.equal(master.controller!.pending!.options[0].value, 'n');
+    const recovery = f.w.taskEngine.recover(stalled.id, b.id, '已确认原任务没有发生副作用');
+    await until(() => !!b.controller!.pending);
+    assert.equal(b.controller!.pending!.options[0].value, 'n');
     assert.equal(a.controller!.pending, undefined);
-    master.controller!.setPermissionMode('plan');
+    b.controller!.setPermissionMode('plan');
     assert.equal(await recovery, undefined);
     assert.equal(
-      f.w.collaboration.state.tasks.some((t) => t.recoveryOf === stalled.id),
+      f.w.taskEngine.state.tasks.some((t) => t.recoveryOf === stalled.id),
       false,
     );
   } finally {
@@ -173,7 +171,7 @@ test('hard process death after an actual write retains unknown effect and never 
     assert.equal(await readFile(join(home, 'project/result.txt'), 'utf8'), 'persisted actual effect');
     const f = await executionFixture(home);
     try {
-      const c = f.w.collaboration,
+      const c = f.w.taskEngine,
         old = c.state.tasks[0];
       assert.equal(old.status, 'interrupted');
       assert.equal(old.recovery, 'uncertain');
@@ -186,7 +184,6 @@ test('hard process death after an actual write retains unknown effect and never 
         [...f.w.panes.values()].every((p) => p.controller),
         JSON.stringify([...f.w.panes.values()].map((p) => ({ id: p.id, error: p.error }))),
       );
-      c.configure(old.issuer, [old.target]);
       const source = f.w.panes.get(old.issuer)!.controller!;
       const pending = c.recover(old.id, old.issuer, '已核对现有文件，只允许重新验证并继续原任务');
       await until(() => !!source.pending);
@@ -215,7 +212,7 @@ test('hard process death after an actual write retains unknown effect and never 
 test('recovery approval becomes invalid when observed files change; unreadable artifacts cannot be accepted', async () => {
   const f = await executionFixture();
   try {
-    const c = f.w.collaboration,
+    const c = f.w.taskEngine,
       task = (await c.executePlan(f.w.focused, planFor(f.w, [f.w.focused])))[0];
     await until(() => task.status === 'needs_review');
     Object.assign(task, { recovery: 'uncertain' });
@@ -244,13 +241,12 @@ test('legacy JSON is backed up before import; restored SQLite snapshot stays aut
   let restored: WorkspaceController | undefined;
   try {
     const p = await f.w.split('row');
-    f.w.collaboration.configure([...f.w.panes.keys()][0], [p.id]);
-    f.w.collaboration.pause(true);
-    const snapshot = structuredClone(f.w.collaboration.state);
+    f.w.taskEngine.pause(true);
+    const snapshot = structuredClone(f.w.taskEngine.state);
     snapshot.tasks = [];
     await f.w.save();
     const layout = f.w.path,
-      db = f.w.collaboration.journal.path;
+      db = f.w.taskEngine.journal.path;
     await f.w.close();
     const legacy = JSON.parse(await readFile(layout, 'utf8'));
     legacy.collaboration = snapshot;
@@ -266,20 +262,14 @@ test('legacy JSON is backed up before import; restored SQLite snapshot stays aut
       [...restored.panes.values()].every((p) => p.controller),
       JSON.stringify([...restored.panes.values()].map((p) => ({ id: p.id, error: p.error }))),
     );
-    restored.collaboration.configure(legacy.panes[0].id, [p.id]);
-    const blocker = await restored.collaboration.enqueue(
-      legacy.panes[0].id,
-      p.id,
-      'blocker',
-      'fixture:write',
-      [],
-      { role: 'developer', scope: ['result.txt'], acceptance: ['核对内容'] },
-    );
+    const blocker = await restored.taskEngine.enqueue(p.id, p.id, 'blocker', 'fixture:write', [], {
+      role: 'developer',
+      scope: ['result.txt'],
+      acceptance: ['核对内容'],
+    });
     await until(() => blocker.status === 'needs_review');
-    const task = await restored.collaboration.enqueue(legacy.panes[0].id, p.id, 'hold', 'fixture:write', [
-      blocker.id,
-    ]);
-    restored.collaboration.pause(true);
+    const task = await restored.taskEngine.enqueue(p.id, p.id, 'hold', 'fixture:write', [blocker.id]);
+    restored.taskEngine.pause(true);
     Object.assign(task, { status: 'interrupted' });
     await restored.save();
     const command = restored.send(
@@ -343,7 +333,7 @@ test('the selected model can submit a ready plan to the durable scheduler withou
               ? {}
               : n === 2
                 ? { plan: propose(plan, c.planning.intake()!.requirements!) }
-                : { plan_id: digest(c.planning.state(c.agent).value.plan!) },
+                : { plan_id: digest(c.planning.snapshot(c.agent)!.plan!) },
         raw = JSON.stringify(args);
       yield { type: 'block-start', index: 0, blockType: 'tool-call' };
       yield { type: 'tool-call-delta', index: 0, id, name, argumentsDelta: raw };
@@ -351,10 +341,10 @@ test('the selected model can submit a ready plan to the durable scheduler withou
       yield { type: 'finish', reason: { kind: 'tool-calls' } };
     };
     await f.w.send(f.w.focused, '规划并执行当前项目修改');
-    await until(() => f.w.collaboration.state.tasks[0]?.status === 'needs_review');
+    await until(() => f.w.taskEngine.state.tasks[0]?.status === 'needs_review');
     assert.equal(f.writes(), 1);
-    assert.equal(f.w.collaboration.state.tasks.length, 1);
-    assert.equal(f.w.collaboration.journal.effects(f.w.collaboration.state.tasks[0].id).length, 1);
+    assert.equal(f.w.taskEngine.state.tasks.length, 1);
+    assert.equal(f.w.taskEngine.journal.effects(f.w.taskEngine.state.tasks[0].id).length, 1);
     assert.ok((await f.w.current.controller!.planning.describe()).includes('实际写文件并验收'));
   } finally {
     await f.close();

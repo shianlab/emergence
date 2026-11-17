@@ -1,3 +1,4 @@
+import { digest } from '../src/core/storage/execution-journal.ts';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -17,18 +18,15 @@ async function* call(name: string, args: object): AsyncIterable<StreamChunk> {
   yield { type: 'finish', reason: { kind: 'tool-calls' } };
 }
 
-test('a real question answer reopens analysis, preserves constraints and dispatches to the worker once', async () => {
+test('a real question answer reopens analysis, preserves constraints and executes once in the same session', async () => {
   const f = await executionFixture();
   try {
     await f.ctx.plugin(UserQuestions);
     await f.ctx.plugin(AskUser);
     const main = f.w.current;
     const c = main.controller!;
-    const worker = await f.w.split('row');
-    await f.w.setMaster(main.id);
-    // This regression owns admission and execution; existing assurance tests own final review.
-    f.w.team.followthrough.advance = async () => {};
-    await writeFile(join(f.cwd, 'facts.txt'), '涌现支持终端多窗口协作。');
+    const worker = main;
+    await writeFile(join(f.cwd, 'facts.txt'), '涌现支持终端多窗口执行。');
     f.ctx.effect(() =>
       f.ctx.tools.register(
         defineTool({
@@ -47,7 +45,7 @@ test('a real question answer reopens analysis, preserves constraints and dispatc
       objective: '与另一窗口协同生成简单介绍',
       route: 'planned',
       intent: 'execute',
-      reason: '用户要求协作交付',
+      reason: '用户要求执行交付',
       acceptance: ['result.txt 有介绍内容'],
       constraints: ['只写 result.txt'],
       questions: ['介绍只写中文，还是中英双语？'],
@@ -75,7 +73,7 @@ test('a real question answer reopens analysis, preserves constraints and dispatc
           objective: analysis.objective,
           route: 'planned',
           intent: 'execute',
-          reason: '用户已选择仅中文，继续原协作任务',
+          reason: '用户已选择仅中文，继续原执行任务',
           changes: [
             {
               action: 'add',
@@ -89,33 +87,38 @@ test('a real question answer reopens analysis, preserves constraints and dispatc
       } else if (n === 3) yield* call('read', { file_path: 'facts.txt' });
       else if (n === 4) {
         const state = c.planning.intake()!;
-        yield* call('emergence_plan_step', {
-          requirementRevision: state.requirements!.revision,
-          draftRevision: 0,
-          step: {
-            id: 'intro',
-            objective: analysis.objective,
-            role: 'developer',
-            project: f.cwd,
-            scope: ['result.txt'],
-            capabilities: ['tool:write'],
-            requirementIds: ['a1'],
-            localCriteria: [{ requirementId: 'a1', text: 'result.txt 有介绍内容' }],
-            purpose: 'delivery',
-            dependsOn: [],
+        yield* call('emergence_plan', {
+          plan: {
+            requirementRevision: state.requirements!.revision,
+            unknowns: [],
+            assumptions: [],
+            options: [],
+            reason: '按已澄清目标执行',
+            evidence: ['read-clarification'],
+            steps: [
+              {
+                id: 'intro',
+                objective: analysis.objective,
+                role: 'developer',
+                window: main.id,
+                session: c.id,
+                model: main.modelId,
+                project: f.cwd,
+                scope: ['result.txt'],
+                capabilities: ['tool:write'],
+                requirementIds: ['a1'],
+                localCriteria: [{ requirementId: 'a1', text: 'result.txt 有介绍内容' }],
+                purpose: 'delivery',
+                dependsOn: [],
+              },
+            ],
           },
         });
       } else if (n === 5) {
-        const state = c.planning.intake()!;
-        yield* call('emergence_plan_commit', {
-          requirementRevision: state.requirements!.revision,
-          draftRevision: state.draft!.draftRevision,
-          reason: '用户答复已入原需求，交给执行窗口',
-          evidence: ['read-clarification'],
-        });
+        yield* call('emergence_execute_plan', { plan_id: digest(c.planning.snapshot(c.agent)!.plan!) });
       } else yield { type: 'finish', reason: { kind: 'stop' } };
     };
-    await f.w.send(main.id, '请和另外一个窗口协作生成简单介绍。');
+    await f.w.send(main.id, '请在当前窗口生成简单介绍。');
     await until(() => !!c.pending);
     const before = structuredClone(c.planning.intake()!);
     const pending = c.pending!;
@@ -126,17 +129,11 @@ test('a real question answer reopens analysis, preserves constraints and dispatc
       null,
       'The answered question must not leave analysis permanently locked',
     );
-    assert.equal(
-      afterAnswer!.autonomy!.startedAt,
-      before.autonomy!.startedAt,
-      'Answering must not renew planning time',
-    );
     assert.deepEqual(afterAnswer!.inheritedRequirements, before.requirements);
-    assert.equal(afterAnswer!.coordination, before.coordination);
     assert.notDeepEqual(afterAnswer!.source!.admittedIds, before.source!.admittedIds);
-    assert.equal(f.w.collaboration.state.tasks.length, 1, JSON.stringify(c.planning.state(c.agent).value));
-    await until(() => f.w.collaboration.state.tasks[0]?.status === 'needs_review');
-    const tasks = f.w.collaboration.state.tasks;
+    assert.equal(f.w.taskEngine.state.tasks.length, 1, JSON.stringify(c.planning.snapshot(c.agent)!));
+    await until(() => f.w.taskEngine.state.tasks[0]?.status === 'needs_review');
+    const tasks = f.w.taskEngine.state.tasks;
     assert.equal(tasks.length, 1);
     assert.equal(tasks[0].target, worker.id);
     assert.equal(f.writes(), 1);
@@ -161,7 +158,6 @@ test('cancelled and wrong-window answers do not unlock planning; stale clarifica
     const main = f.w.current;
     const c = main.controller!;
     const worker = await f.w.split('row');
-    await f.w.setMaster(main.id);
     let count = 0;
     f.provider.stream = async function* (): AsyncIterable<StreamChunk> {
       if (count++ === 0)
@@ -182,7 +178,7 @@ test('cancelled and wrong-window answers do not unlock planning; stale clarifica
         });
       else yield { type: 'finish', reason: { kind: 'stop' } };
     };
-    await f.w.send(main.id, '请协作写说明，先询问语言。');
+    await f.w.send(main.id, '请执行写说明，先询问语言。');
     await until(() => !!c.pending);
     const before = structuredClone(c.planning.intake()!);
     const pending = c.pending!;
@@ -199,14 +195,8 @@ test('cancelled and wrong-window answers do not unlock planning; stale clarifica
     c.respondInteraction(pending.id, pending.version, { action: 'cancel' });
     await c.agent.whenIdle();
     assert.deepEqual(c.planning.intake()!.analysis, before.analysis);
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     assert.equal(f.writes(), 0);
-    assert.equal(
-      c.planning.resumesDraft(c.agent, '继续规划'),
-      false,
-      'An unanswered question must not resume the stale draft',
-    );
-
     const late = c.planning.captureClarification(c.agent)!;
     assert.ok(late);
     await c.planning.admit(c.agent, [
@@ -215,9 +205,9 @@ test('cancelled and wrong-window answers do not unlock planning; stale clarifica
         content: [{ type: 'text', text: '换个新任务，检查项目配置' }],
       }),
     ]);
-    const next = c.planning.state(c.agent).value;
+    const next = c.planning.snapshot(c.agent)!;
     await assert.rejects(late('中文'), /需求已变化/);
-    assert.equal(c.planning.state(c.agent).value, next);
+    assert.deepEqual(c.planning.snapshot(c.agent)!, next);
   } finally {
     await f.close();
   }

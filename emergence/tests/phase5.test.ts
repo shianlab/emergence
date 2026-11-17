@@ -9,7 +9,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { loadConfig, saveConfig } from '../src/app/config.ts';
 import { inspector } from '../src/app/extensions.ts';
 import { readTemplate, templateSchema } from '../src/app/templates.ts';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { configSchema, defaultConfig } from '../src/core/domain/configuration.ts';
 import { keyAction, uiSchema } from '../src/core/domain/ui-preferences.ts';
 import { harness } from './fixtures/harness.ts';
@@ -121,7 +121,6 @@ test('templates recreate independent projects/models, archive drafts and roll ba
     const first = w.focused;
     await w.split('row', f.b, 'two');
     const second = w.focused;
-    w.collaboration.configure(first, [second]);
     w.updateView(first, '保留草稿', 0);
     await w.send(second, '/template save dual');
     const template = await readTemplate(f.home, 'dual');
@@ -137,9 +136,9 @@ test('templates recreate independent projects/models, archive drafts and roll ba
       ],
     );
     assert.ok([...w.panes.values()].every((p) => !previous.includes(p.sessionId)));
-    assert.equal(w.collaboration.state.mode, 'independent');
-    assert.equal(w.collaboration.state.paused, true);
-    assert.equal(w.collaboration.state.master, undefined);
+    assert.equal('master' in w.taskEngine.state, false);
+    assert.equal(w.taskEngine.state.paused, false);
+    assert.equal('master' in w.taskEngine.state, false);
     const archive = (await readdir(join(f.home, 'workspaces'))).find((n) => n.includes('.before-template-'))!;
     assert.match(await readFile(join(f.home, 'workspaces', archive), 'utf8'), /保留草稿/);
     const ids = [...w.panes.values()].map((p) => p.sessionId),

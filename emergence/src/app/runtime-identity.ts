@@ -36,7 +36,6 @@ export function runtimeIdentity(c: SessionController, agent: Agent) {
             dispatchable: w.dispatchable,
             project: w.controller.cwd,
             model: w.controller.model.model,
-            profile: w.profile,
           })),
         }
       : { mode: 'headless' },
@@ -44,7 +43,7 @@ export function runtimeIdentity(c: SessionController, agent: Agent) {
 }
 export function runtimeIdentityContext(c: SessionController, agent: Agent) {
   // Identity is stable model context. Full live rosters, permission snapshots and clocks
-  // remain available through runtimeIdentity / team tools, rather than repeated each step.
+  // remain available through runtimeIdentity / capability tools, rather than repeated each step.
   const identity = runtimeIdentity(c, agent);
   const { intake, ...core } = identity.core;
   const workspace = {

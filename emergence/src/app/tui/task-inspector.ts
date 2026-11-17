@@ -13,7 +13,7 @@ import { safeError } from '../../core/adapters/redaction.ts';
 import type { TaskRecord } from '../../core/domain/task.ts';
 import { effectiveKeys, keyAction, palette } from '../../core/domain/ui-preferences.ts';
 import type { WorkspaceController } from '../workspace.ts';
-import { teamFeedback } from './team-feedback.ts';
+import { historicalObjective } from '../../core/storage/task-history.ts';
 import { fitCells, paneNumber, taskCounts, taskState } from './workspace-chrome.ts';
 
 /** Read-only task presentation. Actions delegate to the existing workspace commands. */
@@ -126,7 +126,7 @@ export function mountTaskInspector(
     changed();
   }
   function task() {
-    return workspace.collaboration.state.tasks.find((item) => item.id === selected);
+    return workspace.taskEngine.state.tasks.find((item) => item.id === selected);
   }
   function select(id: string) {
     overview = false;
@@ -156,7 +156,7 @@ export function mountTaskInspector(
       { title: taskState(item, en) + '  ' + item.id, body: '' },
       field('目标', 'Objective', item.objective),
       field('最新回执', 'Latest receipt', item.progress),
-      field('计时与处理', 'Timing and next action', workspace.collaboration.diagnose(item)),
+      field('计时与处理', 'Timing and next action', workspace.taskEngine.diagnose(item)),
       field(
         '归属',
         'Ownership',
@@ -224,19 +224,8 @@ export function mountTaskInspector(
         ),
       );
     if (item.dependsOn.length) texts.push(field('依赖', 'Dependencies', item.dependsOn.join('\n')));
-    const coordination = workspace.team.records.find(
-      (r) =>
-        r.executions.includes(item.id) ||
-        workspace.team.followthrough.related(r).some((t) => t.id === item.id),
-    );
-    if (coordination)
-      texts.push(
-        field(
-          '所属总目标',
-          'Coordinated objective',
-          coordination.analysis?.objective ?? coordination.request,
-        ),
-      );
+    const historical = historicalObjective(workspace.taskEngine.state, item);
+    if (historical) texts.push(field('历史总目标（只读）', 'Historical objective (read only)', historical));
     if (item.allocation) texts.push(field('分配原因', 'Allocation reason', item.allocation.reason));
     texts.push(
       field(
@@ -275,7 +264,7 @@ export function mountTaskInspector(
       );
     },
     open(id?: string) {
-      if (id && !workspace.collaboration.state.tasks.some((item) => item.id === id))
+      if (id && !workspace.taskEngine.state.tasks.some((item) => item.id === id))
         throw new Error('任务不存在');
       overview = false;
       selected = id ?? selected;
@@ -310,16 +299,16 @@ export function mountTaskInspector(
       box.border = fullscreen ? ['top'] : ['left'];
       box.borderColor = focused ? colors.accent : colors.border;
       box.backgroundColor = colors.background;
-      title.content = `${en ? 'Tasks' : '任务'} · ${workspace.collaboration.state.tasks.length}`;
+      title.content = `${en ? 'Tasks' : '任务'} · ${workspace.taskEngine.state.tasks.length}`;
       title.fg = colors.accent;
       close.content = en ? '[Close]' : '[关闭]';
       close.width = en ? 7 : 6;
       close.fg = colors.muted;
       summary.fg = colors.muted;
-      summary.content = taskCounts(workspace.collaboration.state.tasks, en);
+      summary.content = taskCounts(workspace.taskEngine.state.tasks, en);
       overviewButton.fg = colors.accent;
       overviewButton.content = overview ? '[返回子任务列表]' : '[查看总目标与分工]';
-      const tasks = [...workspace.collaboration.state.tasks].reverse();
+      const tasks = [...workspace.taskEngine.state.tasks].reverse();
       if (!selected || !tasks.some((item) => item.id === selected)) selected = tasks[0]?.id;
       const index = Math.max(
         0,
@@ -362,7 +351,12 @@ export function mountTaskInspector(
       separator.fg = colors.border;
       const item = task(),
         sections = overview
-          ? teamFeedback(workspace).sections
+          ? [
+              {
+                title: en ? 'Independent session tasks' : '独立会话任务',
+                body: taskCounts(workspace.taskEngine.state.tasks, en),
+              },
+            ]
           : item
             ? detailSections(item, en)
             : [
@@ -424,7 +418,7 @@ export function mountTaskInspector(
       const action = keyAction(workspace.launch.appConfig.ui, key);
       if (action === 'tasks') return false;
       if (key.name === 'up' || key.name === 'down') {
-        const tasks = [...workspace.collaboration.state.tasks].reverse(),
+        const tasks = [...workspace.taskEngine.state.tasks].reverse(),
           index = Math.max(
             0,
             tasks.findIndex((item) => item.id === selected),

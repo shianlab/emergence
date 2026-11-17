@@ -6,7 +6,7 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { nativeReadEvidence } from '../src/core/application/native-read-evidence.ts';
 import { evidenceIsCurrent } from '../src/core/application/tool-evidence.ts';
 import { codeLimits, hostExecutable, hostProcess, scanProject } from '../src/domains/code/project.ts';
@@ -296,12 +296,10 @@ test('real Harness exposes native Code tools in Plan, persists versioned evidenc
       }
       yield { type: 'finish', reason: { kind: 'stop' } };
     };
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    worker.controller!.setPermissionMode('plan');
-    const task = await f.w.collaboration.enqueue(
-      master.id,
+    const worker = await f.w.split('row');
+    worker.controller!.setPermissionMode('edit'); // Researcher contract restricts this execution to read-only operations.
+    const task = await f.w.taskEngine.enqueue(
+      worker.id,
       worker.id,
       'code-discovery',
       '定位 computeRevenue 的实现和调用方',

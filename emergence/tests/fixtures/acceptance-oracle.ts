@@ -3,7 +3,7 @@ import { posix, win32 } from 'node:path';
 import { subjectEvidenceVersion } from '../../src/core/application/assurance.ts';
 import type { EvidenceReceipt } from '../../src/core/domain/assurance.ts';
 import type { TaskRecord } from '../../src/core/domain/task.ts';
-import type { CoordinationRecord } from '../../src/core/domain/team.ts';
+import type { CoordinationRecord } from '../../src/core/domain/legacy-coordination.ts';
 import type { RunDiagnostic } from '../../src/core/domain/run-diagnostics.ts';
 import { toolPath } from '../../src/core/domain/tool-contract.ts';
 import { unresolvedTaskErrors } from '../../src/core/domain/task-failure.ts';

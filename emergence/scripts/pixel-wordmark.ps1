@@ -1,22 +1,22 @@
-param(
-  [string]$BrandDirectory = (Join-Path $PSScriptRoot '../assets/brand'),
-  [ValidateSet('fine', 'balanced', 'bold')][string]$Show
+﻿param(
+    [string]$BrandDirectory = (Join-Path $PSScriptRoot '../assets/brand'),
+    [ValidateSet('fine', 'balanced', 'bold')][string]$Show
 )
 
 $ErrorActionPreference = 'Stop'
 $pixelDirectory = Join-Path $BrandDirectory 'pixel'
 if ($Show) {
-  $wordmark = Get-Content -LiteralPath (Join-Path $pixelDirectory "yongxian-pixel-$Show.txt") -Raw -Encoding UTF8
-  $escape = [char]27
-  [Console]::Write("${escape}[38;2;230;227;220m${escape}[48;2;12;14;17m$wordmark${escape}[0m")
-  return
+    $wordmark = Get-Content -LiteralPath (Join-Path $pixelDirectory "yongxian-pixel-$Show.txt") -Raw -Encoding UTF8
+    $escape = [char]27
+    [Console]::Write("${escape}[38;2;230;227;220m${escape}[48;2;12;14;17m$wordmark${escape}[0m")
+    return
 }
 
 Add-Type -AssemblyName System.Drawing
 if (-not ('EmergenceBrand.TerminalWordmark' -as [type])) {
-  $drawingReferences = @([System.Drawing.Bitmap].Assembly.Location, [System.Drawing.Color].Assembly.Location, 'System.Collections')
-  $drawingReferences += [System.Drawing.Bitmap].GetInterfaces() | ForEach-Object { $_.Assembly.Location } | Where-Object { $_ -notmatch 'System.Private.CoreLib' }
-  Add-Type -ReferencedAssemblies ($drawingReferences | Select-Object -Unique) -TypeDefinition @'
+    $drawingReferences = @([System.Drawing.Bitmap].Assembly.Location, [System.Drawing.Color].Assembly.Location, 'System.Collections')
+    $drawingReferences += [System.Drawing.Bitmap].GetInterfaces() | ForEach-Object { $_.Assembly.Location } | Where-Object { $_ -notmatch 'System.Private.CoreLib' }
+    Add-Type -ReferencedAssemblies ($drawingReferences | Select-Object -Unique) -TypeDefinition @'
 using System;
 using System.Collections.Generic;
 using System.Drawing;

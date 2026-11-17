@@ -1,7 +1,7 @@
 import type { ContentBlock } from '@deepseek-ai/dsh-llm';
 import type { SessionEvent } from '@deepseek-ai/dsh-session';
 import { safeError } from '../../core/adapters/redaction.ts';
-import { intentAnalysisSchema } from '../../core/domain/planning.ts';
+import { intentAnalysisSchema } from '../../core/domain/intent.ts';
 
 export interface TextMessage {
   kind: 'user' | 'assistant' | 'context';

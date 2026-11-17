@@ -1,14 +1,13 @@
 import type { Context } from '@deepseek-ai/cordis';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import type { EventEmitter } from 'node:events';
-import type { CodeWorkHarness } from '../../domains/code/work-harness.ts';
+import type { CodeEvidencePort } from './code-evidence-port.ts';
 import type { AppConfig, ModelConfig } from '../domain/configuration.ts';
 import type { PermissionMode, PermissionSnapshot } from '../domain/permissions.ts';
 import type { Capability } from '../domain/planning.ts';
 import type { CoreObserver } from './observer.ts';
 import type { CorePlanning } from './planning-service.ts';
-import type { Collaboration } from './task-coordinator.ts';
-import type { TeamCoordinator } from './team-coordinator.ts';
+import type { TaskEngine } from './task-engine.ts';
 import type { RunDiagnostics } from './run-diagnostics.ts';
 
 export interface SessionLaunch {
@@ -32,7 +31,7 @@ export interface SessionPort extends Pick<EventEmitter, 'on' | 'off'> {
   readonly core: CoreObserver;
   readonly planning: CorePlanning;
   readonly diagnostics: RunDiagnostics;
-  readonly codeWork: CodeWorkHarness;
+  readonly codeWork: CodeEvidencePort;
   readonly launch: SessionLaunch;
   readonly permissionMode: PermissionMode;
   notice: string;
@@ -52,7 +51,6 @@ export interface PanePort {
   cwd: string;
   modelId: string;
   permissionMode?: PermissionMode;
-  rolePreference?: string;
   draft: string;
   scrollTop: number;
   error?: string;
@@ -60,21 +58,15 @@ export interface PanePort {
 
 /** Window/session operations needed by orchestration, not rendering or input widgets. */
 export interface WorkspacePort extends Pick<EventEmitter, 'on' | 'off'> {
-  /** The shipped workbench owns independent sessions; historical engine fixtures may use workspace scope. */
-  readonly executionScope: 'session' | 'workspace';
   readonly ctx: Context;
   readonly launch: SessionLaunch;
   readonly path: string;
   readonly panes: Map<string, PanePort>;
-  readonly collaboration: Collaboration;
-  readonly team: TeamCoordinator;
+  readonly taskEngine: TaskEngine;
   readonly capabilities: { snapshot(): Capability[] };
-  readonly paneCapacity: { available: number; pending: number };
   focused: string;
   notice: string;
   available(id: string): boolean;
   changed(): void;
   save(): Promise<void>;
-  split(axis: 'row' | 'column', cwd?: string, modelId?: string, target?: string): Promise<PanePort>;
-  discardUnusedPane(id: string, session: string, sequence: number): Promise<void>;
 }

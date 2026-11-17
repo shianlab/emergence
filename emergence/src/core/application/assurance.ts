@@ -1,35 +1,23 @@
-import { schemaParameter, protocolInput, parseProtocol } from '../adapters/tool-protocol.ts';
 import { defineTool, validateJsonSchemaValue } from '@deepseek-ai/dsh-tools';
 import { isAbsolute, relative, resolve } from 'node:path';
-import { canonicalPermissionPath } from '../adapters/permissions.ts';
-import type { EvidenceReceipt } from '../domain/assurance.ts';
 import {
-  claimsSchema,
-  isSuccessfulObservation,
-  isSuccessfulExecutionCheck,
-  type Assessment,
-} from '../domain/assurance.ts';
-import { roles } from '../domain/orchestration.ts';
+  canonicalPermissionPath,
+  evaluatePermissions,
+  permissionFingerprint,
+} from '../adapters/permissions.ts';
+import { safeError } from '../adapters/redaction.ts';
+import { isSuccessfulExecutionCheck, isSuccessfulObservation } from '../domain/assurance.ts';
+import { unresolvedTaskErrors } from '../domain/task-failure.ts';
 import { isReadOnlyTask, type TaskRecord } from '../domain/task.ts';
 import { toolContract } from '../domain/tool-contract.ts';
 import { digest, stableDigest } from '../storage/execution-journal.ts';
-import { AuditCapacityError, availableAuditContext, independentAuditContext } from './audit-allocation.ts';
-import { fileFingerprint } from './execution-evidence.ts';
 import { completionArtifacts } from './completion-evidence.ts';
-import { auditInstructions, auditTaskContract } from './task-admission.ts';
-import type { Collaboration } from './task-coordinator.ts';
-import { captureToolEvidence, evidenceIsCurrent } from './tool-evidence.ts';
-import { safeError } from '../adapters/redaction.ts';
-import { evaluatePermissions, permissionFingerprint } from '../adapters/permissions.ts';
-import {
-  prepareVerification,
-  verificationCovered,
-  verificationGaps,
-  verificationRequirements,
-} from './verification.ts';
+import { fileFingerprint } from './execution-evidence.ts';
 import { mountInspection } from './inspection.ts';
-import { unresolvedTaskErrors } from '../domain/task-failure.ts';
+import type { TaskEngine } from './task-engine.ts';
 import { resolvedEvidenceCurrent } from './task-failures.ts';
+import { captureToolEvidence, evidenceIsCurrent } from './tool-evidence.ts';
+import { prepareVerification, verificationCovered, verificationRequirements } from './verification.ts';
 
 /** Shared version identity for live assurance and read-only evidence replay. */
 export function subjectEvidenceVersion(task: TaskRecord, files: Array<{ path: string; hash: string }>) {
@@ -48,14 +36,9 @@ export function subjectEvidenceVersion(task: TaskRecord, files: Array<{ path: st
 
 /** Evidence is recorded by the host; a model can cite it but cannot manufacture a receipt. */
 export class CoreAssurance {
-  private requesting = new Map<string, Promise<TaskRecord>>();
-  private reserved = new Set<string>();
   private recording = new WeakMap<TaskRecord, number>();
   constructor(
-    private c: Pick<
-      Collaboration,
-      'workspace' | 'state' | 'task' | 'configure' | 'enqueue' | 'current' | 'view' | 'lifecycle'
-    >,
+    private c: Pick<TaskEngine, 'workspace' | 'state' | 'task' | 'current' | 'view' | 'lifecycle'>,
   ) {}
   private get w() {
     return this.c.workspace;
@@ -134,256 +117,6 @@ export class CoreAssurance {
       files.push({ path, hash });
     }
     return subjectEvidenceVersion(task, files);
-  }
-  async request(
-    id: string,
-    kind: Assessment['kind'],
-    requester: string,
-    target?: string,
-    guard?: () => boolean,
-  ): Promise<TaskRecord> {
-    if (this.w.executionScope === 'session')
-      throw new Error('跨窗口审查已移除；请在当前会话检查产物，或自行在另一窗口提交审查任务');
-    const key = id + ':' + kind;
-    const pending = this.requesting.get(key);
-    if (pending) {
-      await pending.catch(() => undefined);
-      // Re-enter admission: joining a request never inherits another caller's authorization.
-      return this.request(id, kind, requester, target, guard);
-    }
-    const request = this.requestOnce(id, kind, requester, target, guard);
-    this.requesting.set(key, request);
-    try {
-      return await request;
-    } finally {
-      this.requesting.delete(key);
-    }
-  }
-  private async requestOnce(
-    id: string,
-    kind: Assessment['kind'],
-    requester: string,
-    target?: string,
-    guard?: () => boolean,
-  ) {
-    const valid = guard ?? (() => true);
-    const initialMaster = this.c.state.master,
-      initialMode = this.c.state.mode;
-    const assertCoordinator = () => {
-      // A completed local task may create its first independent audit window.
-      // Existing coordination must not be silently reactivated or taken over.
-      if (
-        !valid() ||
-        this.c.state.paused ||
-        (initialMaster && initialMaster !== requester) ||
-        this.c.state.master !== initialMaster ||
-        this.c.state.mode !== initialMode
-      )
-        throw new Error('协调已暂停或取消，或主控已变化，未派发审查');
-    };
-    assertCoordinator();
-    const subject = this.c.task(id),
-      source = this.w.panes.get(requester)?.controller;
-    if (!source?.core.enabled || requester !== subject.issuer || source.id !== subject.issuerSession)
-      throw new Error('只能由原派发会话请求审查验证');
-    if (
-      !['review', 'verify'].includes(kind) ||
-      !subject.contract ||
-      subject.assessment ||
-      !['needs_review', 'succeeded'].includes(subject.status) ||
-      subject.recovery === 'uncertain'
-    )
-      throw new Error('任务尚不可审查验证；不能递归审查审查任务');
-    const version = await this.version(subject),
-      previous = this.c.state.tasks.filter((t) => t.assessment?.subject === id && t.assessment.kind === kind);
-    assertCoordinator();
-    const requestKey = 'audit-v2-' + digest({ id, kind, version });
-    if (
-      this.c.state.tasks.some(
-        (task) =>
-          task.issuerSession === subject.issuerSession &&
-          task.requestKey === requestKey &&
-          task.assessment?.version !== version,
-      )
-    )
-      throw new Error('核验唯一键与版本记录冲突，需要核对历史记录');
-    const existing = previous.find((task) => task.assessment!.version === version);
-    if (existing) {
-      if (target && target !== existing.target)
-        throw new Error('同一版本已有独立核验，不能通过改窗口重复创建');
-      const status = await this.status(id);
-      assertCoordinator();
-      const entry = status.entries.find((entry) => entry.id === existing.id);
-      if (!entry?.current) throw new Error('核验回执已失效，需要核对变化并修复原任务，不能重复创建核验');
-      return existing;
-    }
-    if (
-      previous.some(
-        (t) =>
-          !['succeeded', 'failed', 'needs_review', 'cancelled', 'blocked', 'interrupted'].includes(t.status),
-      ) ||
-      previous.length >= 2
-    )
-      throw new Error('审查验证仍在进行或已达到每种两次上限');
-    if (source.permissionMode === 'plan') throw new Error('计划模式不能派发审查任务');
-    if (this.c.state.tasks.length >= 500)
-      throw new Error('当前工作台已达到 500 条任务记录上限，请使用新工作台');
-    // Validate all task data before allocating a session. The durable subject reference
-    // supplies the original goal; host instructions are rendered separately from context.
-    const contract = auditTaskContract(subject, kind);
-    const objective = `独立${kind === 'review' ? '审查' : '验证'}任务 ${id}`;
-    const model =
-      roles(this.w.launch.appConfig.orchestration).find((r) => r.id === contract.role)?.modelId ??
-      subject.modelId;
-    const candidates = [...this.w.panes.values()].filter((p) =>
-      independentAuditContext(this.w, p, subject, kind, model),
-    );
-    const reusable = candidates.find((p) => availableAuditContext(this.w, p, this.reserved));
-    if (!target && !reusable && !this.w.paneCapacity.available) {
-      const retryable = candidates.length > 0 || this.w.paneCapacity.pending > 0;
-      throw new AuditCapacityError(
-        retryable
-          ? '独立审查窗口正忙，等待释放后自动继续'
-          : '窗口已满且没有独立审查上下文；请释放一个窗口或新建空白会话',
-        retryable,
-      );
-    }
-    const focused = this.w.focused;
-    let created: { id: string; session: string; sequence: number } | undefined;
-    let reserved: string | undefined;
-    try {
-      const pane = target
-        ? this.w.panes.get(target)
-        : (reusable ?? (await this.w.split('row', subject.cwd, model)));
-      if (!target && !reusable && pane?.controller?.id)
-        created = {
-          id: pane.id,
-          session: pane.controller.id,
-          sequence: pane.controller.agent.session.snapshotEvents().at(-1)?.seq ?? 0,
-        };
-      if (guard && pane && this.w.focused === pane.id && this.w.panes.has(focused)) {
-        this.w.focused = focused;
-        this.w.changed();
-      }
-      assertCoordinator();
-      if (!pane?.controller || !independentAuditContext(this.w, pane, subject, kind, model))
-        throw new Error(
-          '需要同项目、匹配模型的独立审查上下文；不能复用实施或个人对话；审查与验证需要不同会话',
-        );
-      if (!availableAuditContext(this.w, pane, this.reserved))
-        throw new AuditCapacityError('独立审查窗口正忙或已被用户接管，等待可用资源', true);
-      this.reserved.add(pane.id);
-      reserved = pane.id;
-      if (!this.c.state.workers.includes(pane.id) || this.c.state.mode !== 'collaborate')
-        this.c.configure(
-          requester,
-          [...new Set([...this.c.state.workers.filter((p) => p !== requester), pane.id])],
-          this.c.state.autoWorkers,
-        );
-      return await this.c.enqueue(requester, pane.id, requestKey, objective, [], contract, undefined, {
-        assessment: { subject: id, kind, version },
-        permission: subject.permission,
-        ...(isReadOnlyTask(subject)
-          ? { allocation: { access: 'read' as const, reason: '继承原任务的只读执行契约' } }
-          : {}),
-      });
-    } catch (error) {
-      if (created) {
-        try {
-          await this.w.discardUnusedPane(created.id, created.session, created.sequence);
-        } catch (cleanupError) {
-          throw new AggregateError(
-            [error, cleanupError],
-            '审查未派发，临时窗口回收失败；请核对窗口和存储状态',
-          );
-        }
-      }
-      throw error;
-    } finally {
-      if (reserved) this.reserved.delete(reserved);
-    }
-  }
-  context(task: TaskRecord): string {
-    if (!task.assessment) return '';
-    const subject = this.c.task(task.assessment.subject);
-    const source = this.w.panes.get(subject.issuer)?.controller;
-    const methods = source?.core.catalog?.roles
-      .filter((r) => ['meta-prism', 'meta-warden', 'meta-sentinel'].includes(r.id))
-      .map((r) => ({
-        name: r.name,
-        responsibility: r.responsibility.slice(0, 180),
-        boundary: r.boundary.slice(0, 120),
-      }));
-    return (
-      auditInstructions(subject, task.assessment) +
-      '\n治理职责参考（不授予权限）：' +
-      JSON.stringify(methods ?? [])
-    );
-  }
-
-  async submit(task: TaskRecord, input: unknown) {
-    const a = task.assessment;
-    if (!a || a.checks || this.c.current(task.target) !== task)
-      throw new Error('当前没有可提交的独立审查验证');
-    const subject = this.c.task(a.subject),
-      checks = claimsSchema.parse(input);
-    if ((await this.version(subject)) !== a.version) throw new Error('审查期间产物已变化，结论失效');
-    if (
-      checks.length !== subject.contract!.acceptance.length ||
-      new Set(checks.map((c) => c.criterion)).size !== checks.length ||
-      checks.some((c) => c.criterion >= checks.length)
-    )
-      throw new Error('必须逐项覆盖所有验收标准');
-    for (const check of checks)
-      for (const id of check.receipts) {
-        const receipt = task.receipts.find((r) => r.id === id);
-        if (!receipt || !['read', 'command'].includes(receipt.kind) || (check.passed && !receipt.ok))
-          throw new Error(
-            `验收项 ${check.criterion} 引用的读取或命令回执 ${id} 不存在、失败或不属于本审查上下文；用 emergence_receipts 的 own.id，不要手写或改动编号`,
-          );
-        if (!(await evidenceIsCurrent(receipt)))
-          throw new Error(`回执 ${id} 的输入或产物已变化或无法核对，证据失效`);
-      }
-    const executionVerification = a.kind === 'verify' && !isReadOnlyTask(subject);
-    const gaps = executionVerification ? verificationGaps(subject.contract, checks, task.receipts) : [];
-    if (gaps.length)
-      throw new Error(
-        '局部验收缺少本项目对应 VerificationSpec 的成功回执；其他目录或任意成功命令不能代替\n' +
-          JSON.stringify({
-            code: 'VERIFICATION_EVIDENCE_REQUIRED',
-            gaps,
-            note: '每个缺口的 criterion 都须在自己的 receipts 数组引用对应成功候选；仅在另一个验收项或 note 中引用不算。候选提交时仍复核版本；不必重跑已经有效的命令。无候选时执行契约中的精确检查，或如实报告受阻。',
-          }),
-      );
-    if (
-      checks.some(
-        (c) =>
-          c.passed &&
-          !c.receipts.some((id) => {
-            const r = task.receipts.find((r) => r.id === id)!;
-            return isSuccessfulObservation(r, executionVerification);
-          }),
-      )
-    )
-      throw new Error('通过的验收项缺少实际成功的读取或检查回执');
-    // Every implementation needs an actual check. Native file predicates serve text artifacts;
-    // explicit runtime specifications still require their matching command receipts above.
-    if (
-      executionVerification &&
-      checks.every((c) => c.passed) &&
-      !checks.some((c) =>
-        c.receipts.some((id) => {
-          const r = task.receipts.find((r) => r.id === id)!;
-          return isSuccessfulExecutionCheck(r);
-        }),
-      )
-    )
-      throw new Error(
-        '整体验证须引用实际成功检查：命令退出码为 0，或 emergence_verify_file 原生文件断言通过；普通 read/inspect 不能代替检查，VerificationSpec 仍须对应精确命令',
-      );
-    this.c.lifecycle.amend(task, { assessment: { ...a, checks, submittedAt: new Date().toISOString() } });
-    await this.w.save();
-    return '逐项证据已记录；请 emergence_report 结束任务。最终状态仍取决于实际工具回执。';
   }
   async status(id: string) {
     return this.inspect(id);
@@ -581,7 +314,6 @@ export class CoreAssurance {
             permissionVersion() !== beforePermission
           )
             throw new Error('证据准备期间执行归属或权限已变化，未执行工具');
-          let receipt: EvidenceReceipt | undefined;
           const contract = toolContract(exec.name, exec.arguments);
           const definition =
             contract.operation === 'read' && !contract.sideEffect
@@ -608,25 +340,10 @@ export class CoreAssurance {
             next,
             async (captured) => {
               if (task.runId !== runId) throw new Error('执行归属已变化，不能把旧回执写入新运行');
-              receipt = captured;
               this.c.lifecycle.recordReceipt(task, captured);
               await this.w.save();
             },
           );
-          if (task.assessment && receipt && ['read', 'command'].includes(receipt.kind))
-            return {
-              ...result,
-              content: [
-                ...result.content,
-                {
-                  type: 'text' as const,
-                  text:
-                    '[Emergence 宿主实际回执] ' +
-                    JSON.stringify(receipt) +
-                    '；可用 emergence_receipts 查询；提交证据使用这里的 id。',
-                },
-              ],
-            };
           return result;
         } finally {
           const remaining = (this.recording.get(task) ?? 1) - 1;
@@ -638,7 +355,7 @@ export class CoreAssurance {
         defineTool({
           name: 'emergence_receipts',
           description:
-            '查询本独立审查会话的真实证据编号、文件字节大小/末尾换行/BOM与命令退出码；emergence_assess 只引用 own 中的 id。只读，不产生新证据。',
+            '查询当前计划任务由宿主记录的真实工具回执、文件信息和验证规格。只读；不产生新证据或验收结论。',
           parameters: {},
           output: {
             schema: { type: 'json' },
@@ -646,32 +363,15 @@ export class CoreAssurance {
           },
           execute: async (_args, exec) => {
             const task = this.c.state.tasks.find(
-              (t) =>
-                t.assessment && t.targetSession === exec.agent?.session.id && this.c.current(t.target) === t,
+              (t) => t.targetSession === exec.agent?.session.id && this.c.current(t.target) === t,
             );
-            if (!task) throw new Error('独立审查上下文失效');
-            const subject = this.c.task(task.assessment!.subject);
+            if (!task) throw new Error('当前没有正在执行的计划任务');
             return JSON.parse(
               JSON.stringify({
                 task: task.id,
                 own: task.receipts,
-                verificationRequirements:
-                  task.assessment!.kind === 'verify' && !isReadOnlyTask(subject)
-                    ? verificationRequirements(subject.contract, task.receipts)
-                    : [],
-                independentVerification: (await this.status(subject.id)).entries.filter(
-                  (e) => e.kind === 'verify',
-                ),
-                implementation: {
-                  task: subject.id,
-                  dataDeliveries: this.dataDeliveries(subject),
-                  artifacts: subject.artifactVersions,
-                  receipts: subject.receipts,
-                  errors: subject.result?.errors,
-                  failures: subject.result?.failures,
-                },
-                meaning:
-                  'receipts 字段仅引用 own.id。verificationRequirements 中每个 criteria 索引均须在自身 checks.receipts 引用对应匹配的命令回执，可同时引用读取证据；仅在另一个验收项引用不算。只读审查可以结合 independentVerification 中 passed=true 且 current=true 的独立验证结论判断运行类验收项，在 note 注明验证任务 ID；不需重新运行 Shell，也不能将其说成本会话执行。实施者回执不等于独立验证。文件字节信息对应读取时版本，提交时仍会检查变化。',
+                verificationRequirements: verificationRequirements(task.contract, task.receipts),
+                dataDeliveries: this.dataDeliveries(task),
               }),
             );
           },
@@ -679,78 +379,10 @@ export class CoreAssurance {
         {
           when: ({ agent }) =>
             this.c.state.tasks.some(
-              (t) => t.assessment && t.targetSession === agent.session.id && this.c.current(t.target) === t,
+              (t) => t.targetSession === agent.session.id && this.c.current(t.target) === t,
             ),
         },
       ),
-      ctx.tools.register(
-        defineTool({
-          name: 'emergence_assess',
-          description:
-            '独立审查/验证逐项证据：checks 为 [{criterion:0,passed:true,receipts:[emergence_receipts 的 own.id],note:说明}]。无法判定设置 passed:false,blocked:true；已观察到真实缺陷才仅 passed:false。不能猜测编号或伪造测试通过。',
-          parameters: {
-            checks: schemaParameter(claimsSchema),
-            checks_json: { type: 'string', description: 'Deprecated v0.1 compatibility; use checks.' },
-          },
-          output: { schema: { type: 'string' }, render: (_a, v) => [{ type: 'text', text: v }] },
-          execute: async (args, exec) => {
-            const task = this.c.state.tasks.find(
-              (t) => t.targetSession === exec.agent?.session.id && this.c.current(t.target) === t,
-            );
-            if (!task) throw new Error('审查上下文失效');
-            return this.submit(
-              task,
-              parseProtocol(claimsSchema, protocolInput(args, 'checks', 'checks_json')),
-            );
-          },
-        }),
-        {
-          when: ({ agent }) =>
-            this.c.state.tasks.some(
-              (t) => t.assessment && t.targetSession === agent.session.id && this.c.current(t.target) === t,
-            ),
-        },
-      ),
-      ...(this.w.executionScope === 'workspace'
-        ? [
-            ctx.tools.register(
-              defineTool({
-                name: 'emergence_audit',
-                description:
-                  '为已结束的契约任务派发独立审查或验证。同一任务、产物版本、种类和规则版本只创建一次，重复请求返回原记录（包括失败）；修复后核验修复任务。验证命令仍须原权限审批。',
-                parameters: {
-                  task_id: { type: 'string', required: true },
-                  kind: { type: 'string', enum: ['review', 'verify'], required: true },
-                  target: { type: 'string' },
-                },
-                output: {
-                  schema: { type: 'json' },
-                  render: (_a, v) => [{ type: 'text', text: JSON.stringify(v) }],
-                },
-                execute: async (args, exec) => {
-                  const pane = [...this.w.panes.values()].find(
-                    (p) => p.controller?.id === exec.agent?.session.id,
-                  );
-                  if (!pane) throw new Error('会话失效');
-                  return this.c.view(
-                    await this.request(args.task_id, args.kind as Assessment['kind'], pane.id, args.target),
-                  );
-                },
-              }),
-              {
-                when: ({ agent }) =>
-                  this.w.executionScope === 'workspace' &&
-                  this.c.state.tasks.some(
-                    (t) =>
-                      !t.assessment &&
-                      t.contract &&
-                      t.issuerSession === agent.session.id &&
-                      ['needs_review', 'succeeded'].includes(t.status),
-                  ),
-              },
-            ),
-          ]
-        : []),
     ];
   }
 }

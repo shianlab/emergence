@@ -1,5 +1,5 @@
-param(
-  [string]$BrandDirectory = (Join-Path $PSScriptRoot '../assets/brand')
+﻿param(
+    [string]$BrandDirectory = (Join-Path $PSScriptRoot '../assets/brand')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -8,9 +8,9 @@ Add-Type -AssemblyName System.Drawing
 # This is a pixel mask of the supplied artwork, never a glyph reconstruction.
 # System.Drawing keeps this asset-preparation script dependency-free on Windows.
 if (-not ('EmergenceBrand.WordmarkExtractor' -as [type])) {
-  $drawingReferences = @([System.Drawing.Bitmap].Assembly.Location, [System.Drawing.Color].Assembly.Location, 'System.Collections')
-  $drawingReferences += [System.Drawing.Bitmap].GetInterfaces() | ForEach-Object { $_.Assembly.Location } | Where-Object { $_ -notmatch 'System.Private.CoreLib' }
-  Add-Type -ReferencedAssemblies ($drawingReferences | Select-Object -Unique) -TypeDefinition @'
+    $drawingReferences = @([System.Drawing.Bitmap].Assembly.Location, [System.Drawing.Color].Assembly.Location, 'System.Collections')
+    $drawingReferences += [System.Drawing.Bitmap].GetInterfaces() | ForEach-Object { $_.Assembly.Location } | Where-Object { $_ -notmatch 'System.Private.CoreLib' }
+    Add-Type -ReferencedAssemblies ($drawingReferences | Select-Object -Unique) -TypeDefinition @'
 using System;
 using System.Collections.Generic;
 using System.Drawing;

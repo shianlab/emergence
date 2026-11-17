@@ -32,16 +32,12 @@ jobs:
           python-version: '3.14'
           architecture: x64
       - run: npm ci
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          global-json-file: emergence/global.json
+      - run: npm run setup:quality
       - run: npm run check
       - run: npm run build
-      - name: Validate installer syntax
-        run: |
-          $files = @('../install.ps1', 'release/install.ps1', 'release/run-manager.ps1', 'release/uninstall.ps1', 'tests/release-bootstrap.ps1')
-          foreach ($file in $files) {
-            $parseErrors = $null
-            [Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$null, [ref]$parseErrors) | Out-Null
-            if ($parseErrors) { throw ($parseErrors | Out-String) }
-          }
       - name: Initialize isolated data test runtime
         run: |
           python -m venv .data-venv

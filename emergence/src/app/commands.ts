@@ -221,16 +221,13 @@ export function commandHelp(items: readonly CommandItem[], ui: UIPreferences, ho
 
 /** Only implemented commands; extensions come from the live registration table. */
 export function workspaceCommands(
-  workspace: Pick<
-    WorkspaceController,
-    'panes' | 'launch' | 'collaboration' | 'visible' | 'ctx' | 'extensions'
-  >,
+  workspace: Pick<WorkspaceController, 'panes' | 'launch' | 'taskEngine' | 'visible' | 'ctx' | 'extensions'>,
   paneId: string,
 ): CommandItem[] {
   const pane = workspace.panes.get(paneId),
     controller = pane?.controller,
     en = workspace.launch.appConfig.ui.language === 'en';
-  const mutable = !controller?.busy && !workspace.collaboration.current(paneId);
+  const mutable = !controller?.busy && !workspace.taskEngine.current(paneId);
   return entries
     .filter(([command]) => {
       if (!controller)

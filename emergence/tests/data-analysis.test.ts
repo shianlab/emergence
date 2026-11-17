@@ -251,10 +251,8 @@ test('actual assigned Harness task returns computational receipts with tracked a
   const f = await executionFixture();
   try {
     await writeFile(join(f.cwd, 'data.csv'), 'id,amount\n001,12.50\n002,7.50\n');
-    const master = f.w.current;
     await f.w.split('row');
     const worker = f.w.current;
-    f.w.collaboration.configure(master.id, [worker.id]);
     let step = 0;
     f.provider.stream = async function* (): AsyncIterable<StreamChunk> {
       const seq = [
@@ -277,21 +275,21 @@ test('actual assigned Harness task returns computational receipts with tracked a
       yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
       yield { type: 'finish', reason: { kind: 'tool-calls' } };
     };
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'analyze', '汇总数据');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'analyze', '汇总数据');
     await until(() => ['succeeded', 'needs_review', 'failed'].includes(task.status));
     assert.equal(task.result?.errors.length, 0, JSON.stringify(task.result));
     const receipt = task.receipts.find((r) => r.tool === 'emergence_data_analyze')!;
     assert.equal(receipt.exitCode, 0);
     assert.ok(receipt.manifest!.outputs.length > 0);
-    await f.w.collaboration.assurance.version(task);
+    await f.w.taskEngine.assurance.version(task);
     await writeFile(receipt.manifest!.outputs.find((r) => r.path.endsWith('table.csv'))!.path, 'tampered');
-    await assert.rejects(f.w.collaboration.assurance.version(task), /失效/);
+    await assert.rejects(f.w.taskEngine.assurance.version(task), /失效/);
   } finally {
     await f.close();
   }
 });
 
-test('independent reviewer and verifier complete native data acceptance without shell permission expansion', async () => {
+test('native data receipts support explicit acceptance without shell permission expansion', async () => {
   const f = await executionFixture();
   try {
     const FileTools = await import('@deepseek-ai/dsh-tool-fs');
@@ -299,9 +297,7 @@ test('independent reviewer and verifier complete native data acceptance without 
     await f.ctx.plugin(FileTools, { write: false, edit: false, readImage: false });
     await f.ctx.plugin(Approval);
     await writeFile(join(f.cwd, 'data.csv'), 'id,amount\n001,12.50\n002,7.50\n');
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
+    const worker = await f.w.split('row');
     const positions = new Map<string, number>();
     f.provider.stream = async function* (options): AsyncIterable<StreamChunk> {
       const text = options.messages
@@ -309,7 +305,7 @@ test('independent reviewer and verifier complete native data acceptance without 
         .map((m) => JSON.stringify(m.content))
         .findLast((t) => t.includes('[Emergence task '));
       const taskId = text?.match(/\[Emergence task ([^\]]+)\]/)?.[1];
-      const task = f.w.collaboration.state.tasks.find((t) => t.id === taskId);
+      const task = f.w.taskEngine.state.tasks.find((t) => t.id === taskId);
       if (!task) {
         yield { type: 'finish', reason: { kind: 'stop' } };
         return;
@@ -353,32 +349,20 @@ test('independent reviewer and verifier complete native data acceptance without 
       yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
       yield { type: 'finish', reason: { kind: 'tool-calls' } };
     };
-    const subject = await f.w.collaboration.enqueue(
-      master.id,
-      worker.id,
-      'data-subject',
-      '实际计算总和20',
-      [],
-      { role: 'developer', scope: ['data.csv'], acceptance: ['amount总和20且执行成功'] },
-    );
+    const subject = await f.w.taskEngine.enqueue(worker.id, worker.id, 'data-subject', '实际计算总和20', [], {
+      role: 'developer',
+      scope: ['data.csv'],
+      acceptance: ['amount总和20且执行成功'],
+    });
     await until(() => subject.status === 'needs_review');
-    const settle = async (id: string) =>
-      until(() => {
-        for (const p of f.w.panes.values()) if (p.controller?.pending) p.controller.pending.respond('y');
-        return ['succeeded', 'failed', 'needs_review'].includes(f.w.collaboration.task(id).status);
-      });
-    const verify = await f.w.collaboration.assurance.request(subject.id, 'verify', master.id);
-    await settle(verify.id);
-    assert.equal(verify.status, 'succeeded', JSON.stringify(verify.result));
-    const review = await f.w.collaboration.assurance.request(subject.id, 'review', master.id);
-    await settle(review.id);
-    assert.equal(review.status, 'succeeded', JSON.stringify(review.result));
-    const status = await f.w.collaboration.assurance.status(subject.id);
-    assert.equal(status.verification, true);
-    assert.equal(status.review, true);
-    assert.notEqual(verify.targetSession, subject.targetSession);
-    assert.ok(verify.receipts.some((r) => r.tool === 'emergence_data_analyze' && r.exitCode === 0));
-    await f.w.collaboration.review(subject.id, true, '真实独立复算与读取通过', 'model');
+    assert.ok(subject.receipts.some((r) => r.tool === 'emergence_data_analyze' && r.ok && r.exitCode === 0));
+    assert.ok(!subject.receipts.some((r) => ['pwsh', 'bash'].includes(r.tool)));
+    assert.equal((await f.w.taskEngine.assurance.status(subject.id)).verification, false);
+    await assert.rejects(
+      f.w.taskEngine.review(subject.id, true, '模型声明不是独立验证', 'model'),
+      /审查|验证/,
+    );
+    await f.w.taskEngine.review(subject.id, true, '用户已核对原生计算产物');
     assert.equal(subject.status, 'succeeded');
   } finally {
     await f.close();

@@ -1,13 +1,11 @@
 import { planSchema } from '../domain/planning.ts';
-import { workPlanSchema } from '../domain/work-plan.ts';
-import { planProposalSchema, workProposalSchema, materializeProposal } from '../domain/plan-proposal.ts';
+import { planProposalSchema, materializeProposal } from '../domain/plan-proposal.ts';
 import { RequirementError, requirementTexts, type Requirements } from '../domain/requirements.ts';
 import { parseProtocol, protocolError } from './tool-protocol.ts';
 
 /** Compatibility is input conversion only; both protocols use the same requirement admission. */
 export function readPlanInput(
   json: string,
-  automatic: boolean,
   current: Requirements | undefined,
   establish: (legacy: {
     objective: string;
@@ -24,7 +22,7 @@ export function readPlanInput(
   }
   let requirements = current;
   if (input && typeof input === 'object' && !('requirementRevision' in input)) {
-    const legacy = automatic ? parseProtocol(workPlanSchema, input) : parseProtocol(planSchema, input);
+    const legacy = parseProtocol(planSchema, input);
     requirements ??= establish(legacy);
     if (legacy.objective !== requirements.objective)
       throw new RequirementError(
@@ -80,8 +78,6 @@ export function readPlanInput(
       'requirementRevision',
       '先调用 emergence_analyze 建立需求。',
     );
-  const proposal = automatic
-    ? parseProtocol(workProposalSchema, input)
-    : parseProtocol(planProposalSchema, input);
+  const proposal = parseProtocol(planProposalSchema, input);
   return { proposal, requirements, materialize: () => materializeProposal(proposal, requirements) };
 }

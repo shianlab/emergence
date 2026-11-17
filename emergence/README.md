@@ -1,6 +1,6 @@
 # 涌现 · Emergence
 
-源码安装入口见[根目录快速开始](../README.md)。当前有效验收入口为 `npm run inspect:full`、`npm run check` 与 `npm run inspect:security`；带阶段编号的报告及 `historical:*` 脚本只记录当时实现。
+源码安装入口见[根目录快速开始](../README.md)。当前有效验收入口为 `npm run inspect:full`、`npm run check` 与 `npm run inspect:security`；带阶段编号的报告只记录当时实现，失效的历史命令已退出。
 
 当前版本为 **1.00（程序版本 1.0.0）**，使用 OpenTUI 与 DeepSeek Harness 的真实 profile、工具和会话服务。首次安装、升级与卸载见[安装指南](../docs/installation.md)，源码开发见[根目录 README](../README.md)。本文保留详细配置与使用说明；阶段报告中的旧产品范围以当前独立窗口行为为准。
 
@@ -193,7 +193,7 @@ npm run inspect:local
 
 `/model` 只修改当前窗口和会话的模型选择，不改写共享 `config.json` 的默认模型或覆盖外部新增配置。默认模型可在 `emergence config` 显示的文件中修改。配置和加密凭据更新采用跨进程互斥。
 
-`npm run inspect`、`inspect:local` 和 `inspect:full` 使用同一当前版本矩阵，包含构建、单元/Harness、模型配置、故障恢复、独立窗口与终端交互。结果在上级 `artifacts/full-audit-日期/`；不触发打包、安装或发布。`test:personalization`、`test:workspace` 和 `test:independent-windows` 可单独验证对应流程。旧阶段脚本归入 `historical:*`，不作为发布门禁。
+`npm run inspect`、`inspect:local` 和 `inspect:full` 使用同一当前版本矩阵，包含构建、单元/Harness、模型配置、故障恢复、独立窗口与终端交互。结果在上级 `artifacts/full-audit-日期/`；不触发打包、安装或发布。`test:personalization`、`test:workspace` 和 `test:independent-windows` 可单独验证对应流程。旧阶段报告仅供追溯，不作为发布门禁。
 
 历史跨窗口验收记录仍保留在 artifacts 和阶段报告中，但不作为当前产品能力承诺；该功能已于 2026-11-16 移除。
 

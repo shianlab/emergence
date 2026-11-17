@@ -1,8 +1,11 @@
 import { canonicalPermissionPath } from '../adapters/permissions.ts';
 import { isReadOnlyTask, type TaskRecord } from '../domain/task.ts';
 import { toolContract, toolPath } from '../domain/tool-contract.ts';
-import { containsPath, scopesOverlap } from './work-allocation.ts';
+import { containsPath } from './project-contract.ts';
 import { projectViolation } from './project-contract.ts';
+export function scopesOverlap(a: string[], b: string[]) {
+  return a.some((x) => b.some((y) => containsPath(x, y) || containsPath(y, x)));
+}
 
 export function tasksConflict(a: TaskRecord, b: TaskRecord) {
   try {
@@ -45,12 +48,12 @@ export function allocationViolation(task: TaskRecord, name: string, args: unknow
         paths.some((p) => !containsPath(root, p)) ||
         !paths.some((p) => containsPath(p, target))
       )
-        return '操作超出任务已声明范围，请向主控报告以修订分工';
+        return '操作超出任务已声明范围，请说明范围缺口并修订计划';
     } catch {
       return '任务路径无法可靠解析';
     }
     return;
   }
   if (contract.resource === 'none' && contract.parallelFileTask) return;
-  return '并行文件任务不允许额外命令、检索或外部副作用；请报告主控，改用独占任务';
+  return '并行文件任务不允许额外命令、检索或外部副作用；请修订计划，改用独占任务';
 }

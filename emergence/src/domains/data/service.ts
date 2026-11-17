@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { lstat, mkdir, open, readFile, realpath, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
-import { inside } from '../../app/instruction-files.ts';
+import { inside } from '../../platform/path-policy.ts';
 import { safeError } from '../../core/adapters/redaction.ts';
 import {
   attachNativeOutputs,

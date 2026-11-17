@@ -2,20 +2,55 @@ import type { Agent } from '@deepseek-ai/dsh-agent';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { realpath } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import type { SessionController } from '../../app/controller.ts';
-import { digest, inside } from '../../app/instruction-files.ts';
+import type { CodeWorkHost } from './host.ts';
+import { digest } from '../../platform/content-hash.ts';
+import { inside } from '../../platform/path-policy.ts';
 import { evaluatePermissions } from '../../core/adapters/permissions.ts';
 import { withNativeCheckInputs } from '../../core/application/native-read-evidence.ts';
 import { toolArguments, toolPath } from '../../core/domain/tool-contract.ts';
 import { CodeWorkflow, sourceMutation } from './workflow.ts';
+import type { CodeEvidence, CodeEvidencePort } from '../../core/application/code-evidence-port.ts';
 
 const guidance = `Emergence 原生编程闭环（已内嵌，无需 Skill）：编码任务先定位实现、调用方与测试，再用 emergence_code_work begin 记录当前任务。checks/status 从真实项目配置提供检查命令；先用普通 pwsh/bash 复现和记录基线，read 后用 write/edit 修改，再执行相关 typecheck/lint/test。检查仍需要原权限，不用 Shell 绕过文件版本保护、不弱化测试。status 展示实际退出码、诊断、失效版本；未运行不能声称通过。相同版本失败两次先调整策略。交付前 status 并说明未覆盖范围。主控按现有计划向可用窗口分配探索、实现、独立验证，传递变更路径、运行 ID、检查 callId 与诊断；复用现有权限与验收，不要求用户逐步提醒。恢复须先 preview，再以 expected_hash 调用 emergence_code_restore；仅限记录的既有文本文件，其他副作用不承诺撤销。`;
 
-export class CodeWorkHarness {
+export class CodeWorkHarness implements CodeEvidencePort {
   private workflows = new WeakMap<Agent, Map<string, CodeWorkflow>>();
   private registered = new WeakSet<Agent>();
   private busy = new WeakSet<Agent>();
-  constructor(private c: SessionController) {}
+  constructor(private c: CodeWorkHost) {}
+  async evidence(agent: Agent): Promise<CodeEvidence> {
+    const work = await this.get(agent);
+    const resolved = await work.resolvedFailures(AbortSignal.timeout(10000));
+    const repairedChecks: Array<readonly [string, string]> = [];
+    for (const id of resolved) {
+      const failed = work.run!.checks.find((check) => check.callId === id);
+      const success = work.run!.checks.findLast(
+        (check) => check.id === failed?.id && check.status === 'succeeded',
+      );
+      if (success) repairedChecks.push([id, success.callId]);
+    }
+    if (!work.run) return { repairedChecks, unverifiedChanges: false };
+    const status = await work.status(AbortSignal.timeout(10000));
+    return {
+      repairedChecks,
+      result: {
+        runId: work.run.id,
+        verified: status.verified,
+        criteriaChanged: status.criteriaChanged,
+        paths: status.changes.map((change) => change.path.slice(0, 1000)),
+        checks: work.run.checks.slice(-16).map((check) => ({
+          callId: check.callId,
+          command: check.command.slice(0, 1000),
+          exitCode: check.exitCode,
+          status: check.status,
+          version: check.version,
+        })),
+      },
+      unverifiedChanges:
+        work.run.changes.some((change) => change.beforeHash !== change.afterHash || change.uncertain) &&
+        !status.verified,
+    };
+  }
   private permitted(agent: Agent, name: string, path: string) {
     return evaluatePermissions([this.c.permissionSnapshot(), ...this.c.permissionConstraints(agent)], {
       name,
@@ -40,7 +75,7 @@ export class CodeWorkHarness {
     let work = maps.get(key);
     if (!work) {
       work = new CodeWorkflow(
-        this.c.launch.home,
+        this.c.home,
         root,
         session,
         (path) => this.permitted(agent, 'read', path) === 'allow',
@@ -53,10 +88,7 @@ export class CodeWorkHarness {
   register(agent: Agent) {
     if (this.registered.has(agent)) return;
     this.registered.add(agent);
-    const when = ({ agent: current }: { agent: Agent }) =>
-      current === agent &&
-      this.c.owns(current) &&
-      this.c.planning.toolVisible(current, 'emergence_code_work');
+    const when = ({ agent: current }: { agent: Agent }) => current === agent && this.c.owns(current);
     agent.ctx.tools.register(
       defineTool({
         name: 'emergence_code_work',
@@ -162,7 +194,7 @@ export class CodeWorkHarness {
       }),
       c.ctx.on('system-prompt/assemble', async (_assembly, { agent }, next) => {
         const rendered = await next();
-        if (agent && c.owns(agent) && !c.planning.coordinatorRole(agent)) {
+        if (agent && c.owns(agent)) {
           const work = await this.get(agent),
             run = work.run;
           rendered.sections.push({

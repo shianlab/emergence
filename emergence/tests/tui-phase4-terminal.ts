@@ -103,7 +103,7 @@ try {
   assert.equal(identity.panes[1].cwd, secondProject);
   assert.equal(identity.panes[1].modelId, 'second');
   assert.equal(identity.collaboration.master, undefined);
-  assert.deepEqual(identity.collaboration.workers, []);
+  assert.equal('workers' in identity.collaboration, false);
   assert.doesNotMatch(screen(), /主控|执行窗口|协作模式/);
   checks.independentProjectsAndModels = true;
   await send('hello second');

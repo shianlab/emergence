@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { harness } from './fixtures/harness.ts';
 
@@ -92,7 +92,6 @@ async function fixture() {
   const master = w.current,
     worker = await w.split('row', cwd, 'worker'),
     second = await w.split('column', cwd, 'worker');
-  w.collaboration.configure(master.id, [worker.id, second.id]);
   const contract = {
     role: 'developer',
     scope: ['project'],
@@ -127,9 +126,9 @@ async function fixture() {
 test('E4 completion waits for evidence review; dependent tasks remain queued until acceptance', async () => {
   const f = await fixture();
   try {
-    const c = f.w.collaboration,
-      a = await c.enqueue(f.master.id, f.worker.id, 'a', 'unit:good', [], f.contract);
-    const b = await c.enqueue(f.master.id, f.second.id, 'b', 'unit:good', [a.id], f.contract);
+    const c = f.w.taskEngine,
+      a = await c.enqueue(f.worker.id, f.worker.id, 'a', 'unit:good', [], f.contract);
+    const b = await c.enqueue(f.worker.id, f.worker.id, 'b', 'unit:good', [a.id], f.contract);
     await until(() => a.status === 'needs_review');
     assert.equal(b.status, 'queued');
     assert.equal(f.count(), 1);
@@ -147,11 +146,11 @@ test('E4 completion waits for evidence review; dependent tasks remain queued unt
     await f.close();
   }
 });
-test('E4 real failures cannot be approved, repairs are linked and bounded, takeover prevents repair', async () => {
+test('E4 real failures cannot be approved, repairs are linked and bounded, cancellation prevents repair', async () => {
   const f = await fixture();
   try {
-    const c = f.w.collaboration,
-      a = await c.enqueue(f.master.id, f.worker.id, 'a', 'unit:tool-error', [], f.contract);
+    const c = f.w.taskEngine,
+      a = await c.enqueue(f.worker.id, f.worker.id, 'a', 'unit:tool-error', [], f.contract);
     await until(() => a.status === 'needs_review');
     await assert.rejects(c.review(a.id, true, 'claimed pass'), /真实失败/);
     await c.review(a.id, false, 'tool failed');
@@ -161,9 +160,9 @@ test('E4 real failures cannot be approved, repairs are linked and bounded, takeo
     await assert.rejects(c.repair(a.id, 'duplicate'), /已创建/);
     await until(() => repair.status === 'needs_review');
     await assert.rejects(c.repair(repair.id, 'again'), /预算/);
-    const b = await c.enqueue(f.master.id, f.second.id, 'b', 'unit:slow', [], f.contract);
+    const b = await c.enqueue(f.second.id, f.second.id, 'b', 'unit:slow', [], f.contract);
     await until(() => b.status === 'running');
-    await c.takeover(f.second.id);
+    await c.cancel(b.id);
     await assert.rejects(c.repair(b.id, 'try again'), /不可修复/);
   } finally {
     await f.close();
@@ -172,8 +171,8 @@ test('E4 real failures cannot be approved, repairs are linked and bounded, takeo
 test('E4 role permissions block execution even when worker and master permit it', async () => {
   const f = await fixture();
   try {
-    const c = f.w.collaboration,
-      a = await c.enqueue(f.master.id, f.worker.id, 'a', 'unit:good', [], {
+    const c = f.w.taskEngine,
+      a = await c.enqueue(f.worker.id, f.worker.id, 'a', 'unit:good', [], {
         ...f.contract,
         role: 'researcher',
       });
@@ -182,7 +181,7 @@ test('E4 role permissions block execution even when worker and master permit it'
     assert.ok(a.result!.errors.length);
     await assert.rejects(c.review(a.id, true, 'model said pass'), /真实失败/);
     await assert.rejects(
-      c.enqueue(f.master.id, f.worker.id, 'unknown', 'unit:good', [], { ...f.contract, role: 'missing' }),
+      c.enqueue(f.worker.id, f.worker.id, 'unknown', 'unit:good', [], { ...f.contract, role: 'missing' }),
       /角色不存在/,
     );
   } finally {
@@ -192,12 +191,12 @@ test('E4 role permissions block execution even when worker and master permit it'
 test('E4 step/time/concurrency budgets stop work and preserve queued assignments', async () => {
   const f = await fixture();
   try {
-    const c = f.w.collaboration,
-      a = await c.enqueue(f.master.id, f.worker.id, 'a', 'unit:slow', [], {
+    const c = f.w.taskEngine,
+      a = await c.enqueue(f.worker.id, f.worker.id, 'a', 'unit:slow', [], {
         ...f.contract,
         maxDurationMs: 1000,
       });
-    const b = await c.enqueue(f.master.id, f.second.id, 'b', 'unit:good', [], { ...f.contract, maxSteps: 1 });
+    const b = await c.enqueue(f.second.id, f.second.id, 'b', 'unit:good', [], { ...f.contract, maxSteps: 1 });
     await until(() => a.status === 'running');
     assert.equal(b.status, 'queued');
     await until(() => a.status === 'cancelled');
@@ -213,9 +212,9 @@ test('E4 step/time/concurrency budgets stop work and preserve queued assignments
 test('E4 repaired dependency releases downstream work without rewriting failed attempt history', async () => {
   const f = await fixture();
   try {
-    const c = f.w.collaboration,
-      a = await c.enqueue(f.master.id, f.worker.id, 'a', 'unit:good', [], f.contract);
-    const b = await c.enqueue(f.master.id, f.second.id, 'b', 'unit:good', [a.id], f.contract);
+    const c = f.w.taskEngine,
+      a = await c.enqueue(f.worker.id, f.worker.id, 'a', 'unit:good', [], f.contract);
+    const b = await c.enqueue(f.worker.id, f.worker.id, 'b', 'unit:good', [a.id], f.contract);
     await until(() => a.status === 'needs_review');
     await c.review(a.id, false, 'need stronger evidence');
     assert.equal(b.status, 'queued');
@@ -233,8 +232,8 @@ test('E4 repaired dependency releases downstream work without rewriting failed a
 test('audit: repairs retain original role limits and handoff constraints after configuration changes', async () => {
   const f = await fixture();
   try {
-    const c = f.w.collaboration;
-    const task = await c.enqueue(f.master.id, f.worker.id, 'audit-role', 'unit:good', [], {
+    const c = f.w.taskEngine;
+    const task = await c.enqueue(f.worker.id, f.worker.id, 'audit-role', 'unit:good', [], {
       ...f.contract,
       role: 'researcher',
       context: 'ORIGINAL_REQUIRED_CONSTRAINT',
@@ -262,8 +261,8 @@ test('audit: repairs retain original role limits and handoff constraints after c
 test('audit: repairs cannot silently move to a replacement worker session', async () => {
   const f = await fixture();
   try {
-    const c = f.w.collaboration,
-      task = await c.enqueue(f.master.id, f.worker.id, 'audit-session', 'unit:good', [], f.contract);
+    const c = f.w.taskEngine,
+      task = await c.enqueue(f.worker.id, f.worker.id, 'audit-session', 'unit:good', [], f.contract);
     await until(() => task.status === 'needs_review');
     await f.w.send(f.worker.id, '/new');
     await assert.rejects(c.repair(task.id, 'retry'), /会话|目录|模型/);

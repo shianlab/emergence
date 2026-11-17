@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 /** Uses the Windows-provided Framework compiler; this WinExe needs no browser or NuGet dependency. */
@@ -10,13 +10,17 @@ export async function buildNativeModelConfiguration() {
   await mkdir(out, { recursive: true });
   const executable = join(out, '涌现模型配置.exe'),
     stamp = join(out, 'native-build.json');
+  const sources = (await readdir('native/model-config'))
+    .filter((name) => name.endsWith('.cs'))
+    .sort()
+    .map((name) => join('native/model-config', name));
   const fingerprint = createHash('sha256');
   for (const source of [
-    'native/model-config/Program.cs',
+    ...sources,
     'native/model-config/app.manifest',
     'assets/brand/pixel/yongxian-pixel-fine.png',
   ])
-    fingerprint.update(await readFile(source));
+    fingerprint.update(source).update(await readFile(source));
   fingerprint.update(await readFile(new URL(import.meta.url)));
   const sourceHash = fingerprint.digest('hex');
   async function entryCopy() {
@@ -99,7 +103,7 @@ $stream.Dispose(); $icon.Dispose(); $attributes.Dispose(); $graphics.Dispose(); 
     `/win32manifest:${resolve('native/model-config/app.manifest')}`,
     `/win32icon:${icon}`,
     `/resource:${resolve('assets/brand/pixel/yongxian-pixel-fine.png')},Wordmark`,
-    resolve('native/model-config/Program.cs'),
+    ...sources.map((source) => resolve(source)),
   ]);
   await writeFile(
     executable + '.config',

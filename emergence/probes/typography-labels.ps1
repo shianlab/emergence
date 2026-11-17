@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$Request)
+﻿param([Parameter(Mandatory = $true)][string]$Request)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 $spec = Get-Content -LiteralPath $Request -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -17,5 +17,8 @@ foreach ($label in $spec.labels) {
         $rect = New-Object System.Drawing.RectangleF(0, 0, $bitmap.Width, $bitmap.Height)
         $graphics.DrawString([string]$label.text, $font, $brush, $rect, $format)
         $bitmap.Save([string]$label.path, [System.Drawing.Imaging.ImageFormat]::Png)
-    } finally { $format.Dispose(); $brush.Dispose(); $font.Dispose(); $graphics.Dispose(); $bitmap.Dispose() }
+    }
+    finally {
+        $format.Dispose(); $brush.Dispose(); $font.Dispose(); $graphics.Dispose(); $bitmap.Dispose()
+    }
 }

@@ -1,0 +1,173 @@
+{
+  "scope": "Stage 4 frozen inspection inputs compared with Stage 5; independent panes only. Hashes identify changed source, not runtime coverage.",
+  "ownership": [
+    {
+      "from": "workspace-ui.ts pane view construction, input submission and view fields",
+      "to": [
+        "src/app/tui/pane-view.ts",
+        "src/app/tui/pane-view-state.ts"
+      ],
+      "state": "Per-pane projection and controls; registry remains with mountWorkspaceUI. Explicit callbacks; original request/session binding retained."
+    },
+    {
+      "from": "workspace-ui.ts keyboard/paste handlers",
+      "to": [
+        "src/app/tui/workspace-input.ts"
+      ],
+      "state": "One WorkspaceModalState created by the mount, shared with menu presentation. No parallel input/approval state."
+    },
+    {
+      "from": "workspace-ui.ts notices, footer and brand animation cache",
+      "to": [
+        "src/app/tui/pane-notice.ts",
+        "src/app/tui/workspace-brand.ts"
+      ],
+      "state": "Notice clock per view, brand cache private to factory; mount retains timer/subscription/disposal ownership."
+    },
+    {
+      "from": "Program.cs bootstrap, HTTP/process and value helpers",
+      "to": [
+        "native/model-config/Program.cs",
+        "native/model-config/Connection.cs",
+        "native/model-config/Json.cs",
+        "native/model-config/Choice.cs"
+      ],
+      "state": "One Connection per launch, idempotent disposal and late-response rejection."
+    },
+    {
+      "from": "Program.cs native Form, rendering, drafts and async callbacks",
+      "to": [
+        "native/model-config/ConfigurationForm.cs",
+        "native/model-config/ConfigurationPages.cs",
+        "native/model-config/ConfigurationActions.cs",
+        "native/model-config/ModelDraft.cs"
+      ],
+      "state": "One partial Form owns controls, snapshot/default allocation and lifetime; isolated ModelDraft owns editor data; six named actions use the existing Run gate."
+    },
+    {
+      "from": "single C# build source",
+      "to": [
+        "scripts/build-model-config.ts"
+      ],
+      "state": "Sorted source discovery feeds fingerprint and compilation. Existing output and package location retained."
+    },
+    {
+      "from": "new native lifecycle and draft regression coverage",
+      "to": [
+        "tests/native-model-structure.test.ts",
+        "tests/fixtures/NativeModelConfigurationTests.cs"
+      ],
+      "state": "Headless compilation and isolated temporary executable; no desktop UI. Existing tests unchanged."
+    }
+  ],
+  "retained": [
+    "workspace-ui layout/refresh/navigation composition and sole lifetime owner",
+    "existing message/interaction/composer/navigation/list/task inspector components",
+    "existing model API validation, revision handling and DPAPI",
+    "Framework 4.8, native controls, approved visuals and independent window behavior"
+  ],
+  "files": [
+    {
+      "path": "native/model-config/Choice.cs",
+      "status": "added",
+      "before": null,
+      "after": "822608d2295c53fdee382cc37f935485e8e0cc0e14d427800ea4e37993e5f670"
+    },
+    {
+      "path": "native/model-config/ConfigurationActions.cs",
+      "status": "added",
+      "before": null,
+      "after": "c72c49f156fc1246c7898134f649f1a700277c52e2dce4cc48123b5de15a4836"
+    },
+    {
+      "path": "native/model-config/ConfigurationForm.cs",
+      "status": "added",
+      "before": null,
+      "after": "837b30cb0b23c2e714bf6b18747a8c722ae39a16a7a72c824b4ac69ab1df1fbe"
+    },
+    {
+      "path": "native/model-config/ConfigurationPages.cs",
+      "status": "added",
+      "before": null,
+      "after": "a5e56733700fbd3b59d17a913a97e3770b608a33c7f42441babfaf4c21597ae8"
+    },
+    {
+      "path": "native/model-config/Connection.cs",
+      "status": "added",
+      "before": null,
+      "after": "3864e4d68d6ab74c759966bfee43489e1caa005615cf761574840b11ed8b3366"
+    },
+    {
+      "path": "native/model-config/Json.cs",
+      "status": "added",
+      "before": null,
+      "after": "85b2021a116e8ce80c1d2940584d45547e4045ec3088ac3a3fe3142566a273fb"
+    },
+    {
+      "path": "native/model-config/ModelDraft.cs",
+      "status": "added",
+      "before": null,
+      "after": "2d31e81be448f071e544f4ff8989d62c9fa8481f575c56d91cf1006766ff92d3"
+    },
+    {
+      "path": "native/model-config/Program.cs",
+      "status": "modified",
+      "before": "3b44fab6872d56ccc81a8f32d484be9475b52969738b0a52daedb7c70fca7e5a",
+      "after": "e5703aadf6389af070ac0836741c3e988634f3ca7a6bab921a996c31e99257a7"
+    },
+    {
+      "path": "scripts/build-model-config.ts",
+      "status": "modified",
+      "before": "8034b8104c91e9a6a4f2555c2045a62746dc9fbf1e40d3ac116af4c9d42dae4e",
+      "after": "d35adbbe344e8a8584256c0eebc85ec8c71071ced06d285ace2e91cb6bbd7147"
+    },
+    {
+      "path": "src/app/tui/pane-notice.ts",
+      "status": "added",
+      "before": null,
+      "after": "255cc5d7f2d61bae93649bcb986b742591397d58c5b2d2148af3ee5d80d3ac36"
+    },
+    {
+      "path": "src/app/tui/pane-view-state.ts",
+      "status": "added",
+      "before": null,
+      "after": "8f8f843635ab2607bda70f8577ef59bbec874df377710d549971d21440221fb6"
+    },
+    {
+      "path": "src/app/tui/pane-view.ts",
+      "status": "added",
+      "before": null,
+      "after": "6d31490763f2f271ac70bf3bd97394fee73ff70e103e846e36233fda6471ee57"
+    },
+    {
+      "path": "src/app/tui/workspace-brand.ts",
+      "status": "added",
+      "before": null,
+      "after": "8ba716017770d688f6e20e12218bdfa486c0d5677315adfa1138e4137859124e"
+    },
+    {
+      "path": "src/app/tui/workspace-input.ts",
+      "status": "added",
+      "before": null,
+      "after": "10c48d21749ddf788befc228dc9ecf305f8461a5fc7eedf7875bfb99009771f9"
+    },
+    {
+      "path": "src/app/workspace-ui.ts",
+      "status": "modified",
+      "before": "a79fe33efd059c175af883ad6fcc2f749c225c46e33aaa2130ca44616fc43f0e",
+      "after": "72d8d63d2bd841f4558ddd16b66b55a3a46d8bce62f08936ab75949d847de2da"
+    },
+    {
+      "path": "tests/fixtures/NativeModelConfigurationTests.cs",
+      "status": "added",
+      "before": null,
+      "after": "aee16e74a431411e723b3f925ede665590c7ef630aa8fde71ff9a9c473dac7fb"
+    },
+    {
+      "path": "tests/native-model-structure.test.ts",
+      "status": "added",
+      "before": null,
+      "after": "0ee25893a4120f02f332a2b3cc7f47a13ed8d2616b0ac11d134f6d52d6962b2b"
+    }
+  ]
+}

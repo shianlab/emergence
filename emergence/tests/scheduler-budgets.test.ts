@@ -29,11 +29,9 @@ test('approval longer than execution allowance can still complete after approval
   const f = await executionFixture();
   try {
     await f.ctx.plugin(UserApproval);
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    master.controller!.setPermissionMode('ask');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'wait', 'fixture:write', [], {
+    const worker = await f.w.split('row');
+    worker.controller!.setPermissionMode('ask');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'wait', 'fixture:write', [], {
       role: 'developer',
       scope: ['result.txt'],
       acceptance: ['实际写入'],
@@ -62,11 +60,9 @@ test('approval wait has its own bounded timeout and does not execute the tool', 
   try {
     await f.ctx.plugin(UserApproval);
     f.config.orchestration.budgets.approvalMs = 1000;
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    master.controller!.setPermissionMode('ask');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'wait-expiry', 'fixture:write');
+    const worker = await f.w.split('row');
+    worker.controller!.setPermissionMode('ask');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'wait-expiry', 'fixture:write');
     await until(() => task.status === 'cancelled');
     assert.equal(task.timeout, 'approval');
     // The task watchdog and phase watchdog enforce the same approval boundary.
@@ -83,13 +79,11 @@ test('queued work behind an approval uses approval waiting rather than expiring 
   try {
     await f.ctx.plugin(UserApproval);
     f.config.orchestration.budgets.queueMs = 1000;
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    master.controller!.setPermissionMode('ask');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const first = await f.w.collaboration.enqueue(master.id, worker.id, 'approval-head', 'fixture:write');
+    const worker = await f.w.split('row');
+    worker.controller!.setPermissionMode('ask');
+    const first = await f.w.taskEngine.enqueue(worker.id, worker.id, 'approval-head', 'fixture:write');
     await until(() => first.status === 'waiting_user');
-    const next = await f.w.collaboration.enqueue(master.id, worker.id, 'approval-tail', 'fixture:write');
+    const next = await f.w.taskEngine.enqueue(worker.id, worker.id, 'approval-tail', 'fixture:write');
     await delay(1400);
     assert.equal(next.status, 'queued');
     assert.equal(next.timeout, undefined);
@@ -104,16 +98,14 @@ test('queued task has a finite wait and exposes why it cannot start', async () =
   const f = await executionFixture();
   try {
     f.config.orchestration.budgets.queueMs = 1000;
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const first = await f.w.collaboration.enqueue(master.id, worker.id, 'first', 'fixture:write', [], {
+    const worker = await f.w.split('row');
+    const first = await f.w.taskEngine.enqueue(worker.id, worker.id, 'first', 'fixture:write', [], {
       role: 'developer',
       scope: ['result.txt'],
       acceptance: ['核对'],
     });
     await until(() => first.status === 'needs_review');
-    const next = await f.w.collaboration.enqueue(master.id, worker.id, 'next', 'fixture:write', [first.id]);
+    const next = await f.w.taskEngine.enqueue(worker.id, worker.id, 'next', 'fixture:write', [first.id]);
     await delay(100);
     assert.match(next.progress, /独立验收/);
     await until(() => next.status === 'cancelled');
@@ -141,7 +133,7 @@ test('host allocated shared reads can overlap but writes and unknown tasks retai
   }
 });
 
-test('execution and planning watchdogs abort an unresponsive model without waiting for another step', async () => {
+test('execution and session watchdogs abort an unresponsive model without waiting for another step', async () => {
   for (const mode of ['execution', 'planning'] as const) {
     const f = await executionFixture();
     try {
@@ -160,8 +152,7 @@ test('execution and planning watchdogs abort an unresponsive model without waiti
       const master = f.w.current,
         worker = await f.w.split('row');
       if (mode === 'execution') {
-        f.w.collaboration.configure(master.id, [worker.id]);
-        const task = await f.w.collaboration.enqueue(master.id, worker.id, 'stall', 'fixture:write', [], {
+        const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'stall', 'fixture:write', [], {
           role: 'developer',
           scope: ['result.txt'],
           acceptance: ['核对'],
@@ -171,11 +162,10 @@ test('execution and planning watchdogs abort an unresponsive model without waiti
         assert.equal(task.timeout, 'execution');
       } else {
         master.controller!.launch.appConfig.orchestration.budgets.planningMs = 1000;
-        await f.w.setMaster(master.id);
         await f.w.send(master.id, '实现多文件任务并验证');
-        await until(() => master.controller!.planning.intake()?.autonomy?.decision === 'blocked');
+        await until(() => !!master.controller!.lastError);
         await master.controller!.agent.whenIdle();
-        assert.match(master.controller!.notice, /主控规划/);
+        assert.match(master.controller!.notice, /响应|预算|超时/);
       }
       assert.equal(aborted, true);
       assert.equal(f.writes(), 0);
@@ -210,32 +200,23 @@ test('a newer overlapping reader cannot bypass an older queued writer on another
     yield* original(options);
   };
   try {
-    const master = f.w.current,
-      a = await f.w.split('row'),
+    const a = await f.w.split('row'),
       b = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [a.id, b.id]);
     const allocation = (file: string, access: 'read' | 'write') => ({
       reason: 'host fixture',
       paths: [join(f.cwd, file)],
       access,
     });
-    await f.w.collaboration.enqueue(master.id, a.id, 'busy', 'fair-busy', [], undefined, undefined, {
+    await f.w.taskEngine.enqueue(a.id, a.id, 'busy', 'fair-busy', [], undefined, undefined, {
       allocation: allocation('unrelated.txt', 'write'),
     });
     await until(() => started.includes('fair-busy'));
-    await f.w.collaboration.enqueue(master.id, a.id, 'older', 'fair-older', [], undefined, undefined, {
+    await f.w.taskEngine.enqueue(a.id, a.id, 'older', 'fair-older', [], undefined, undefined, {
       allocation: allocation('result.txt', 'write'),
     });
-    const newer = await f.w.collaboration.enqueue(
-      master.id,
-      b.id,
-      'newer',
-      'fair-newer',
-      [],
-      undefined,
-      undefined,
-      { allocation: allocation('result.txt', 'read') },
-    );
+    const newer = await f.w.taskEngine.enqueue(b.id, b.id, 'newer', 'fair-newer', [], undefined, undefined, {
+      allocation: allocation('result.txt', 'read'),
+    });
     await delay(100);
     assert.deepEqual(started, ['fair-busy']);
     assert.match(newer.progress, /更早任务/);
@@ -249,34 +230,30 @@ test('a newer overlapping reader cannot bypass an older queued writer on another
   }
 });
 
-test('approval waiting propagates through manual dependencies across three worker windows', async () => {
+test('approval waiting propagates through three dependent tasks in one session', async () => {
   const f = await executionFixture();
   try {
     await f.ctx.plugin(UserApproval);
     f.config.orchestration.budgets.queueMs = 1000;
     const master = f.w.current;
-    const workers = [await f.w.split('row'), await f.w.split('row'), await f.w.split('row')];
+    const workers = [master, master, master];
     master.controller!.setPermissionMode('ask');
-    f.w.collaboration.configure(
-      master.id,
-      workers.map((pane) => pane.id),
-    );
-    const first = await f.w.collaboration.enqueue(
-      master.id,
+    const first = await f.w.taskEngine.enqueue(
+      workers[0].id,
       workers[0].id,
       'approval-dependency',
       'fixture:write',
     );
     await until(() => first.status === 'waiting_user');
-    const second = await f.w.collaboration.enqueue(
-      master.id,
+    const second = await f.w.taskEngine.enqueue(
+      workers[1].id,
       workers[1].id,
       'direct-dependency',
       'fixture:write',
       [first.id],
     );
-    const third = await f.w.collaboration.enqueue(
-      master.id,
+    const third = await f.w.taskEngine.enqueue(
+      workers[2].id,
       workers[2].id,
       'transitive-dependency',
       'fixture:write',

@@ -2,8 +2,8 @@ import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-credentials';
 import type {} from '@deepseek-ai/dsh-settings';
 import type { AppConfig } from '../core/domain/configuration.ts';
-import type { LaunchConfig } from './controller.ts';
-import { assertModelHistory } from './controller.ts';
+import type { LaunchConfig } from './session-config.ts';
+import { assertModelHistory } from './session-model.ts';
 import type { ModelConfigurationHost } from './model-configuration.ts';
 import { modelWireConfig } from './model-endpoint.ts';
 import type { WorkspaceController } from './workspace.ts';
@@ -83,7 +83,7 @@ export function configurationHost(
           !ownedRunning &&
           !pane.controller?.permissionTransitioning;
         try {
-          w.collaboration.assertMutable(pane.id);
+          w.taskEngine.assertMutable(pane.id);
         } catch {
           mutable = false;
         }

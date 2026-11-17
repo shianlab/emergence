@@ -141,7 +141,7 @@ export function apply(
         const third = await workspace.split('column');
         assert.equal(third.modelId, 'deepseek');
         assert.equal(first.modelId, 'second');
-        assert.equal(workspace.collaboration.state.master, undefined);
+        assert.equal('master' in workspace.taskEngine.state, false);
         workspace.hide(third.id);
         assert.equal(host.windows().length, 3);
         assert.ok(host.windows().some((w) => w.id === first.id && w.role === '独立窗口'));

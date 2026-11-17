@@ -9,16 +9,39 @@ const directory =
 await mkdir(directory, { recursive: true });
 async function hashes() {
   const values: Record<string, string> = {};
-  for (const root of ['src', 'native', 'scripts', 'tests', 'assets', 'bin', 'vendor/meta-kim']) {
+  for (const root of [
+    'src',
+    'native',
+    'scripts',
+    'tests',
+    'probes',
+    'release',
+    'quality',
+    'assets',
+    'bin',
+    'vendor/meta-kim',
+  ]) {
     for (const file of await readdir(root, { recursive: true }))
-      if (/\.(ts|tsx|py|cjs|cs|manifest|json|md|txt|png|jpg)$/.test(file)) {
+      if (/\.(ts|tsx|py|ps1|psd1|cjs|cs|manifest|json|md|txt|png|jpg)$/.test(file)) {
         const path = join(root, file);
         values[path] = createHash('sha256')
           .update(await readFile(path))
           .digest('hex');
       }
   }
-  for (const path of ['package.json', 'package-lock.json', 'tsconfig.json'])
+  for (const path of [
+    'package.json',
+    'package-lock.json',
+    'tsconfig.json',
+    '.prettierrc.json',
+    '.editorconfig',
+    'global.json',
+    'ruff.toml',
+    '../install.ps1',
+    '../.github/workflows/ci.yml',
+    '../.gitattributes',
+    '../.gitignore',
+  ])
     values[path] = createHash('sha256')
       .update(await readFile(path))
       .digest('hex');
@@ -35,7 +58,10 @@ const before = await hashes(),
   }> = [];
 const tests = (await readdir('tests')).filter((p) => p.endsWith('.test.ts')).map((p) => 'tests/' + p);
 const checks: Array<[string, string[]]> = [
-  ['编排格式规范', ['--import', 'tsx', 'scripts/check-orchestration.ts']],
+  ['TypeScript 格式规范', ['--import', 'tsx', 'scripts/check-typescript.ts']],
+  ['Python 格式与静态检查', ['--import', 'tsx', 'scripts/check-languages.ts', 'python']],
+  ['原生 C# 格式与严格编译', ['--import', 'tsx', 'scripts/check-languages.ts', 'native']],
+  ['PowerShell 格式、语法与静态检查', ['--import', 'tsx', 'scripts/check-languages.ts', 'powershell']],
   ['严格类型检查', ['node_modules/typescript/bin/tsc', '--noEmit']],
   ['核心分层与任务状态写入边界', ['--import', 'tsx', 'scripts/check-architecture.ts']],
   ['完整本机构建（CLI / Harness / 原生配置工具）', ['--import', 'tsx', 'scripts/build.ts']],

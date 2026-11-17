@@ -5,11 +5,11 @@ import { settledTaskStatuses as terminal, type TaskRecord } from '../domain/task
 import { digest } from '../storage/execution-journal.ts';
 import { fileFingerprint } from './execution-evidence.ts';
 import { RunDiagnosticsStore } from '../storage/run-diagnostics-store.ts';
-import type { Collaboration } from './task-coordinator.ts';
+import type { TaskEngine } from './task-engine.ts';
 const bounded = (value: unknown, length = 1000) => safeError(value).slice(0, length);
 
 type Host = Pick<
-  Collaboration,
+  TaskEngine,
   | 'task'
   | 'journal'
   | 'workspace'
@@ -77,6 +77,11 @@ export class TaskRecovery {
       source = this.host.workspace.panes.get(requester)?.controller;
     if (!source || requester !== task.issuer || source.id !== task.issuerSession)
       throw new Error('只能在原派发会话中决定恢复');
+    if (
+      retry &&
+      (task.assessment || task.issuer !== task.target || task.issuerSession !== task.targetSession)
+    )
+      throw new Error('历史跨窗口任务不能恢复执行；请在所需窗口单独提交新任务');
     const existing = retry && this.host.state.tasks.find((candidate) => candidate.recoveryOf === id);
     if (existing) return existing;
     if (retry && (!['interrupted', 'blocked'].includes(task.status) || task.cancelReason))
@@ -136,7 +141,6 @@ export class TaskRecovery {
         task.contract,
         undefined,
         {
-          local: task.local,
           workflow: task.workflow,
           recoveryOf: id,
           followup: `恢复 ${id}：${note}\n已有副作用记录摘要：${factsHash}。操作可能已发生，执行前先核对，不要盲目重复。`,

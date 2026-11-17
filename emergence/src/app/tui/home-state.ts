@@ -4,7 +4,7 @@ import { constants } from 'node:fs';
 import { copyFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import type { LaunchConfig } from '../controller.ts';
+import type { LaunchConfig } from '../session-config.ts';
 
 /** Same project key as WorkspaceController; the entry page never writes this file. */
 export function snapshotPath(config: Pick<LaunchConfig, 'cwd' | 'home'>) {

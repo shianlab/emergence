@@ -1,6 +1,7 @@
 import { builtinModules } from 'node:module';
 import { dirname, relative, resolve } from 'node:path';
 import ts from 'typescript';
+import { analyzeDependencies, dependencyViolation, forbiddenCycles } from './architecture-graph.ts';
 
 const root = process.cwd();
 const config = ts.readConfigFile('tsconfig.json', ts.sys.readFile);
@@ -9,6 +10,15 @@ const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, root);
 const program = ts.createProgram(parsed.fileNames, parsed.options),
   checker = program.getTypeChecker();
 const errors: string[] = [];
+const graph = analyzeDependencies(
+  root,
+  program
+    .getSourceFiles()
+    .filter((source) => relative(root, source.fileName).replaceAll('\\', '/').startsWith('src/'))
+    .map((source) => ({ path: relative(root, source.fileName).replaceAll('\\', '/'), text: source.text })),
+);
+for (const group of forbiddenCycles(graph.dependencies.allImportCycles))
+  errors.push('type/value dependency cycle crosses an enforced boundary: ' + group.join(' -> '));
 let checked = 0;
 const local = (file: string) => relative(root, file).replaceAll('\\', '/');
 const isTask = (node: ts.Node) =>
@@ -29,11 +39,11 @@ for (const source of program.getSourceFiles()) {
   const fail = (node: ts.Node, reason: string) =>
     errors.push(`${file}:${source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1} ${reason}`);
   function dependency(node: ts.Node, specifier: ts.Node | undefined) {
-    if (!specifier || !ts.isStringLiteral(specifier)) return;
+    if (!specifier || !ts.isStringLiteralLike(specifier)) return;
     const name = specifier.text,
       target = name.startsWith('.') ? local(resolve(dirname(source.fileName), name)) : name;
-    if (file.startsWith('src/core/') && target.startsWith('src/app/'))
-      fail(node, 'core must not import app, including type-only imports');
+    const violation = dependencyViolation(file, target);
+    if (violation) fail(node, violation);
     if (
       domain &&
       ((name.startsWith('.') && !target.startsWith('src/core/domain/')) ||

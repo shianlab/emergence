@@ -1,14 +1,8 @@
-import { propose } from './fixtures/plan-proposal.ts';
 import { ToolCallId, type StreamChunk } from '@deepseek-ai/dsh-llm';
-import { defineTool } from '@deepseek-ai/dsh-tools';
-import UserApproval from '@deepseek-ai/dsh-user-approval';
 import assert from 'node:assert/strict';
-import { readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { test } from 'node:test';
 import { runtimeIdentity } from '../src/app/runtime-identity.ts';
-import { planSchema } from '../src/core/domain/planning.ts';
-import { executionFixture, until } from './fixtures/core-execution.ts';
+import { executionFixture } from './fixtures/core-execution.ts';
 
 for (const intent of ['discuss', 'clarify'] as const)
   test(`${intent} analysis blocks effects and manual plan execution; subsequent execution input can proceed`, async () => {
@@ -151,118 +145,6 @@ test('a task without routing keywords cannot perform a write before core analysi
       0,
       'native core must intercept implementation even when keyword routing misses intent',
     );
-  } finally {
-    await f.close();
-  }
-});
-
-test('selecting a master makes an ordinary task create and run a worker plan through native tools', async () => {
-  const f = await executionFixture();
-  f.config.core.planning.submission = 'whole';
-  f.w.current.controller!.launch.appConfig.core.planning.submission = 'whole';
-  await f.ctx.plugin(UserApproval);
-  try {
-    const main = f.w.current,
-      worker = await f.w.split('row');
-    await f.w.setMaster(main.id);
-    await writeFile(join(f.cwd, 'seed.txt'), 'source');
-    f.ctx.effect(() =>
-      f.ctx.tools.register(
-        defineTool({
-          name: 'read',
-          description: 'actual read',
-          parameters: { file_path: { type: 'string', required: true } },
-          output: { schema: { type: 'string' }, render: (_a, v) => [{ type: 'text', text: v }] },
-          execute: async (args) => readFile(join(f.cwd, args.file_path), 'utf8'),
-        }),
-      ),
-    );
-    const plan = planSchema.parse({
-      objective: '新增说明文件',
-      constraints: ['当前项目'],
-      acceptance: ['文件有内容'],
-      nonGoals: [],
-      unknowns: [],
-      assumptions: [],
-      options: [],
-      reason: '交给空闲执行窗口实现',
-      evidence: ['master-read'],
-      steps: [
-        {
-          id: 'write',
-          objective: '写入 result.txt 并报告',
-          window: worker.id,
-          session: worker.controller!.id,
-          project: f.cwd,
-          model: worker.modelId,
-          role: 'developer',
-          capabilities: ['tool:write'],
-          dependsOn: [],
-          scope: ['result.txt'],
-          acceptance: ['文件有内容'],
-        },
-      ],
-    });
-    const original = f.provider.stream.bind(f.provider);
-    let count = 0;
-    f.provider.stream = async function* (options): AsyncIterable<StreamChunk> {
-      if (
-        options.messages.some(
-          (m) =>
-            m.role === 'user' &&
-            m.content.some((b) => b.type === 'text' && b.text.startsWith('[Emergence task ')),
-        )
-      ) {
-        assert.ok(JSON.stringify(options.messages).includes('不要重复调用目标分析'));
-        yield* original(options);
-        return;
-      }
-      const n = count++;
-      if (n > 2) {
-        yield { type: 'finish', reason: { kind: 'stop' } };
-        return;
-      }
-      const name = ['emergence_analyze', 'read', 'emergence_plan_work'][n],
-        args =
-          n === 0
-            ? {
-                objective: plan.objective,
-                reason: plan.reason,
-                route: 'planned',
-                intent: 'execute',
-                constraints: plan.constraints,
-                acceptance: plan.acceptance,
-              }
-            : n === 1
-              ? { file_path: 'seed.txt' }
-              : {
-                  work: propose(
-                    {
-                      ...plan,
-                      steps: plan.steps.map(({ window, session, model, ...step }) => step),
-                    },
-                    main.controller!.planning.intake()!.requirements!,
-                  ),
-                },
-        id = ToolCallId(n === 1 ? 'master-read' : 'master-' + n),
-        raw = JSON.stringify(args);
-      yield { type: 'block-start', index: 0, blockType: 'tool-call' };
-      yield { type: 'tool-call-delta', index: 0, id, name, argumentsDelta: raw };
-      yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
-      yield { type: 'finish', reason: { kind: 'tool-calls' } };
-    };
-    await f.w.send(main.id, '帮我做一个说明文件');
-    await until(() => {
-      for (const p of f.w.panes.values()) p.controller?.pending?.respond('y');
-      return f.w.collaboration.state.tasks[0]?.status === 'needs_review';
-    });
-    const task = f.w.collaboration.state.tasks[0];
-    assert.equal(task.target, worker.id);
-    assert.equal(task.issuer, main.id);
-    assert.equal(f.writes(), 1);
-    assert.equal(await readFile(join(f.cwd, 'result.txt'), 'utf8'), 'persisted actual effect');
-    await assert.rejects(f.w.setMaster(worker.id), /完成或取消/);
-    await assert.rejects(f.w.clearMaster(), /完成或取消/);
   } finally {
     await f.close();
   }

@@ -1,23 +1,21 @@
 import { evaluatePermissions } from '../adapters/permissions.ts';
 import { roles } from '../domain/orchestration.ts';
 import type { PlanWindow } from '../domain/planning.ts';
-import type { WorkStep } from '../domain/work-plan.ts';
+import type { TaskPlan } from '../domain/task-plan.ts';
 import type { SessionPort } from './runtime-ports.ts';
 
-/** Shared eligibility policy. Forecasting in Plan mode never changes actual execution permission. */
+/** Eligibility never changes the actual permission snapshots used at execution. */
 export function allocationRestriction(
   source: SessionPort,
   owner: SessionPort | undefined,
-  step: WorkStep,
+  step: TaskPlan['steps'][number],
   window: PlanWindow,
-  forecast = false,
 ): string | undefined {
   const role = roles(source.launch.appConfig.orchestration).find((role) => role.id === step.role);
   if (!role || !owner) return '角色或窗口不存在';
   if (role.modelId && role.modelId !== window.model) return '角色要求的模型不匹配';
   if (role.skills.some((skill) => !window.capabilities.includes('skill:' + skill))) return '缺少角色所需技能';
   const policy = source.permissionSnapshot();
-  if (forecast && policy.mode === 'plan') policy.mode = 'edit';
   const policies = [
     policy,
     ...source.permissionConstraints(source.agent),

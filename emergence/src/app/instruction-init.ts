@@ -2,7 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { lstat, realpath, rename, unlink, writeFile } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 import { withLease } from '../core/storage/lease.ts';
-import { boundedText, digest, inside, pathIdentity } from './instruction-files.ts';
+import { boundedText } from '../platform/text-file.ts';
+import { digest } from '../platform/content-hash.ts';
+import { inside, pathIdentity } from '../platform/path-policy.ts';
 
 export type InitDraft = {
   target: string;

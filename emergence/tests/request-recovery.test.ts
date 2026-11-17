@@ -21,12 +21,11 @@ async function fixture() {
   f.ctx.effect(() => mountModelResponseValidation(f.ctx));
   const master = f.w.current,
     worker = await f.w.split('row');
-  f.w.collaboration.configure(master.id, [worker.id]);
   return {
     ...f,
     worker,
     master,
-    start: () => f.w.collaboration.enqueue(master.id, worker.id, 'request-recovery', 'fixture:write'),
+    start: () => f.w.taskEngine.enqueue(worker.id, worker.id, 'request-recovery', 'fixture:write'),
     events: () => worker.controller!.agent.session.snapshotEvents(),
   };
 }
@@ -51,7 +50,7 @@ test('R4 500/429 transport faults retry only the failed model request and keep d
       assert.equal(retry[0].data.mode === 'normal' && retry[0].data.maxRetries, 2);
       assert.equal(f.events().filter((e) => e.type === 'llm/retry-started').length, 1);
       assert.ok(f.worker.controller!.diagnostics.snapshot!.durations['model-wait'] >= 400);
-      assert.equal(f.w.collaboration.state.tasks.length, 1);
+      assert.equal(f.w.taskEngine.state.tasks.length, 1);
     } finally {
       await f.close();
     }
@@ -111,7 +110,7 @@ test('R4 exhausted retries and permanent errors terminate instead of replaying b
       assert.equal(task.status, 'failed');
       assert.equal(f.worker.controller!.busy, false);
       assert.equal(f.writes(), 0);
-      assert.equal(f.w.collaboration.state.tasks.length, 1);
+      assert.equal(f.w.taskEngine.state.tasks.length, 1);
     } finally {
       await f.close();
     }
@@ -151,8 +150,8 @@ test('malformed response discards every uncommitted call and recovers without re
     await until(() => !!task.endedAt);
     assert.equal(task.status, 'succeeded');
     assert.equal(f.writes(), 1);
-    assert.equal(f.w.collaboration.state.tasks.length, 1);
-    assert.equal(f.w.collaboration.journal.effects(task.id).length, 1);
+    assert.equal(f.w.taskEngine.state.tasks.length, 1);
+    assert.equal(f.w.taskEngine.journal.effects(task.id).length, 1);
     const retries = f.events().filter((e) => e.type === 'llm/retry');
     assert.equal(retries.length, 1);
     assert.equal(retries[0].data.failure.code, 'MALFORMED_RESPONSE');
@@ -180,7 +179,7 @@ test('R4 cancellation and original deadlines stop retry backoff; neither resets 
       };
       const task = await f.start();
       await until(() => f.events().some((e) => e.type === 'llm/retry'));
-      if (cancellation) await f.w.collaboration.cancel(task.id);
+      if (cancellation) await f.w.taskEngine.cancel(task.id);
       await until(() => !!task.endedAt);
       assert.equal(
         task.status,
@@ -219,7 +218,7 @@ test('R4 loss after a returned write retries the following request only and neve
     assert.equal(task.status, 'succeeded');
     assert.equal(f.writes(), 1);
     assert.equal(f.events().filter((e) => e.type === 'llm/retry').length, 2);
-    assert.equal(f.w.collaboration.journal.effects(task.id).length, 1);
+    assert.equal(f.w.taskEngine.journal.effects(task.id).length, 1);
   } finally {
     await f.close();
   }

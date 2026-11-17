@@ -115,17 +115,27 @@ test('suggestions preserve provenance and conflicts, but cannot become accepted 
 });
 
 test('legacy conversion uses the same admission and refuses text changes instead of appending them', () => {
-  const legacy = materializeProposal(proposal(), requirements);
-  const converted = readPlanInput(JSON.stringify(legacy), true, requirements, () => {
+  const materialized = materializeProposal(proposal(), requirements);
+  const legacy = {
+    ...materialized,
+    steps: materialized.steps.map((step) => ({
+      ...step,
+      window: 'window',
+      session: 'session',
+      model: 'model',
+      project: '/project',
+    })),
+  };
+  const converted = readPlanInput(JSON.stringify(legacy), requirements, () => {
     throw new Error('must not establish twice');
   });
   assert.deepEqual(converted.materialize().constraints, legacy.constraints);
   legacy.constraints = ['换个说法：不要编辑验证脚本'];
   assert.throws(
-    () => readPlanInput(JSON.stringify(legacy), true, requirements, () => requirements),
+    () => readPlanInput(JSON.stringify(legacy), requirements, () => requirements),
     /LEGACY_REQUIREMENTS_CHANGED/,
   );
-  assert.throws(() => readPlanInput('{', true, requirements, () => requirements), /INVALID_JSON/);
+  assert.throws(() => readPlanInput('{', requirements, () => requirements), /INVALID_JSON/);
 });
 
 test('continuations inherit omitted requirements; only explicit changes citing the new user message can amend them', () => {

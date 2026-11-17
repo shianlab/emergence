@@ -1,0 +1,4297 @@
+{
+  "scope": "All 156 src TS/Python files plus the native C# entry. File classification is not a deletion authorization; retirement.md identifies member-level dependencies and prerequisites.",
+  "baselineDate": "2026-11-16",
+  "releaseCommit": "9a8447f4b252b841cc6c2e5ad3043ef3a5d45399",
+  "sourceFingerprint": "ca07e6de9fff02bf34f3f958f84b14e64733df50c65605bae785a7d812d4fd24",
+  "areas": "architecture.md#模块职责",
+  "modules": [
+    {
+      "path": "src/app/capabilities.ts",
+      "area": "M12",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 111,
+      "literalIncoming": [
+        {
+          "from": "src/app/plugin.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 16,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/cli.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 335,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/app/code-presentation.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 61,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/commands.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 322,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 36,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/settings.ts",
+          "line": 11,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/command-list.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 13,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/navigation.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 19,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/config.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": true,
+      "lines": 78,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 13,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-configuration.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/settings.ts",
+          "line": 12,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/controller.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 1164,
+      "literalIncoming": [
+        {
+          "from": "src/app/instructions.ts",
+          "line": 7,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/model-config-runtime.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/model-config-runtime.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/plugin.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/runtime-identity.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/composer.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/entry.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/home-state.ts",
+          "line": 7,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 14,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/ui.ts",
+          "line": 10,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/harness.ts",
+          "line": 6,
+          "typeOnly": true
+        },
+        {
+          "from": "src/domains/code/work-harness.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/domains/data/harness.ts",
+          "line": 3,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/app/credentials.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 126,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-configuration.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/plugin.ts",
+          "line": 8,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/doctor.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 173,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/extensions.ts",
+      "area": "M12",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 308,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace.ts",
+          "line": 18,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/instruction-files.ts",
+      "area": "M13",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 224,
+      "literalIncoming": [
+        {
+          "from": "src/app/instruction-init.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/instructions.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/harness.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/project.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/work-harness.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/workflow.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/instruction-init.ts",
+      "area": "M13",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 128,
+      "literalIncoming": [
+        {
+          "from": "src/app/instructions.ts",
+          "line": 16,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/instructions.ts",
+      "area": "M13",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 240,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 37,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/integration.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 98,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 19,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/interaction-ui.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 207,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 20,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/interactions.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 142,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 38,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/controller.ts",
+          "line": 44,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/interaction-ui.ts",
+          "line": 10,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/app/layout.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 123,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 39,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/templates.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 21,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 20,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/local-policy.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 32,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 40,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/model-config-runtime.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 180,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/plugin.ts",
+          "line": 9,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/model-config-window.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 112,
+      "literalIncoming": [
+        {
+          "from": "src/app/model-config.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-config.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/model-config.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 190,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/plugin.ts",
+          "line": 10,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/model-configuration.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 358,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 18,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-config-runtime.ts",
+          "line": 7,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/model-config.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 11,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/model-endpoint.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 18,
+      "literalIncoming": [
+        {
+          "from": "src/app/model-config-runtime.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-configuration.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/model-presets.ts",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 246,
+      "literalIncoming": [
+        {
+          "from": "src/app/model-configuration.ts",
+          "line": 8,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/plugin.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 227,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/app/profiles.ts",
+      "area": "M02",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 58,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 19,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/runtime-health.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 69,
+      "literalIncoming": [
+        {
+          "from": "src/app/doctor.ts",
+          "line": 8,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/runtime-identity.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 59,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 41,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/settings.ts",
+      "area": "M11",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 684,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace.ts",
+          "line": 29,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/templates.ts",
+      "area": "M02",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 78,
+      "literalIncoming": [
+        {
+          "from": "src/app/settings.ts",
+          "line": 13,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 30,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/terminal-actions.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 40,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 22,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/aggregate-art.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 82,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/aggregate-image.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 23,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/aggregate-brand.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 62,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/app/tui/aggregate-image.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 38,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 24,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/auxiliary-info.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 68,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 25,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/command-list.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 97,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 19,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 27,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/composer.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 138,
+      "literalIncoming": [
+        {
+          "from": "src/app/interaction-ui.ts",
+          "line": 11,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 20,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 28,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/entry.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 106,
+      "literalIncoming": [
+        {
+          "from": "src/app/plugin.ts",
+          "line": 11,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/header-brand.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 6,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 29,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/home-logo-data.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 6,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 21,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/home-state.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 78,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/entry.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 22,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/home.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 685,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/entry.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/logo-data.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 4,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/app/tui/message-model.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 177,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 42,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/composer.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/message-view.ts",
+          "line": 13,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/message-view.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 387,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 30,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/navigation.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 84,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 31,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/rich-text.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 318,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/message-view.ts",
+          "line": 20,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/session-usage.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 45,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 43,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/task-inspector.ts",
+      "area": "M03",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 449,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 37,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/team-bar.ts",
+      "area": "M03",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 84,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 38,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/team-feedback.ts",
+      "area": "M03",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 120,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/task-inspector.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/team-bar.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/typography.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 10,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/rich-text.ts",
+          "line": 17,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/tui/volcano-brand.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 34,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/app/tui/workspace-chrome.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 106,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/task-inspector.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/team-feedback.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 26,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 39,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/ui.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 113,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/app/version.ts",
+      "area": "M01",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 4,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 20,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/doctor.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 18,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/workspace-commands.ts",
+      "area": "M02",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 427,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace.ts",
+          "line": 31,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/workspace-ui.ts",
+      "area": "M03",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 1670,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/entry.ts",
+          "line": 3,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/app/workspace.ts",
+      "area": "M02",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": true,
+      "lines": 781,
+      "literalIncoming": [
+        {
+          "from": "src/app/commands.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/extensions.ts",
+          "line": 8,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/model-config-runtime.ts",
+          "line": 9,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/plugin.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/settings.ts",
+          "line": 14,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/entry.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/navigation.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/task-inspector.ts",
+          "line": 15,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/team-bar.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/team-feedback.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/workspace-chrome.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 12,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 40,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/approval-identity.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 24,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 21,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/catalog.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 21,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/harness.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/collaboration-tools.ts",
+      "area": "M14",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 296,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/harness.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 43,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 13,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/memory-content.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 12,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/memory.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/memory-store.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/memory.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 257,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 14,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/model-response.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 50,
+      "literalIncoming": [
+        {
+          "from": "src/app/plugin.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/permissions.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 67,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/instructions.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/memory.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/allocation-policy.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 23,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/completion-evidence.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/inspection.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/project-contract.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-allocation.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-recovery.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/tool-evidence.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/work-allocation.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/harness.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/work-harness.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/harness.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/plan-input.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 88,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 3,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/planning-drafts.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 65,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 47,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/planning.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 430,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 18,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/redaction.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 48,
+      "literalIncoming": [
+        {
+          "from": "src/app/capabilities.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/cli.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/controller.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/credentials.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/doctor.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/extensions.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/integration.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/interaction-ui.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-config.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-configuration.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/plugin.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/settings.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/command-list.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/composer.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 11,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/message-model.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/message-view.ts",
+          "line": 11,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/navigation.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/task-inspector.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/team-feedback.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/workspace-chrome.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/ui.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/collaboration-tools.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/memory-content.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/memory.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 22,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 19,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-failures.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-lifecycle.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-recovery.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/workflow.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/initialize.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/task-execution.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 641,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 11,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/adapters/tool-protocol.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 106,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/plan-input.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning-drafts.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/inspection.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 1,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/allocation-policy.ts",
+      "area": "M05",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 50,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/dispatch-admission.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 5,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/allocation-snapshot.ts",
+      "area": "M05",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 30,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/dispatch-admission.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 33,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/assurance.ts",
+      "area": "M06",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 757,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 24,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/audit-allocation.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 59,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 8,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/completion-evidence.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 59,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 18,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/coordinator-context.ts",
+      "area": "M07",
+      "classification": "retired-behavior-candidate",
+      "compatibilityBoundary": false,
+      "lines": 87,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 41,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/dispatch-admission.ts",
+      "area": "M05",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 88,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 32,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/execution-evidence.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 84,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/inspection.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 25,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-recovery.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/tool-evidence.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/workflow.ts",
+          "line": 8,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/inspection.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 133,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 30,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/native-read-evidence.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 42,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/inspection.ts",
+          "line": 11,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/tool-evidence.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/service.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/work-harness.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 8,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/observer.ts",
+      "area": "M14",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 211,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/harness.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 8,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/planning-drafts.ts",
+      "area": "M05",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 202,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 46,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/planning-service.ts",
+      "area": "M05",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 1102,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning-drafts.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 6,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/allocation-snapshot.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 9,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/ports.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 15,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/observer.ts",
+          "line": 13,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/storage/observation-store.ts",
+          "line": 3,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/project-contract.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 137,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/dispatch-admission.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 45,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-admission.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-allocation.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 34,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/work-allocation.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/work-allocation.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/run-diagnostics.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 217,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 18,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 12,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/runtime-ports.ts",
+      "area": "M06",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 81,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/harness.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/adapters/memory.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/allocation-policy.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/audit-allocation.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/dispatch-admission.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/inspection.ts",
+          "line": 10,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 42,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-budgets.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 26,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 9,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 9,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-admission.ts",
+      "area": "M05",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 105,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 19,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/dispatch-admission.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 43,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 27,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-allocation.ts",
+      "area": "M05",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 57,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-scheduler.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-budgets.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 99,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 28,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-coordinator.ts",
+      "area": "M06",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 910,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/collaboration-tools.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 8,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 20,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 10,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-lifecycle.ts",
+          "line": 10,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-recovery.ts",
+          "line": 8,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-scheduler.ts",
+          "line": 3,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-failures.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 134,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 18,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 32,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 10,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-lifecycle.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": true,
+      "lines": 141,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 29,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-recovery.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 152,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 30,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/task-scheduler.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 161,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 31,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/team-coordinator.ts",
+      "area": "M07",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 342,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace.ts",
+          "line": 11,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 11,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/team-followthrough.ts",
+      "area": "M07",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 467,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 10,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/tool-evidence.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 219,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 21,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-failures.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/verification.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 116,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 24,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 35,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/work-allocation.ts",
+      "area": "M05",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 171,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 44,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-allocation.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/application/workspace-interactions.ts",
+      "area": "M06",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 70,
+      "literalIncoming": [
+        {
+          "from": "src/app/workspace.ts",
+          "line": 12,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/assets/catalog.ts",
+      "area": "M14",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 4,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/catalog.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/assurance.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 77,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/audit-allocation.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-admission.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/tool-evidence.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/configuration.ts",
+      "area": "M04",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 135,
+      "literalIncoming": [
+        {
+          "from": "src/app/capabilities.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/cli.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/config.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/controller.ts",
+          "line": 24,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/doctor.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/extensions.ts",
+          "line": 7,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/model-config-runtime.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/model-configuration.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/model-endpoint.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/model-presets.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/settings.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 5,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/contracts.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 232,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/catalog.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/harness.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/observer.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/ports.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/configuration.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/observation-store.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/instructions.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 12,
+      "literalIncoming": [
+        {
+          "from": "src/app/instruction-files.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/configuration.ts",
+          "line": 3,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/interaction.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 44,
+      "literalIncoming": [
+        {
+          "from": "src/app/interactions.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/interactions.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/workspace-interactions.ts",
+          "line": 1,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/inventory-view.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 76,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 5,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/memory.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 55,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/memory-content.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/memory.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/memory-store.ts",
+          "line": 5,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/orchestration.ts",
+      "area": "M04",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 86,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/navigation.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-commands.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/collaboration-tools.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/allocation-policy.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 21,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/project-contract.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-admission.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/configuration.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 3,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/permissions.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 120,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 11,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/controller.ts",
+          "line": 25,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/settings.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 17,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 13,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/permissions.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 6,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/configuration.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/orchestration.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/team.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/plan-proposal.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 202,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/plan-input.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/work-draft.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/planning-tools.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 44,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 22,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/planning.ts",
+      "area": "M04",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 217,
+      "literalIncoming": [
+        {
+          "from": "src/app/capabilities.ts",
+          "line": 6,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/message-model.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/plan-input.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/allocation-policy.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/coordinator-context.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/dispatch-admission.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 27,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/project-contract.ts",
+          "line": 6,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 7,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-admission.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 13,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/work-allocation.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/contracts.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/inventory-view.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/team.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/plan-store.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/project-contract.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 68,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/project-contract.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/orchestration.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/requirements.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task-plan.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 8,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/requirements.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 297,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/plan-input.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 13,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/plan-proposal.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/work-draft.ts",
+          "line": 3,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/run-budget.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 69,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 23,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 37,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/run-diagnostics.ts",
+          "line": 9,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-budgets.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/orchestration.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/run-diagnostics.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/task-diagnostics.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/team.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/run-diagnostics.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 77,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 20,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/run-diagnostics.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-budgets.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task-diagnostics.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/run-diagnostics-store.ts",
+          "line": 3,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/run-manifest.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 60,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/execution-evidence.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/native-read-evidence.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/tool-evidence.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/assurance.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/task-diagnostics.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 24,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 5,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/task-failure.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 28,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 31,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-failures.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 9,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/task-plan.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 103,
+      "literalIncoming": [
+        {
+          "from": "src/core/domain/plan-proposal.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/work-plan.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/task-transitions.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 31,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/task-lifecycle.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/task.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 231,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/navigation.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/task-inspector.ts",
+          "line": 13,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/team-feedback.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/workspace-chrome.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/collaboration-tools.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 13,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/audit-allocation.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/audit-allocation.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/completion-evidence.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/project-contract.ts",
+          "line": 7,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-admission.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-admission.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-allocation.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-budgets.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-failures.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-lifecycle.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-recovery.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-scheduler.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/task-diagnostics.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/task-transitions.ts",
+          "line": 1,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/team.ts",
+      "area": "M04",
+      "classification": "mixed-active-and-retired",
+      "compatibilityBoundary": false,
+      "lines": 89,
+      "literalIncoming": [
+        {
+          "from": "src/app/tui/team-feedback.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 38,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 36,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-followthrough.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning.ts",
+          "line": 10,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/domain/task.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/tool-contract.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 220,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/harness.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/planning.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/execution-evidence.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 39,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/project-contract.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-allocation.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-failures.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/tool-evidence.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/work-allocation.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/assurance.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/permissions.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning-tools.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning.ts",
+          "line": 11,
+          "typeOnly": true
+        },
+        {
+          "from": "src/domains/code/work-harness.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/workflow.ts",
+          "line": 9,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/ui-preferences.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 157,
+      "literalIncoming": [
+        {
+          "from": "src/app/commands.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/interaction-ui.ts",
+          "line": 9,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/settings.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/command-list.ts",
+          "line": 3,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/composer.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/home.ts",
+          "line": 12,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/message-view.ts",
+          "line": 12,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/rich-text.ts",
+          "line": 16,
+          "typeOnly": true
+        },
+        {
+          "from": "src/app/tui/task-inspector.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/tui/team-bar.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace-ui.ts",
+          "line": 18,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/configuration.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/work-draft.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 149,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/planning-drafts.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/coordinator-context.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/planning-drafts.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/planning.ts",
+          "line": 13,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/domain/work-plan.ts",
+      "area": "M04",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 11,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/plan-input.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/allocation-policy.ts",
+          "line": 4,
+          "typeOnly": true
+        },
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/work-allocation.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/domain/plan-proposal.ts",
+          "line": 3,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/storage/execution-journal.ts",
+      "area": "M08",
+      "classification": "shared-core",
+      "compatibilityBoundary": true,
+      "lines": 218,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 22,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/memory.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/adapters/task-execution.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/allocation-snapshot.ts",
+          "line": 1,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/assurance.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/dispatch-admission.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/execution-evidence.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/project-contract.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-coordinator.ts",
+          "line": 23,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-lifecycle.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-recovery.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/team-coordinator.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/tool-evidence.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/verification.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/workspace-interactions.ts",
+          "line": 2,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/memory-store.ts",
+          "line": 14,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/run-diagnostics-store.ts",
+          "line": 4,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/storage/lease.ts",
+      "area": "M08",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 56,
+      "literalIncoming": [
+        {
+          "from": "src/app/config.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/controller.ts",
+          "line": 32,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/credentials.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/instruction-init.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/plugin.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/templates.ts",
+          "line": 4,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/execution-journal.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/memory-store.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/plan-store.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/definitions.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/initialize.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/storage/memory-store.ts",
+      "area": "M08",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 166,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/memory.ts",
+          "line": 6,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/storage/observation-store.ts",
+      "area": "M08",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 45,
+      "literalIncoming": [
+        {
+          "from": "src/core/adapters/harness.ts",
+          "line": 5,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/storage/plan-store.ts",
+      "area": "M08",
+      "classification": "shared-core",
+      "compatibilityBoundary": true,
+      "lines": 91,
+      "literalIncoming": [
+        {
+          "from": "src/core/application/planning-service.ts",
+          "line": 40,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/storage/run-diagnostics-store.ts",
+      "area": "M08",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 43,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 19,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/run-diagnostics.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/task-recovery.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/core/storage/safe-json-file.ts",
+      "area": "M08",
+      "classification": "shared-core",
+      "compatibilityBoundary": false,
+      "lines": 65,
+      "literalIncoming": [
+        {
+          "from": "src/app/config.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/controller.ts",
+          "line": 20,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/credentials.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/profiles.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/templates.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/workspace.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/memory-store.ts",
+          "line": 16,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/observation-store.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/plan-store.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/storage/run-diagnostics-store.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/workflow.ts",
+          "line": 10,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/definitions.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/initialize.ts",
+          "line": 8,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/runtime.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/code/checks.ts",
+      "area": "M09",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 107,
+      "literalIncoming": [
+        {
+          "from": "src/domains/code/workflow.ts",
+          "line": 11,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/code/harness.ts",
+      "area": "M09",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 217,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 33,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/code/languages.ts",
+      "area": "M09",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 303,
+      "literalIncoming": [
+        {
+          "from": "src/domains/code/service.ts",
+          "line": 2,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/code/project.ts",
+      "area": "M09",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 430,
+      "literalIncoming": [
+        {
+          "from": "src/domains/code/checks.ts",
+          "line": 2,
+          "typeOnly": true
+        },
+        {
+          "from": "src/domains/code/harness.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/languages.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/service.ts",
+          "line": 3,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/code/workflow.ts",
+          "line": 12,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/code/service.ts",
+      "area": "M09",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 157,
+      "literalIncoming": [
+        {
+          "from": "src/domains/code/harness.ts",
+          "line": 10,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/code/work-harness.ts",
+      "area": "M09",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 249,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 34,
+          "typeOnly": false
+        },
+        {
+          "from": "src/core/application/runtime-ports.ts",
+          "line": 4,
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/domains/code/workflow.ts",
+      "area": "M09",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 431,
+      "literalIncoming": [
+        {
+          "from": "src/app/code-presentation.ts",
+          "line": 1,
+          "typeOnly": true
+        },
+        {
+          "from": "src/domains/code/work-harness.ts",
+          "line": 10,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/analytics.py",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 252,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/domains/data/definitions.ts",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 93,
+      "literalIncoming": [
+        {
+          "from": "src/domains/data/harness.ts",
+          "line": 5,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 12,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/delivery.ts",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 198,
+      "literalIncoming": [
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 13,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/harness.ts",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 186,
+      "literalIncoming": [
+        {
+          "from": "src/app/controller.ts",
+          "line": 35,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/initialize.ts",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 156,
+      "literalIncoming": [
+        {
+          "from": "src/app/cli.ts",
+          "line": 12,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/methods.ts",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 68,
+      "literalIncoming": [
+        {
+          "from": "src/domains/data/harness.ts",
+          "line": 6,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 14,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/probe.py",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 22,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/domains/data/runtime.ts",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 130,
+      "literalIncoming": [
+        {
+          "from": "src/domains/data/initialize.ts",
+          "line": 9,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 15,
+          "typeOnly": false
+        },
+        {
+          "from": "src/domains/data/service.ts",
+          "line": 16,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/service.ts",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 316,
+      "literalIncoming": [
+        {
+          "from": "src/app/doctor.ts",
+          "line": 7,
+          "typeOnly": false
+        },
+        {
+          "from": "src/app/runtime-health.ts",
+          "line": 5,
+          "typeOnly": true
+        },
+        {
+          "from": "src/domains/data/harness.ts",
+          "line": 7,
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/domains/data/worker.py",
+      "area": "M10",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 130,
+      "literalIncoming": []
+    },
+    {
+      "path": "src/report.ts",
+      "area": "M14",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 10,
+      "literalIncoming": []
+    },
+    {
+      "path": "native/model-config/Program.cs",
+      "area": "M11",
+      "classification": "current-capability",
+      "compatibilityBoundary": false,
+      "lines": 395,
+      "literalIncoming": [],
+      "nonTsEntry": "scripts/build-model-config.ts -> app/cli.ts native launcher"
+    }
+  ]
+}

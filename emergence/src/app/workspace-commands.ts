@@ -27,11 +27,10 @@ type CommandHost = Pick<
   | 'settings'
   | 'extensions'
   | 'launch'
-  | 'collaboration'
+  | 'taskEngine'
   | 'interactions'
   | 'find'
   | 'show'
-  | 'team'
   | 'integrations'
   | 'exclusive'
   | 'save'
@@ -141,12 +140,7 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
       host.emit(
         'navigation',
         id,
-        (
-          { '/history': 'history', '/model': 'models', '/roles': 'roles', '/tasks': 'tasks' } as Record<
-            string,
-            string
-          >
-        )[command],
+        ({ '/history': 'history', '/model': 'models', '/tasks': 'tasks' } as Record<string, string>)[command],
         args.join(' '),
       );
       return;
@@ -206,12 +200,12 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
         return;
       case '/tasks':
         host.taskPanel = true;
-        host.overlay = host.collaboration.describe();
+        host.overlay = host.taskEngine.describe();
         host.changed();
         return;
       case '/task': {
         if (args[0] === 'show' && host.listenerCount('task-inspect')) {
-          host.collaboration.task(args[1]);
+          host.taskEngine.task(args[1]);
           host.taskPanel = false;
           host.overlay = '';
           host.emit('task-inspect', id, args[1]);
@@ -219,16 +213,16 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
           return;
         }
         if (args[0] === 'focus') {
-          const target = host.collaboration.task(args[1]).target;
+          const target = host.taskEngine.task(args[1]).target;
           host.show(target);
         } else if (args[0] === 'show') {
           host.taskPanel = false;
-          host.overlay = host.collaboration.describe(args[1]);
-        } else if (args[0] === 'cancel') await host.collaboration.cancel(args[1]);
+          host.overlay = host.taskEngine.describe(args[1]);
+        } else if (args[0] === 'cancel') await host.taskEngine.cancel(args[1]);
         else if (args[0] === 'accept' || args[0] === 'reject')
-          await host.collaboration.review(args[1], args[0] === 'accept', args.slice(2).join(' '));
-        else if (args[0] === 'repair') await host.collaboration.repair(args[1], args.slice(2).join(' '));
-        else if (args[0] === 'note') await host.collaboration.note(args[1], args.slice(2).join(' '));
+          await host.taskEngine.review(args[1], args[0] === 'accept', args.slice(2).join(' '));
+        else if (args[0] === 'repair') await host.taskEngine.repair(args[1], args.slice(2).join(' '));
+        else if (args[0] === 'note') await host.taskEngine.note(args[1], args.slice(2).join(' '));
         else throw new Error('用法：/task cancel <任务ID> 或 /task note <任务ID> "补充指令"');
         host.changed();
         return;
@@ -246,8 +240,8 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
       case '/integrate': {
         if (!args[0]) throw new Error('用法：在目标窗口输入 /integrate <源工作树窗口编号>');
         const source = host.find(args[0]);
-        host.collaboration.assertMutable(source.id);
-        host.collaboration.assertMutable(id);
+        host.taskEngine.assertMutable(source.id);
+        host.taskEngine.assertMutable(id);
         if (source.controller?.busy || pane.controller?.busy || !source.controller || !pane.controller)
           throw new Error('源和目标窗口必须可用且空闲');
         if (host.integrations.length >= 100) throw new Error('整合记录已达上限，请使用新工作台');
@@ -257,7 +251,7 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
             host.integrations.push(record);
             await host.save();
             await performIntegration(record);
-            const latest = host.collaboration.state.tasks.findLast(
+            const latest = host.taskEngine.state.tasks.findLast(
               (t) => t.target === source.id && t.targetSession === source.controller?.id,
             );
             if (record.status === 'merged' && latest && latest.status !== 'succeeded') {
@@ -341,7 +335,7 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
         host.changed();
         return;
       case '/project': {
-        host.collaboration.assertMutable(id);
+        host.taskEngine.assertMutable(id);
         if (!args[0]) throw new Error('用法：/project "项目路径"');
         if (pane.controller?.busy) throw new Error('请先停止当前任务，或用 /split 打开另一个项目');
         const replacement: PaneState = {
@@ -390,7 +384,7 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
   }
   if (!pane.controller) throw new Error(pane.error ?? '会话不可用；使用 /retry 或 /project 恢复');
   if (/^\/resume(?:\s|$)/.test(text)) {
-    host.collaboration.assertMutable(id);
+    host.taskEngine.assertMutable(id);
     const resume = commandTokens(text)[1];
     if (!resume) throw new Error('用法：/resume <会话ID>');
     if (
@@ -410,15 +404,15 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
     return;
   }
   if (/^\/(new|resume|model)(?:\s|$)/.test(text)) {
-    host.collaboration.assertMutable(id);
+    host.taskEngine.assertMutable(id);
     await host.exclusive(id, async () => {
       await pane.controller!.send(text);
       host.changed();
     });
     return;
   }
-  if (!pane.controller.pending && !text.startsWith('/') && host.collaboration.current(id))
-    throw new Error('该窗口正在执行协作任务；用 /task note 补充，或 /takeover 接管');
+  if (!pane.controller.pending && !text.startsWith('/') && host.taskEngine.current(id))
+    throw new Error('该窗口正在执行任务；用 /task note 补充，或 /task cancel 取消');
   host.overlay = '';
   host.taskPanel = false;
   await pane.controller.send(text);

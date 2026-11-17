@@ -1,0 +1,4247 @@
+{
+  "scope": "Stage 2 frozen files compared with Stage 3. Titles are static declarations, not runtime test counts. Coverage names denote retained responsibility coverage, not a claim that deleted cross-window behavior still exists.",
+  "shared": {
+    "admission": [
+      "tests/dispatch-admission.test.ts",
+      "tests/task-admission.test.ts",
+      "tests/core-planning.test.ts",
+      "tests/planning-clarification.test.ts",
+      "tests/requirements.test.ts"
+    ],
+    "execution": [
+      "tests/core-execution.test.ts",
+      "tests/orchestration.test.ts",
+      "tests/scheduler-budgets.test.ts",
+      "tests/task-failures.test.ts",
+      "tests/workspace-approvals.test.ts"
+    ],
+    "evidence": [
+      "tests/task-history.test.ts",
+      "tests/core-memory.test.ts",
+      "tests/completion-evidence.test.ts",
+      "tests/code-data-integration.test.ts",
+      "tests/core-acceptance.test.ts"
+    ],
+    "independent": [
+      "tests/independent-windows.test.ts",
+      "tests/tui-independent-windows.ts",
+      "tests/workspace.test.ts"
+    ]
+  },
+  "changes": [
+    {
+      "file": "src/app/commands.ts",
+      "disposition": "changed",
+      "beforeHash": "2e1ef9bfb172251b956fcfa353afe9cba0b5a1313b693c9532b24c643853bd42",
+      "afterHash": "0b7cc2209fd0a0f39610e36098986bbb368193f461a8534e4e9e60db1332b1f8",
+      "beforeLines": 322,
+      "afterLines": 319
+    },
+    {
+      "file": "src/app/controller.ts",
+      "disposition": "changed",
+      "beforeHash": "ed77df0797d11e2517555af2c0ac456f51d18ab86876a5018c47bc0a14f38542",
+      "afterHash": "d9bd37df10ff20e3612416641587370c10e821e1b4162e5c73e8b9f6b812e594",
+      "beforeLines": 1183,
+      "afterLines": 1174
+    },
+    {
+      "file": "src/app/model-config-runtime.ts",
+      "disposition": "changed",
+      "beforeHash": "b0bbf1451f71573a5641b1b8f48ef7e21ff68abd09684249c27e164a5977191f",
+      "afterHash": "c73349c25b8079498634a07b92136d07cc71f4164d676443f0cbafe91d6c6f38",
+      "beforeLines": 180,
+      "afterLines": 180
+    },
+    {
+      "file": "src/app/runtime-identity.ts",
+      "disposition": "changed",
+      "beforeHash": "a4160ce77e4dec2a37f906c63a25ee1981d0efdf8a385d5ac11fa955df60daff",
+      "afterHash": "796ed38cbf5d9ff5471d611cd0f2f70947b57b7ff0f736d590cb4e3053643e26",
+      "beforeLines": 59,
+      "afterLines": 58
+    },
+    {
+      "file": "src/app/settings.ts",
+      "disposition": "changed",
+      "beforeHash": "0b3467995fb1dd1105ff8808297e831b0ef2a737d0d7d45d360d93c476a43773",
+      "afterHash": "15708058a3118f993805eb3cc4f82d1593c5b76b552eb829761ef32f1b7da26b",
+      "beforeLines": 684,
+      "afterLines": 674
+    },
+    {
+      "file": "src/app/tui/composer.ts",
+      "disposition": "changed",
+      "beforeHash": "bd5fff295673f783861254cf750e31ac31038a526ba8ef5883d14fcf081cebd6",
+      "afterHash": "8d20576285cbfd1656325db98ed9e1ca4a64939c4c215803b74ffa5711119f3d",
+      "beforeLines": 138,
+      "afterLines": 136
+    },
+    {
+      "file": "src/app/tui/navigation.ts",
+      "disposition": "changed",
+      "beforeHash": "6f3aa66ef4e8ff6e25ed25c87bff366e3b3f227b6a5ee7674902bfd26ca47606",
+      "afterHash": "cca25d5181411aeb6c5cc6f7f055855f707daffe1d4bce136cb99d5f2858b31b",
+      "beforeLines": 84,
+      "afterLines": 67
+    },
+    {
+      "file": "src/app/tui/task-inspector.ts",
+      "disposition": "changed",
+      "beforeHash": "e4e65024c75b6cf9b6d3194fd791d84294b7a754da57d085df027eea34e2e02d",
+      "afterHash": "c90a027b6fb3d04aff717a5d9d423eb4748e3956a1c201d5c2d432d4f012a67d",
+      "beforeLines": 449,
+      "afterLines": 443
+    },
+    {
+      "file": "src/app/tui/team-bar.ts",
+      "disposition": "removed",
+      "beforeHash": "37c1041aa7ed5a63173ca762698ed578790b3c2d935752a2b45cd009fb76a693",
+      "afterHash": null,
+      "beforeLines": 84,
+      "afterLines": 0
+    },
+    {
+      "file": "src/app/tui/team-feedback.ts",
+      "disposition": "removed",
+      "beforeHash": "4b08b3f9056621cba474783eee531f80d90b55e951fb98e7b3e580dc0b1ba712",
+      "afterHash": null,
+      "beforeLines": 120,
+      "afterLines": 0
+    },
+    {
+      "file": "src/app/tui/workspace-chrome.ts",
+      "disposition": "changed",
+      "beforeHash": "91d999250e557c34f38d374d1050bdaa644603a4790c921734e52e6a7f4b5504",
+      "afterHash": "fa5bede5f17d513f4ce208515409c679a97c63ec8c5ed9a1e36a7a8e7f5b6ab1",
+      "beforeLines": 106,
+      "afterLines": 87
+    },
+    {
+      "file": "src/app/workspace-commands.ts",
+      "disposition": "changed",
+      "beforeHash": "7cefa37379c3e10f984f338c3ab216d405d564eb62ca886021198cb19ccbedb4",
+      "afterHash": "3d72fe50436f8d6b4256f0e0cf9bd4e7bcbc3950bc011c3313a4c470ab55f654",
+      "beforeLines": 427,
+      "afterLines": 421
+    },
+    {
+      "file": "src/app/workspace-ui.ts",
+      "disposition": "changed",
+      "beforeHash": "9075eece780447a724a357edc5f9b416b2abc930ed26385b4d74d9ea1f8811ca",
+      "afterHash": "a79fe33efd059c175af883ad6fcc2f749c225c46e33aaa2130ca44616fc43f0e",
+      "beforeLines": 1670,
+      "afterLines": 1653
+    },
+    {
+      "file": "src/app/workspace.ts",
+      "disposition": "changed",
+      "beforeHash": "176fd284aa36095e15640e9420af00dd07e39cbaebb3f3cf00fa35fa3a0cacc1",
+      "afterHash": "7506297e47b9a3c9c10998222f541fe6eea2cc7ade6dfb45c5b6f5b3748e3f75",
+      "beforeLines": 781,
+      "afterLines": 670
+    },
+    {
+      "file": "src/core/adapters/capability-access.ts",
+      "disposition": "changed",
+      "beforeHash": "82bb98a14945aa218cce80b8d232c42ae239649667b0736e56a84de092f99c2d",
+      "afterHash": "2b27e22f20c9ae4fbb635887dcce6a4e412bcb030fca4e508f4a8f913f8a4dd8",
+      "beforeLines": 13,
+      "afterLines": 12
+    },
+    {
+      "file": "src/core/adapters/collaboration-tools.ts",
+      "disposition": "removed",
+      "beforeHash": "5e11301d186cfd3f1eab73a3bc40ffea9ea29765b7a7b81ab9a48e5b0c9d2979",
+      "afterHash": null,
+      "beforeLines": 296,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/adapters/plan-input.ts",
+      "disposition": "changed",
+      "beforeHash": "b58360a465cd8cb48f87a74022ea88f6f73a69fa401bd05e5d3212a0b2871038",
+      "afterHash": "b5de0d5c0c909961d5ed9f914f6acdfd6a040f0a52d486269511359f93d8fa6a",
+      "beforeLines": 88,
+      "afterLines": 84
+    },
+    {
+      "file": "src/core/adapters/planning-drafts.ts",
+      "disposition": "removed",
+      "beforeHash": "42dbd1f1b00100b158bc52a7712873eba971ca403ee4ef4cf6016838c3189e6a",
+      "afterHash": null,
+      "beforeLines": 65,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/adapters/planning.ts",
+      "disposition": "changed",
+      "beforeHash": "658ba833d80a6fb65181e27586b9a4de29f573c5d0b31320d2d96ff1496b2e1a",
+      "afterHash": "26cf0922efbb02c1a55237b6437a5e47dd4c1c4382d83787085673cc54dd3260",
+      "beforeLines": 430,
+      "afterLines": 231
+    },
+    {
+      "file": "src/core/adapters/task-execution.ts",
+      "disposition": "changed",
+      "beforeHash": "6c3bb2262a3305a36d62ac1d7705c9813362a99f8dec1e7a9c5b60d3be74e056",
+      "afterHash": "50546a13cb15cddc890c0fef8912574f97ac396d344586e1fcf42710a71473e6",
+      "beforeLines": 615,
+      "afterLines": 562
+    },
+    {
+      "file": "src/core/application/allocation-policy.ts",
+      "disposition": "changed",
+      "beforeHash": "55ab47dca7e4f6ec5f9b599709ffe83f6be4f0fa39c5f7fd60cf3145068ac05a",
+      "afterHash": "b3d4d56d234cdc60592e22e58522bb1792073903eb64551c0f6a219f11bd86ce",
+      "beforeLines": 50,
+      "afterLines": 48
+    },
+    {
+      "file": "src/core/application/allocation-snapshot.ts",
+      "disposition": "changed",
+      "beforeHash": "7c40536ea84d54ca2731200b9942ba9a12734be1b9a894e3de74519fa57f519f",
+      "afterHash": "32204b610693d993d7b857a93a515ea26b79e2b0ba08305e23cbcfa3a67e5758",
+      "beforeLines": 30,
+      "afterLines": 28
+    },
+    {
+      "file": "src/core/application/assurance.ts",
+      "disposition": "changed",
+      "beforeHash": "99d603deeb4ea6affb86a0fc95171540e73c1d8bd5a753ef3a8df82ca8ef4cac",
+      "afterHash": "e6c455767d1513de53eefc251ad46e4e44a21d69e40b3d19d3a7f14f85ceb3c4",
+      "beforeLines": 757,
+      "afterLines": 389
+    },
+    {
+      "file": "src/core/application/audit-allocation.ts",
+      "disposition": "removed",
+      "beforeHash": "b71dfaa16124baeb8fa2806536a9362b0e1254538a972a85c6ad2d2403a25ed1",
+      "afterHash": null,
+      "beforeLines": 59,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/application/coordinator-context.ts",
+      "disposition": "removed",
+      "beforeHash": "928a4864e383a51cead7b7867aa16b3ce7e8fc0b4ef918dd618977676dda1ada",
+      "afterHash": null,
+      "beforeLines": 87,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/application/dispatch-admission.ts",
+      "disposition": "changed",
+      "beforeHash": "67726236892bf619ebae6617473666201d041f3e4b07780d40684d2042844c67",
+      "afterHash": "db10081166006180468cf000324538c06adc700fe6bc5a76420f71acee641e5f",
+      "beforeLines": 88,
+      "afterLines": 87
+    },
+    {
+      "file": "src/core/application/planning-drafts.ts",
+      "disposition": "removed",
+      "beforeHash": "ad12e51c4e5325cf40c1c579a4f9dbe5a40b057b262aaac295ab24e501b71948",
+      "afterHash": null,
+      "beforeLines": 202,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/application/planning-service.ts",
+      "disposition": "changed",
+      "beforeHash": "c8433c70385d97a43ba88c033a3244247c2f664489dc5d97f9a3b32b929a01ba",
+      "afterHash": "358faee8e5e6739b0524f2a00c48e41a2761e55b7340387891521b8a997de6b5",
+      "beforeLines": 1102,
+      "afterLines": 753
+    },
+    {
+      "file": "src/core/application/runtime-ports.ts",
+      "disposition": "changed",
+      "beforeHash": "e39d9051ae01d19fb567dd524c76ff5f7adac2a3d5eca39424c38761f7dace7d",
+      "afterHash": "e01b441b4dd8a2f88f8c679a10b251338d6facc73f0b65c44c536b8df4bbc47d",
+      "beforeLines": 81,
+      "afterLines": 73
+    },
+    {
+      "file": "src/core/application/task-admission.ts",
+      "disposition": "changed",
+      "beforeHash": "3b3f5272e776c47ed8cd39561d17fddb16bcddbd4a48665952985aa139415413",
+      "afterHash": "f98a6e1c23361ffe89239f72007868a9a7d8acca2f5b282bcb478c711b4efc5b",
+      "beforeLines": 105,
+      "afterLines": 67
+    },
+    {
+      "file": "src/core/application/task-allocation.ts",
+      "disposition": "changed",
+      "beforeHash": "ce56f4ed4c55c951e4609f361d1413755b003b9d3e6783253d0811eb60a67ef3",
+      "afterHash": "36560cf7e8c4777ddf089de0c78f5ecb11dbde76b060d00f302066e5e00dfbba",
+      "beforeLines": 57,
+      "afterLines": 60
+    },
+    {
+      "file": "src/core/application/task-budgets.ts",
+      "disposition": "changed",
+      "beforeHash": "02b0439d3c90da36857b647744902f7deae1b6ce3d2b2a8ee2b0a72d87cedf28",
+      "afterHash": "42a2de7d27ca3e1487a9a8fc444a0a0c4d7dc36830c52f9e5e15c15bf13e32ae",
+      "beforeLines": 99,
+      "afterLines": 93
+    },
+    {
+      "file": "src/core/application/task-coordinator.ts",
+      "disposition": "removed",
+      "beforeHash": "8195ddc53e3cbb010f5295ee2c2cfae55e7dce9888c3d3de8de227d66d6d26bd",
+      "afterHash": null,
+      "beforeLines": 910,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/application/task-lifecycle.ts",
+      "disposition": "changed",
+      "beforeHash": "43d64899036e306b6d7bade91c9b61af652eb5850f803a60b406ae6cc7e5f06f",
+      "afterHash": "eea4327f6aa98e6bd3ba4a75cc344ca6a8d55ea90136c98589c556fc53cb3948",
+      "beforeLines": 141,
+      "afterLines": 120
+    },
+    {
+      "file": "src/core/application/task-recovery.ts",
+      "disposition": "changed",
+      "beforeHash": "a69977b695a553e0b08343d199e977329ab3d7d84393396e3af1b9672442544a",
+      "afterHash": "fc12d053ea1728f583bb1db274b2e97bd1d26094fced9a3a781d09a15f527bc9",
+      "beforeLines": 152,
+      "afterLines": 156
+    },
+    {
+      "file": "src/core/application/task-scheduler.ts",
+      "disposition": "changed",
+      "beforeHash": "df70405e2206405134b6d196b0b08d9208b5faf5b821b93e4587b721f6c4e651",
+      "afterHash": "bbb02998a3b9c6e416764ad72cb5eec35ae15c314299a8a9e957a23f3097398e",
+      "beforeLines": 161,
+      "afterLines": 151
+    },
+    {
+      "file": "src/core/application/team-coordinator.ts",
+      "disposition": "removed",
+      "beforeHash": "a2e99462c5f7ab30e79402fbd361aa70402e88028088ffc060d994d05f2188f4",
+      "afterHash": null,
+      "beforeLines": 342,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/application/team-followthrough.ts",
+      "disposition": "removed",
+      "beforeHash": "96c862ae0d8aef9e23ac9a129c769206c0cbe0d82f20b09ea93b472bcb57b726",
+      "afterHash": null,
+      "beforeLines": 467,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/application/work-allocation.ts",
+      "disposition": "removed",
+      "beforeHash": "c8092add86c2e1ef5c00ef338c5ce7550ccb9a0fec97238873d3bfd23f38b0c3",
+      "afterHash": null,
+      "beforeLines": 171,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/assets/catalog.ts",
+      "disposition": "changed",
+      "beforeHash": "78ea1521c317235e927e401b9e614b7fcfe30e3a16d4ba739cd15c296a7e30cf",
+      "afterHash": "c4bdb390f04beae276f65fd2c3834f8c054a5025d7949b76c4fd4244daa730b6",
+      "beforeLines": 4,
+      "afterLines": 4
+    },
+    {
+      "file": "src/core/domain/inventory-view.ts",
+      "disposition": "changed",
+      "beforeHash": "b7fa2481859161c20994663adc8932d10d54e6e9bc6b93e4062210e2529c60a6",
+      "afterHash": "4fe81d581709a4859e39896d509a424f7372fe4a3fd5e061dbcf2ac00d03fef9",
+      "beforeLines": 76,
+      "afterLines": 44
+    },
+    {
+      "file": "src/core/domain/planning-tools.ts",
+      "disposition": "changed",
+      "beforeHash": "6d31f6d25d0faafe99c913e56a1b472b919b9936cdf76fdd496278ccf08b7fd1",
+      "afterHash": "973555bbf77b23d881447f057f9c50c7cb5758139151aac688f97a28282751ee",
+      "beforeLines": 44,
+      "afterLines": 18
+    },
+    {
+      "file": "src/core/domain/planning.ts",
+      "disposition": "changed",
+      "beforeHash": "b4f02682049c2ee2ffb7f6394e798a802c8aa06e5edbecafd57956706491d8ef",
+      "afterHash": "2f0780a7ede37c82ac7a2a8fcabc4a18ba92a9de61425cb31bf620a07a65ea48",
+      "beforeLines": 200,
+      "afterLines": 198
+    },
+    {
+      "file": "src/core/domain/task.ts",
+      "disposition": "changed",
+      "beforeHash": "e83eec3bf6ca7ba6f7ee2b399de3d96f26018eb3512cff9e97dcd0541d40f8f9",
+      "afterHash": "3a9a6d373c612b6cc57bcb66d6cf432f6541c2de5c18fc5550c634fdb28c6cc0",
+      "beforeLines": 231,
+      "afterLines": 162
+    },
+    {
+      "file": "src/core/domain/team.ts",
+      "disposition": "removed",
+      "beforeHash": "04395d5017cbed2d2348a4aad3eec39e9b846b73b5c4c9cad3e4ef9915ee1baa",
+      "afterHash": null,
+      "beforeLines": 89,
+      "afterLines": 0
+    },
+    {
+      "file": "src/core/domain/tool-contract.ts",
+      "disposition": "changed",
+      "beforeHash": "e4b2d80a8354f402b70aa006dd1d31195d1244f7f7a4830e2d8fd2921d8c19fd",
+      "afterHash": "8a06f42216a40836daff86d5dda262ce10757b6ba57770946266eb4c68fdefcc",
+      "beforeLines": 220,
+      "afterLines": 212
+    },
+    {
+      "file": "src/core/domain/work-draft.ts",
+      "disposition": "removed",
+      "beforeHash": "0410f8b2691d9dd49d36f752597071ecd9aa6805078b10201d560aef5948b869",
+      "afterHash": null,
+      "beforeLines": 149,
+      "afterLines": 0
+    },
+    {
+      "file": "src/domains/code/harness.ts",
+      "disposition": "changed",
+      "beforeHash": "96fd00c12f18decef19e4c4b050be6555f036b46c486f5e1ad5bdbeb67600fbb",
+      "afterHash": "46b15877ae71eb34e2baaf8d2d63a5a3161f9ad6c309f9d9fc2077c413c2420c",
+      "beforeLines": 217,
+      "afterLines": 215
+    },
+    {
+      "file": "src/domains/code/host.ts",
+      "disposition": "changed",
+      "beforeHash": "865fbc24c9cbd71ced25e912f9169d2301da3a54eba32db1149332f095394cb5",
+      "afterHash": "61bbc04f581615aa7ee362e67281bcf59043582512c81e0d840eb26c98ba9084",
+      "beforeLines": 8,
+      "afterLines": 6
+    },
+    {
+      "file": "src/domains/code/work-harness.ts",
+      "disposition": "changed",
+      "beforeHash": "f04e2c623edd6b36971bec4d21716672493db2d107b2c5c9488d51e419728a4d",
+      "afterHash": "6712ada2b5324e643d7ca5f2e3c02e10e7e6debb02ac333c89adbb5069bc7f54",
+      "beforeLines": 282,
+      "afterLines": 281
+    },
+    {
+      "file": "src/domains/data/harness.ts",
+      "disposition": "changed",
+      "beforeHash": "3010eb0269cff9805d1d943be524bf1b934ce0b8a3d804cea0016b12761d03e5",
+      "afterHash": "0cfeb2489db8b9360a586344da54c197161ed2a4906883a70dc2ffff1af16a18",
+      "beforeLines": 184,
+      "afterLines": 178
+    },
+    {
+      "file": "src/domains/data/host.ts",
+      "disposition": "changed",
+      "beforeHash": "653d38831c32523462116953a724c9757a5c6877e5d64b593ffe3aed970f4599",
+      "afterHash": "1d31bda8b788522d344c82c83ceadc96914ad11fe558e530b4531515217a205b",
+      "beforeLines": 11,
+      "afterLines": 9
+    },
+    {
+      "file": "src/domains/data/methods.ts",
+      "disposition": "changed",
+      "beforeHash": "0186416476e807be2817db8d466e927222a72148c61423a2ce66cc208e8d93da",
+      "afterHash": "79d07d99087eff7a19c876b1008779f2e87f621f915f40015c6b7c612406c0f3",
+      "beforeLines": 68,
+      "afterLines": 68
+    },
+    {
+      "file": "scripts/architecture-graph.ts",
+      "disposition": "changed",
+      "beforeHash": "6cf442dce497e6c25a78a93d84df4b9591e30256bad9a567a52856005e4fb26e",
+      "afterHash": "2412488f507c25fc00c9b8e51f5ba3e34bbd9b84dad70cdc69a6cd1fc44341a5",
+      "beforeLines": 169,
+      "afterLines": 175
+    },
+    {
+      "file": "scripts/inspect-audit.ts",
+      "disposition": "removed",
+      "beforeHash": "e11ca02c4b02ba3c8b6b5f6179286280d2c7b85f84edc909e7f6f88e71b0850f",
+      "afterHash": null,
+      "beforeLines": 144,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-backend.ts",
+      "disposition": "removed",
+      "beforeHash": "426e8c7ea2f91ac49973e39be996e99834696626bc14fd7215fe3c0697b63be9",
+      "afterHash": null,
+      "beforeLines": 88,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-code-data-phase1.ts",
+      "disposition": "removed",
+      "beforeHash": "1d96f6c12fa44391981cd45162cb11fd30546ed5bdfb656569853f2f4e16deb1",
+      "afterHash": null,
+      "beforeLines": 76,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-core-phase1.ts",
+      "disposition": "removed",
+      "beforeHash": "6748ea6cb8fa98d0f932f1766864a63c58523065da270b1877ad58e80a67cf34",
+      "afterHash": null,
+      "beforeLines": 62,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-core-phase2.ts",
+      "disposition": "removed",
+      "beforeHash": "4947fdb1fdceff41e4feb2bf16ad43e86cd823876aa60533ffec0a5b419e7670",
+      "afterHash": null,
+      "beforeLines": 89,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-core-phase3.ts",
+      "disposition": "removed",
+      "beforeHash": "b452e38ec875ff0d649e7f1b0bd7e50c1b40f9eb00b2761d43597a00efbe2389",
+      "afterHash": null,
+      "beforeLines": 94,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-core-phase4.ts",
+      "disposition": "removed",
+      "beforeHash": "04bfc90634ede05b2848b78da606612f9b3395db7983b9db287d7ef61797fc8f",
+      "afterHash": null,
+      "beforeLines": 97,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-core-phase5.ts",
+      "disposition": "removed",
+      "beforeHash": "7eab4fbd17ff87314b71ac0ec902f5f0131edaacac65328c5bb098eca8f9f773",
+      "afterHash": null,
+      "beforeLines": 99,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-core-phase6.ts",
+      "disposition": "removed",
+      "beforeHash": "e3751fb129114b1cf1853abc4905f9f63d4f0da4b8596167d2d3a07f7317af10",
+      "afterHash": null,
+      "beforeLines": 93,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-experience-e1.ts",
+      "disposition": "removed",
+      "beforeHash": "504af62ff85a2b1bc6f03233839bfdd933f2354e4385fd2072b84263346a4f98",
+      "afterHash": null,
+      "beforeLines": 52,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-experience-e2.ts",
+      "disposition": "removed",
+      "beforeHash": "b74e0d29a20cf0ece45891290d9023fac8ea2ebc0d57985fa845df9e99cbb994",
+      "afterHash": null,
+      "beforeLines": 55,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-experience-e3.ts",
+      "disposition": "removed",
+      "beforeHash": "ecda340d7bb65c08d692d551b9a2c10d354540ff63599e6a81be42cea7f6dab3",
+      "afterHash": null,
+      "beforeLines": 57,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-experience-e4.ts",
+      "disposition": "removed",
+      "beforeHash": "e7ea8953ad9ebe12c03f7ff9f8fe4403561b82ecbfbe044c89c45f8bc3a87991",
+      "afterHash": null,
+      "beforeLines": 51,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-experience-e5.ts",
+      "disposition": "removed",
+      "beforeHash": "cc27db47a1218cb899546670a221e5e0fcb56d5a5b557f96bc0f2b8c5f2d7188",
+      "afterHash": null,
+      "beforeLines": 57,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-master-phase2.ts",
+      "disposition": "removed",
+      "beforeHash": "f74631a32c3b7f6823fa3f2cf0656f3f06f11bd834277c122784cb76f2c6909d",
+      "afterHash": null,
+      "beforeLines": 80,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-master-phase3.ts",
+      "disposition": "removed",
+      "beforeHash": "07c3e944567bfa4c436d1959476f80c8cec837ef263999653419ef6ce2328cb3",
+      "afterHash": null,
+      "beforeLines": 93,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-master-phase4.ts",
+      "disposition": "removed",
+      "beforeHash": "d794ed7edd9320d43436c31ea1d58b4296b28c28d915378820b5e228e22f0ff0",
+      "afterHash": null,
+      "beforeLines": 99,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-phase2.ts",
+      "disposition": "removed",
+      "beforeHash": "5bd67e6ae2afaf6e4f00c7a6d20cccfa19cb24151b7bbb6523fcc5c0c942be50",
+      "afterHash": null,
+      "beforeLines": 83,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-phase3.ts",
+      "disposition": "removed",
+      "beforeHash": "c3fdb8e35bc686bc02004a7e145b89dfaca6b6afd0e7265dd233fcae8c3ecb39",
+      "afterHash": null,
+      "beforeLines": 87,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-phase4.ts",
+      "disposition": "removed",
+      "beforeHash": "7633629319c02404cd9c172db02249db03919a410245057f75827265cd5e1927",
+      "afterHash": null,
+      "beforeLines": 117,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-phase5.ts",
+      "disposition": "removed",
+      "beforeHash": "e9075e05a63bcc2868cb756d5ceb5987f82d516e499c5f069acb5ab2e7136a8b",
+      "afterHash": null,
+      "beforeLines": 79,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-phase6.ts",
+      "disposition": "removed",
+      "beforeHash": "23df32a6e7570b9fe3741f3cb5aa156abd3d880cedba91546d42b3ade581b85b",
+      "afterHash": null,
+      "beforeLines": 143,
+      "afterLines": 0
+    },
+    {
+      "file": "scripts/inspect-runtime-team.ts",
+      "disposition": "removed",
+      "beforeHash": "4ca0b07c1c40f0d592b71d74be3a1bd4fb6d32597323b1737fca7d47b40e8b5c",
+      "afterHash": null,
+      "beforeLines": 74,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/architecture-baseline.test.ts",
+      "disposition": "changed",
+      "beforeHash": "42e654e93e6ce359ab56e23d19f6c4fc8c4ed401c5ca9d4c565c8d58bdd1e0b3",
+      "afterHash": "95d74010330234119778ba944afe030314a1e84626b5fe4728e1f4614cf68ad9",
+      "beforeLines": 55,
+      "afterLines": 54
+    },
+    {
+      "file": "tests/architecture-dependencies.test.ts",
+      "disposition": "changed",
+      "beforeHash": "c93562c61016ef4ed86efe32bf79cdb873ac260fa1edffe0d3931e0405c36847",
+      "afterHash": "e0f1f2db057fc4928a0235e41872581239ecadd44ff1db4c328e3b34a9fc91dd",
+      "beforeLines": 42,
+      "afterLines": 58
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "disposition": "changed",
+      "beforeHash": "e8aa9f18d1f0ecd44f29b247166e7ef08a3f1cf93c6ac4f3da414aaf7405ee23",
+      "afterHash": "6386b291335bb6901f2703e613251db24584d6a8ad42c5aaa28860ede39bc368",
+      "beforeLines": 340,
+      "afterLines": 338
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "disposition": "changed",
+      "beforeHash": "ec95dc8216fd27390f554513245c0a9046bdf65b5f343267212a5775395cd8cb",
+      "afterHash": "66fa2b0dfe0f674e435ac1f8aec7ccff888e7f2fb031136e6a39ea78860d24a3",
+      "beforeLines": 448,
+      "afterLines": 445
+    },
+    {
+      "file": "tests/capability-host.test.ts",
+      "disposition": "changed",
+      "beforeHash": "03cef8e622d0e3bfa69c819494c33f86ba6973e8c23b821297655879e1944840",
+      "afterHash": "75d82ec4754981fa390ba2b867c3d0722faf155b3bb6583539b516ca15b190aa",
+      "beforeLines": 129,
+      "afterLines": 127
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "disposition": "changed",
+      "beforeHash": "4d7f0acf06d0244d4f8e6dc74852ea924006528531b0e5d0c560c6157432c459",
+      "afterHash": "1cdf44be46c477a7b7ec2c32303fb83c0448cdee9c509cb6e222fcd74ebfad51",
+      "beforeLines": 408,
+      "afterLines": 404
+    },
+    {
+      "file": "tests/code-data-integration.test.ts",
+      "disposition": "changed",
+      "beforeHash": "3b8b33bb92072a782d3ab54c5727016b589be8baa40ad645d417924d591ad9d4",
+      "afterHash": "8abcc7d11f223e1036b4f8fc304b1b2f491ad03bc24464d734046b16b59f72a2",
+      "beforeLines": 311,
+      "afterLines": 277
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "disposition": "changed",
+      "beforeHash": "0662c754721b1895630913270638856a43ababd4e6a5fdf1d684f7e75e5c4834",
+      "afterHash": "45b98c6049288ffe162076c71399e508c8601db54b73e8628ccbf544130f3499",
+      "beforeLines": 342,
+      "afterLines": 340
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "disposition": "changed",
+      "beforeHash": "288a8cc6cc9fe984793ff23dfc61527b12142a62a570316a966175e2fd5da4e6",
+      "afterHash": "50839da4598272d15cfdec3a9ee9007156268510d193a99e3246c1ba01ea4138",
+      "beforeLines": 472,
+      "afterLines": 460
+    },
+    {
+      "file": "tests/collaboration.test.ts",
+      "disposition": "removed",
+      "beforeHash": "eba52c837af0143b657daa358e73e5fdeab653e3b68c6a1c614414180d2afa0c",
+      "afterHash": null,
+      "beforeLines": 218,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/core-acceptance.test.ts",
+      "disposition": "changed",
+      "beforeHash": "3d4ed20c5939742081da81b6b99c1cb53088a45e0d4b5cf395131d3f8c4fb710",
+      "afterHash": "e4becc797108ddc7462e56748a145dd8ce33daa207fe86984cb6114f9bb9c731",
+      "beforeLines": 290,
+      "afterLines": 245
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "disposition": "changed",
+      "beforeHash": "b48396346af8defb24ec62bdc15d254ca8027b14712c6f01ecd46b2b09577a3c",
+      "afterHash": "20a43351c26e9b3b8773840de607ff5b2c0a3b9af8f5dd64e971c28b283d7062",
+      "beforeLines": 734,
+      "afterLines": 47
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "disposition": "changed",
+      "beforeHash": "16f0e99aa9b5650178242d24c86a9484d7879ac1b293d0645615f016889067f0",
+      "afterHash": "a3cb09315280396b8f281842cc829e071c401f79e4b59816f3bcc87783f0cc93",
+      "beforeLines": 363,
+      "afterLines": 353
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "disposition": "changed",
+      "beforeHash": "e67e9cbafb9a174852679be8fc3410b05901404f04394e10d3e768c30c4ef5c8",
+      "afterHash": "4b845c82aa8f63f71e73922c9b8622aa250a73b703db5962117ee68a449ea8bb",
+      "beforeLines": 647,
+      "afterLines": 614
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "disposition": "changed",
+      "beforeHash": "3968c3859fd1bbacc4bac58fa041e26cd8bc0eef859d023352efd5d8e09f384c",
+      "afterHash": "2bb25073985b643fbe1343b6c15eab7e80467edf479230be3ef34a37ad74ce2c",
+      "beforeLines": 387,
+      "afterLines": 371
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "disposition": "changed",
+      "beforeHash": "357968b37162f4810dac660d522dba2fa9c81f68c9caa2273eacff4069fce2a6",
+      "afterHash": "7e0c83a09916b46f260ca58cbce8183ec7240c4375022613298e4ca52be8f2f0",
+      "beforeLines": 262,
+      "afterLines": 260
+    },
+    {
+      "file": "tests/dispatch-lifetime.test.ts",
+      "disposition": "changed",
+      "beforeHash": "34d9c7813d1f5a609887a346a84ec6d17e38f8caf0f291aeaac3a05ac93bcb68",
+      "afterHash": "486f6ef906705fb44b6eab2fef1b1cb520e79dcf00b2c8f3ebefab75d50cf5e2",
+      "beforeLines": 88,
+      "afterLines": 84
+    },
+    {
+      "file": "tests/experience-e4-terminal.ts",
+      "disposition": "removed",
+      "beforeHash": "616931dd86819e76c6589d465dc9446f64fdf01f989083fe0e63630c64404576",
+      "afterHash": null,
+      "beforeLines": 396,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/experience-e5-ui.ts",
+      "disposition": "changed",
+      "beforeHash": "01488e6a6b32ae5f9af1fdf29f831f9125b2ba5457ff9390d886c829300bc170",
+      "afterHash": "916ded924608e57c2f071d4a22f0291f6c25ce9af69dfac6e9fbf2d928788a51",
+      "beforeLines": 202,
+      "afterLines": 200
+    },
+    {
+      "file": "tests/fixtures/acceptance-capture.ts",
+      "disposition": "changed",
+      "beforeHash": "9667a49fa5e84a9e6b076ea36a4c13e90fd9fdcb3421731cf817e4d93320b7dd",
+      "afterHash": "8b1616775005cac29b625ed2b10dfd9298c43cfffcb573ddfbcb1a2788c19a14",
+      "beforeLines": 145,
+      "afterLines": 145
+    },
+    {
+      "file": "tests/fixtures/acceptance-diagnostics.ts",
+      "disposition": "changed",
+      "beforeHash": "56e5788a65acee76b5caf9dce3a40886aa288be0906db10928bfd18db7ae3de2",
+      "afterHash": "e8ea0d1ac99800419577217e1cf10fbc533b11d4fa9fc0c04b60b0bd0fca1284",
+      "beforeLines": 135,
+      "afterLines": 135
+    },
+    {
+      "file": "tests/fixtures/acceptance-oracle.ts",
+      "disposition": "changed",
+      "beforeHash": "cab0d9f5a87ecb0a93a9024af873f73682b1bd9ca7b5fff6142fdc4b42affb99",
+      "afterHash": "44c82702ea4a00987ef79813cb6f8c9ea1cb64ae2ad9095355e35d180d0aad92",
+      "beforeLines": 375,
+      "afterLines": 375
+    },
+    {
+      "file": "tests/fixtures/core-crash.ts",
+      "disposition": "changed",
+      "beforeHash": "0f48198648a925cfebacc63c34bbe4e8ef7e7c271bea6c8a77a1ae99273dd6b5",
+      "afterHash": "2c3a358836b363b5cfff1fea5ba190fde0d6ca2c958ae9f16f5a78d361587308",
+      "beforeLines": 12,
+      "afterLines": 10
+    },
+    {
+      "file": "tests/fixtures/core-execution.ts",
+      "disposition": "changed",
+      "beforeHash": "4d131788e7bdbb412715cb1f4466025969d27a77bca4567caa12ffa9cf1c0dc2",
+      "afterHash": "79d3ed6659f35e87ec19ce8c7a5193ebef3f4a47282e9c3fd7bd332b29a6215f",
+      "beforeLines": 98,
+      "afterLines": 98
+    },
+    {
+      "file": "tests/fixtures/historical-orchestration.ts",
+      "disposition": "removed",
+      "beforeHash": "6d77c6bc7ebe0a5eda9cc5c34525272835cfeb1707c2dc9925c88b06ab8a9f2d",
+      "afterHash": null,
+      "beforeLines": 25,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/fixtures/model-config-runtime-plugin.ts",
+      "disposition": "changed",
+      "beforeHash": "f598de77ef175aa356f466e81b3c240fb9d37c40ced81b23c53e172d19c17f0e",
+      "afterHash": "53cef39fcabc89c8cf72ca6781ea2558d1a40c3e0b95e27ca61a6627a5919ad1",
+      "beforeLines": 335,
+      "afterLines": 335
+    },
+    {
+      "file": "tests/fixtures/workspace-approvals.ts",
+      "disposition": "changed",
+      "beforeHash": "b37dbe4b8b8002a79f1c3f0a54ecafedd00899b33936467a9a412455f89860da",
+      "afterHash": "438abc000910fbfcb8c3cd034185d84937a7161ebf46e23ddcf616b6069e7052",
+      "beforeLines": 38,
+      "afterLines": 34
+    },
+    {
+      "file": "tests/independent-windows.test.ts",
+      "disposition": "changed",
+      "beforeHash": "13c3403ec56d38c560a8018b709ca6388fc430eac9464712a57967dae20c91fb",
+      "afterHash": "0af53e304cecd01a8535bf38923ba19dfb77d28fa3d972e05d77a9198de9fad0",
+      "beforeLines": 246,
+      "afterLines": 277
+    },
+    {
+      "file": "tests/inventory-view.test.ts",
+      "disposition": "changed",
+      "beforeHash": "f3c470c690e21ab1521dc70f07fbcbb255f797a14ec21dead2261342e4011753",
+      "afterHash": "a10cde65242ef4a11dea5f50b93c182d02d07db8f5103122af6a74b3f3f09170",
+      "beforeLines": 62,
+      "afterLines": 56
+    },
+    {
+      "file": "tests/kim-team-live.ts",
+      "disposition": "removed",
+      "beforeHash": "6f4d01c2ddb1a8bc8e4cee8d941636023d2ce8d241d677f7c21de62efd9f5897",
+      "afterHash": null,
+      "beforeLines": 201,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/live-phase4.ts",
+      "disposition": "removed",
+      "beforeHash": "ee1c5d56a2eb7592dddf4fa3824f86889ae3d0f90537b2b8fece4a8478f2bf6b",
+      "afterHash": null,
+      "beforeLines": 183,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/master-dispatch-live.ts",
+      "disposition": "removed",
+      "beforeHash": "87c6ab6bafbd1024212f3d1768d5f7e807b2c6c362569b04d54a747cd23e00d8",
+      "afterHash": null,
+      "beforeLines": 225,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "disposition": "removed",
+      "beforeHash": "2eab462329ae51546e0c6a0dd2734586e678bb26b1d71599ec8913bde2f81bab",
+      "afterHash": null,
+      "beforeLines": 813,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/master-followthrough-live.ts",
+      "disposition": "removed",
+      "beforeHash": "ca4c747e725841572df46fffc148033a327fdcc0526112d79ed3dd134b8939b9",
+      "afterHash": null,
+      "beforeLines": 289,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "disposition": "removed",
+      "beforeHash": "ea8aa2e6b94ebcd5bbb5028bdb5a9b4376f4c5aaeaeee3879dd6cfa056f6e63e",
+      "afterHash": null,
+      "beforeLines": 1096,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/master-team-live.ts",
+      "disposition": "removed",
+      "beforeHash": "06048243bbd8bd0e76d24ff4c0e60520ff7df5bf3c3dc1419008590465ce7237",
+      "afterHash": null,
+      "beforeLines": 486,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "disposition": "changed",
+      "beforeHash": "51b76b2b100f651d8fe6f95b0d91f208d4c0bd40e9714c1611b523694749d626",
+      "afterHash": "ee45f41325c7874e62f7104722708b7d64d76c8770718afa4291fa9705ac4b03",
+      "beforeLines": 274,
+      "afterLines": 273
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "disposition": "changed",
+      "beforeHash": "e70944d7d6d0747cc17a438aa0e7a836e90b2e6879d9cb726951ba66c2a9992a",
+      "afterHash": "fe6fda0e49a23a1ee14caaf0e1f14153df18aa97217efdef7efcd3b0c1dedab7",
+      "beforeLines": 403,
+      "afterLines": 434
+    },
+    {
+      "file": "tests/phase3e-live.ts",
+      "disposition": "removed",
+      "beforeHash": "6e9505519366a20c8ac79cc191a147889050ea251c4cb17b0cac4fac419078ba",
+      "afterHash": null,
+      "beforeLines": 204,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/phase4-terminal.ts",
+      "disposition": "removed",
+      "beforeHash": "8ef2739130b8e7216e0f5a1019cb60b2a2d8261c985ef4be5edd60ea538c4b71",
+      "afterHash": null,
+      "beforeLines": 348,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/phase5-terminal.ts",
+      "disposition": "changed",
+      "beforeHash": "ae6ee21bf22a3af8d6d0a83463fe2907e3f5061840ea3bfed27956846bc6e5c1",
+      "afterHash": "704f9f268649539e7ac8596693044605be42be0fe1627299c3619a7fcdc3167f",
+      "beforeLines": 313,
+      "afterLines": 313
+    },
+    {
+      "file": "tests/phase5.test.ts",
+      "disposition": "changed",
+      "beforeHash": "c2f9c965217a8c39ca9a4f767e97fbc803a090c87090f4bb4be0c3ded96ff6e5",
+      "afterHash": "1596657091e7e169110de1de4b7faeecbf41ac31706566c6318af62987599062",
+      "beforeLines": 353,
+      "afterLines": 352
+    },
+    {
+      "file": "tests/planning-clarification-live.ts",
+      "disposition": "removed",
+      "beforeHash": "fc48cec83b77eb6129b96ceae1f737937e06e22870bc7d77a6e3ee0cea560f80",
+      "afterHash": null,
+      "beforeLines": 224,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/planning-clarification.test.ts",
+      "disposition": "changed",
+      "beforeHash": "1367316f2d308416080254f516cc24871e4abb3b009eb8d08da6ce37a6d8bd94",
+      "afterHash": "5050e4c08c0b0259cd0b3b5217f63818a693d40636a8bbf07e32ad95dc66074d",
+      "beforeLines": 225,
+      "afterLines": 215
+    },
+    {
+      "file": "tests/planning-drafts.test.ts",
+      "disposition": "removed",
+      "beforeHash": "3a6ea25415c8be457a4f10e542eff5b0ba27f19acc9de25b2e07e9da59bc66de",
+      "afterHash": null,
+      "beforeLines": 406,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/project-contract.test.ts",
+      "disposition": "changed",
+      "beforeHash": "aceb8253c951ac9d448ab553e533f589106392e29f4214aef3246727e730d5ba",
+      "afterHash": "2eb5cce9ffcaebb883300b93060a75738d3da13d7d4d22a941b488b8be1885ab",
+      "beforeLines": 395,
+      "afterLines": 388
+    },
+    {
+      "file": "tests/report-admission.test.ts",
+      "disposition": "changed",
+      "beforeHash": "27f593f68cc00b4e37b0fae5bf08064b39da9afd7fe2c26abf50362f005be7f5",
+      "afterHash": "bd926696f88a60b2801b386e34d5e78bbce53d904d5a686bc6c4ef0cf86edad7",
+      "beforeLines": 64,
+      "afterLines": 63
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "disposition": "changed",
+      "beforeHash": "672309aed48438d4457578844f322ed171fbf3618aa4d949e283e33d4db42ab2",
+      "afterHash": "8fc8377fcd343df3b9f0b6913f1c282e5395555c2035801ba2ab7407327ecaf8",
+      "beforeLines": 294,
+      "afterLines": 293
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "disposition": "changed",
+      "beforeHash": "22443b526d2d85c13f73db376225615c860b97a57464072a5f2a464008bb7d12",
+      "afterHash": "e058d2e7dd057a4ccaddc6bcb9e2bb62375f42acdf990dd2fdb30e4de3f2aad0",
+      "beforeLines": 272,
+      "afterLines": 282
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "disposition": "changed",
+      "beforeHash": "bad915549eb15b04aa47709307aa0f0227feaf60c0e77bba150b92bac1969d22",
+      "afterHash": "b3c155f983c20b24811daec0197659e09c61a03c258221bb2b469c644b7d85e2",
+      "beforeLines": 282,
+      "afterLines": 275
+    },
+    {
+      "file": "tests/runtime-intake.test.ts",
+      "disposition": "changed",
+      "beforeHash": "176ba853d381d1c4a70fa566e1cea58a6e5a5e9aaeb0d03c8b3c5f9201f4470c",
+      "afterHash": "5e601b6ac2a18b322e23150ec0ede33d4215864f5b8d2e0af2bfb6262065579f",
+      "beforeLines": 270,
+      "afterLines": 152
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "disposition": "changed",
+      "beforeHash": "e0c217aaa292add4c5acc2039b0e748081860806d09d63fc407161ddb7d918dd",
+      "afterHash": "d70c0d1c14876f570b74ef1de486e55ca532aa73f9a3b725d2fcb9e7a97de760",
+      "beforeLines": 299,
+      "afterLines": 276
+    },
+    {
+      "file": "tests/task-admission.test.ts",
+      "disposition": "changed",
+      "beforeHash": "5ef367a553706edc41d0c577c9fbdd8bc3818647f52fdb526d8e2ecfe5fefc50",
+      "afterHash": "a790d2f779926fc62df2edb962ad2d2ea8e4a141a7d039651edea9def22df240",
+      "beforeLines": 190,
+      "afterLines": 177
+    },
+    {
+      "file": "tests/task-failures.test.ts",
+      "disposition": "changed",
+      "beforeHash": "186aca65553c1790692600da7162207a2d7b77c399be0bb8c3e08ac2a378f5d5",
+      "afterHash": "214ab4a0bee705a2bf92b80eab3a6fc074eb7f7a97c2aaa37c9569e86f2599ab",
+      "beforeLines": 155,
+      "afterLines": 153
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "disposition": "removed",
+      "beforeHash": "b4e204887b8b64f51cb7dcfc6a337ad8de32626fc233a5bdd638dc67c442dc64",
+      "afterHash": null,
+      "beforeLines": 308,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/team-reconfiguration.test.ts",
+      "disposition": "removed",
+      "beforeHash": "dfed3b49fb6129007048d320b90589d7502d958a5d618c74f4e066541409dafe",
+      "afterHash": null,
+      "beforeLines": 115,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/tui-approvals-r3.ts",
+      "disposition": "changed",
+      "beforeHash": "1c112fe545b7965ea890f1ab3c6b68803e1b29f2627844883eb2080fd800b8a2",
+      "afterHash": "c605818d64abac7493c9aee3c94780779544c5eb5b6d45c307d42218911adf9c",
+      "beforeLines": 108,
+      "afterLines": 108
+    },
+    {
+      "file": "tests/tui-core-phase4.ts",
+      "disposition": "changed",
+      "beforeHash": "f462b39d0922eae561436a8348bcd021b695692e47d8d93a02fd2091c5280e5a",
+      "afterHash": "a19013a603b72cef464bc662c920567a7dc39aced7c5d868f5ce1e131b6f453b",
+      "beforeLines": 95,
+      "afterLines": 94
+    },
+    {
+      "file": "tests/tui-independent-windows.ts",
+      "disposition": "changed",
+      "beforeHash": "e24d9bbf773af9fb98a0bd0d851159b164c43d3ebde23e7f78552b72af1dac0a",
+      "afterHash": "6bc00546d6bcd5359c1b217ecfa3f048cc760ca2b9fc47df43ab48a99d5a9f45",
+      "beforeLines": 91,
+      "afterLines": 91
+    },
+    {
+      "file": "tests/tui-master-phase4.ts",
+      "disposition": "removed",
+      "beforeHash": "b37ab572aedd53b74b2489e9eb4d6d560960dcfad0fcd51b12e5c55ca4881adc",
+      "afterHash": null,
+      "beforeLines": 3,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/tui-phase4-terminal.ts",
+      "disposition": "changed",
+      "beforeHash": "ed183639b7528372218f5c30fd337ff598ea83e4568997fd23d063faafe4d266",
+      "afterHash": "0708199b413bbb2b599a6b979aa1926a3f3fb8805e014f605fb3d0d9ec171fe2",
+      "beforeLines": 183,
+      "afterLines": 183
+    },
+    {
+      "file": "tests/tui-phase4.ts",
+      "disposition": "changed",
+      "beforeHash": "4ba5918e159af7f372c0f6ee942fddb9fbfeabe595103e71f0e4721c1575baeb",
+      "afterHash": "264a2c05b9b80e729aba5f78f07a951efb86c5060683a476944257384489ec3a",
+      "beforeLines": 342,
+      "afterLines": 342
+    },
+    {
+      "file": "tests/tui-runtime-team.ts",
+      "disposition": "removed",
+      "beforeHash": "d32b10e5a34a0f6a67146588cce129c0692b9f731672e074e44d7ca90a3053c7",
+      "afterHash": null,
+      "beforeLines": 105,
+      "afterLines": 0
+    },
+    {
+      "file": "tests/workspace-approvals.test.ts",
+      "disposition": "changed",
+      "beforeHash": "1e088f172151236141ec3e751bfcaa45b823e860f06b38283ec13da9a274dde4",
+      "afterHash": "d6590a41e53d8d870a4ecdb2d613a2d77971a1fcfaf634686d42b2ef5c394323",
+      "beforeLines": 248,
+      "afterLines": 248
+    },
+    {
+      "file": "package.json",
+      "disposition": "changed",
+      "beforeHash": "8495477e9c840e34fb69f688885f0ba8104d789454c45b91b062a3f6c9e542fb",
+      "afterHash": "4185b06dee5b5d124e4be77a63d16f9ff1f7d908475577fffedb68cdcf13e0ef",
+      "beforeLines": 160,
+      "afterLines": 130
+    },
+    {
+      "file": "src/core/adapters/task-tools.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "c7d083c3d5bd882775bdaa6a63b5bdda9c50c76b2dbf33add0bf42492c9190e8",
+      "beforeLines": 0,
+      "afterLines": 66
+    },
+    {
+      "file": "src/core/application/task-engine.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "18054e14dec1f2fbf854586ac9eb8a3812bcfacf24c119bb9e71aaf7e496f176",
+      "beforeLines": 0,
+      "afterLines": 810
+    },
+    {
+      "file": "src/core/domain/legacy-coordination.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "581cd56661c0249f9c72ea5ec525e196ee52ab12f97b507f094734774555e21e",
+      "beforeLines": 0,
+      "afterLines": 83
+    },
+    {
+      "file": "src/core/domain/legacy-work-draft.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "053b4207518139c52a2b51e82350de5362413f676275b11afaca746c01aa8795",
+      "beforeLines": 0,
+      "afterLines": 28
+    },
+    {
+      "file": "src/core/domain/task-state.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "a64c99129ed9f331c3265d1c5ec486c3b229478b30f41f23fcaf6e039607d80b",
+      "beforeLines": 0,
+      "afterLines": 80
+    },
+    {
+      "file": "src/core/storage/task-history.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "f17121a27ffd5adc1a8c4261d4f15655a5fe1dc195101af91f54c5560eb120db",
+      "beforeLines": 0,
+      "afterLines": 48
+    },
+    {
+      "file": "tests/task-history.test.ts",
+      "disposition": "added",
+      "beforeHash": null,
+      "afterHash": "748c1b2b725975bec7fd2e13c0d934f17b3fb7106039fbcf88984385a72971ca",
+      "beforeLines": 0,
+      "afterLines": 231
+    }
+  ],
+  "testChanges": [
+    {
+      "file": "tests/architecture-baseline.test.ts",
+      "title": "restart takes task truth from SQLite while retaining layout drafts, without accepting a stale JSON success",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/architecture-baseline.test.ts"
+      ]
+    },
+    {
+      "file": "tests/architecture-dependencies.test.ts",
+      "title": "dependency checks detect type-only cycles through imports, re-exports and import types",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/architecture-dependencies.test.ts"
+      ]
+    },
+    {
+      "file": "tests/architecture-dependencies.test.ts",
+      "title": "value loads, computed imports and directional boundaries remain distinguishable",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/architecture-dependencies.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "MCP shutdown during startup cannot publish late tools or accept a new server afterwards",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "a slow MCP configuration change excludes new work and structural changes in every pane",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "template loading keeps focus but retires saved team roles",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "an owned child extension tool receives the child project, model and session instead of the root binding",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "the UI disable command can abort a running extension command and release its resources",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "model image compatibility includes tool results and pending context, while offloaded images stay text-only",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "the UI can disable an extension while its asynchronous panel is waiting",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-phase5.test.ts",
+      "title": "a child uses the capability restriction of its actual model route",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "diagnostics strip terminal title/clipboard controls while preserving Chinese and newlines",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "configured credential variables are redacted even without KEY or TOKEN in the name",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "redaction observes newly added and rotated credentials immediately without caching environment values",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "OS lease rejects a second owner and releases for the next owner",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "a terminated lease-owner process cannot leave a stale workspace lock",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "parallel configuration updates preserve both additions and a pane model switch does not overwrite shared settings",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "an active persisted session cannot be resumed by a second controller, even in a different Harness context",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "nested agent shell approval belongs to its runtime owner; forged durable lineage cannot bypass it",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "oversized pasted drafts cannot break workspace persistence or split surrogate pairs",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "a delayed task receipt cannot wake a replacement master session",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/audit-security.test.ts",
+      "title": "a child command failure cannot be hidden by a successful parent task report",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/audit-security.test.ts"
+      ]
+    },
+    {
+      "file": "tests/capability-host.test.ts",
+      "title": "native Code/Data run on minimal ports without an app controller and observe live permissions",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/capability-host.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "host contracts preserve mode boundaries and ignore remote read-only claims",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "host capture records real file versions and invalidates stale inputs and outputs",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "changing a file during a read cannot certify the returned content",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "failed, cancelled and unfinished execution never produces successful evidence; raw payloads stay out of manifests",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "unknown prefixes get untrusted receipts, while controls cannot certify themselves; legacy receipt shape remains valid",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "real Harness persists manifests in existing journal and enforces allocated paths",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "real Harness no longer exempts arbitrary emergence-prefixed execution from receipts",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-foundation.test.ts",
+      "title": "evidence budget reserves in-flight slots before concurrent effects start",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-foundation.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-integration.test.ts",
+      "title": "two-window native KIM plan repairs Python then computes data and independently verifies both stages",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-integration.test.ts",
+      "title": "a downstream task refuses stale native data inputs even when no artifacts were model-reported",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-integration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-data-integration.test.ts",
+      "title": "fresh idle windows publish Code/Data capabilities and existing deny rules disable only that domain",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-data-integration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "bundled ignore-aware scanner works without PATH tools or a Git repository",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "project profile observes configuration, workspace, guidance and actual dirty Git status without running scripts",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "actual compaction keeps Code pointers available without copying the entire repository into the prompt",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "project and Python results survive the real lossless-JSON tool protocol",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "TS language service resolves implementation, real references and tests; edits invalidate the snapshot",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "Python AST locates definitions and import hints without executing project modules, with explicit text fallback",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "bounded discovery excludes links, dependencies, ignored and denied content; cancellation is propagated",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-understanding.test.ts",
+      "title": "real Harness exposes native Code tools in Plan, persists versioned evidence, restores pointers and rejects stale/cross-project context",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-understanding.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "project aliases share physical check paths and retain descendant escape protection",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "check discovery is data only; diagnostic locations preserve Windows/Chinese paths",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "baseline failure resolves only after same actual check on current sources; stale and weakened criteria do not pass",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "R4 rerunning the same source to green does not resolve a real failing check",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "native check receipts belong to their actual subproject directory, not an identical root command",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "timeouts, background, exceptions, missing checks, repeated failures and changed-during-check remain unverified",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "change recovery preserves CRLF and dirty originals; external edits, unknown writes, and path escape block recovery",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "real Harness + native FS CAS + native PowerShell: reproduce, fix, rerun and restore without clobbering outside edits",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "assigned coding task accepts repaired baseline without erasing failure receipts",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/code-workflow.test.ts",
+      "title": "actual typecheck discovers an incompatible caller; native literal edit refuses ambiguous replacements",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/code-workflow.test.ts"
+      ]
+    },
+    {
+      "file": "tests/collaboration.test.ts",
+      "title": "collaboration uses exact turns, durable deduplication, queues, dependencies, actual failures, takeover and restart without replay",
+      "status": "retired-file",
+      "coverage": [
+        "tests/independent-windows.test.ts",
+        "tests/tui-independent-windows.ts",
+        "tests/workspace.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-acceptance.test.ts",
+      "title": "complete local lifecycle: model plan, execution, independent rejection, bounded repair, verification, approved memory, restart and recall",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "independent real reads and actual process exits produce separate evidence; model approval and memory depend on current artifacts",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "read-only review hides mutation and command tools only for its own task lifetime",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "a failed actual verification process cannot be hidden by success claims or repeated review loops",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "fabricated receipt IDs never become review evidence",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "rejected metadata can be corrected using actual own receipts; the rejection remains in the session log",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "implementation verification accepts file-reading criteria plus an actual successful process criterion",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "native file predicates provide real verification without a shell and expire when the file changes",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "failed native predicates cannot be covered by a model success claim",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "native text counts distinguish bytes, Unicode code points and Han characters without treating invalid UTF8 as empty",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-assurance.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "directory query evidence is a result snapshot, not an unreadable regular file",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "a premature report stays uncommitted and can be corrected after actual assessment",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "a graph waiting for acceptance can add independent audit workers without replacing existing task owners",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "a file changed during the actual read cannot certify evidence for the new bytes",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "native file observations distinguish final LF, CRLF, BOM and no newline without shell execution",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-assurance.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "long original context and goal survive real independent verification without recursive expansion",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "cancelled audit allocation removes only its unused new pane",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "failed audit persistence rolls back the unstarted task and newly allocated pane",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "audit rollback never closes an explicit user window or a new pane with a user draft",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "automatic audits reuse independent empty windows at 4, 8 and 16 panes and complete real checks",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "idle personal conversations and draft windows are not silently reused for independent audits",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "concurrent and late audit requests reuse one versioned record and recheck each caller",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "objective closure revalidates referenced inputs even when delivered files are unchanged",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "missing receipts and mismatched provenance cannot certify persisted successful checks",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-assurance.test.ts",
+      "title": "audit identity survives workspace restart without creating another check",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "transaction journal excludes a second owner and fences stale commits; incompatible versions are preserved",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "one-window execution graph is durable, deduplicated and advances dependencies only after evidence review",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "invalid graph rolls back all tasks; cyclic durable snapshots cannot be loaded",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "same-project attempts serialize; queued recovery needs a native decision and cannot reuse stale permission approval",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "hard process death after an actual write retains unknown effect and never replays before explicit reconciliation",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "recovery approval becomes invalid when observed files change; unreadable artifacts cannot be accepted",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "legacy JSON is backed up before import; restored SQLite snapshot stays authoritative and shutdown cancels recovery dialogs",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-execution.test.ts",
+      "title": "the selected model can submit a ready plan to the durable scheduler without repeating inline effects",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-execution.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "routing keeps simple questions and specific fixes light; plans reject invented bindings, cycles and evidence",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "actual Harness blocks premature writes, discovers real capabilities, reads, validates plan, then executes under original permissions",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "simple and focused requests take one model request; complex unknowns and capability gaps cannot allow writes",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "research and malformed-plan retries are bounded; denied reads cannot become evidence",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "multi-project plans bind real window identities; independent mode and inherited plan permission remain authoritative",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "queued followups do not replace the active goal before admission; a new direct task persists removal of the old plan",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "capability inventory honors live activation, model-invocable skills and actual MCP connect/disconnect",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "a ready plan cannot bypass later permission changes or stale worker bindings",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "accepted multi-window plans dispatch through the existing scheduler without a second execution loop",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "planning storage rejects corruption, wrong scope and junctions without overwriting source files",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "only admitted user input changes requirement provenance; failed revisions do not reset budgets",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/core-planning.test.ts",
+      "title": "a working-directory change preserves the goal but invalidates old project evidence and bindings",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/core-planning.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "quality facts distinguish blanks from nulls and appear in exported reports without rewriting inputs",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/data-analysis.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "all eight published methods pass independent expected values and counterexamples",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/data-analysis.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "method discovery remains available while business questions block execution",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/data-analysis.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "actual native analysis produces CSV, safe Chinese HTML, exact proof and replayable snapshot",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/data-analysis.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "reports escape executable HTML and spreadsheet formulas; unconfirmed facts cannot acquire confirmed status",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/data-analysis.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "project definitions require real approval, bind parameters, resist stale edits, and isolate projects",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/data-analysis.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "actual assigned Harness task returns computational receipts with tracked artifacts and independent task version invalidation",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/data-analysis.test.ts"
+      ]
+    },
+    {
+      "file": "tests/data-analysis.test.ts",
+      "title": "independent reviewer and verifier complete native data acceptance without shell permission expansion",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "concurrent graph submissions share one approval and durable graph; presentation changes do not duplicate work",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "worker permissions changed during approval cannot be admitted using the old snapshot",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "capability lookup discards a mixed snapshot when worker ownership changes mid-query",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "a partially staged graph is absent from checkpoints and cannot be pumped",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "failed graph persistence rolls back every task and allows one clean retry",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "manual admission rejects duplicate step IDs, cycles and missing dependencies before creating a graph",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "cancellation while saving rolls back the committed intent before any tool executes",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-admission.test.ts",
+      "title": "concurrent recovery shares one decision and returns the same durable retry on repetition",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/dispatch-lifetime.test.ts",
+      "title": "late turn settlement cannot replace the authoritative cancellation receipt",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/dispatch-lifetime.test.ts"
+      ]
+    },
+    {
+      "file": "tests/independent-windows.test.ts",
+      "title": "shipped multi-window sessions keep projects/models and conversation input independent",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/independent-windows.test.ts"
+      ]
+    },
+    {
+      "file": "tests/independent-windows.test.ts",
+      "title": "retired window control fails at commands and runtime before any cross-window effects",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/independent-windows.test.ts"
+      ]
+    },
+    {
+      "file": "tests/independent-windows.test.ts",
+      "title": "single-window execution still runs through the real Harness and produces its file",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/independent-windows.test.ts"
+      ]
+    },
+    {
+      "file": "tests/independent-windows.test.ts",
+      "title": "old workspace/journal and role templates restore history without restoring window control",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/independent-windows.test.ts"
+      ]
+    },
+    {
+      "file": "tests/inventory-view.test.ts",
+      "title": "model inventory pages do not duplicate full worker catalogs and retain per-window permission facts",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "a natural request survives an early stop, matches two workers, starts concurrent real writes and deduplicates dispatch",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "one worker processes independent steps in sequence without a second user instruction",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "discussion generates no effects; repeated missing decisions stop at the host correction budget",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "approval cancellation prevents host automatic dispatch",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "scoped worker cannot escape its paths; dependencies wait for actual acceptance",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "matching respects project, role preference and unavailable windows; overlapping paths retain a lock",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "Plan mode can prepare matched work but cannot dispatch or write",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "read-only reference paths do not block another scoped edit; actual writes to the protected path remain denied",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "a model stuck in tool calls hits the native step budget rather than looping forever",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "a ready plan at the planning limit still dispatches through the normal gate",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "a ready plan at the time limit still respects Plan mode and denied approval",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "automatic dispatch also checks the expanded plan context budget after window matching",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "a rejected expanded plan can be revised and actually dispatched within the same turn",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "a taken-over worker is awaited without reserving a task and automatically receives work after release",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "cancelling a resource wait cannot restart dispatch when the worker is released",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "a worker doing independent work is not occupied; the master waits and dispatches after it finishes",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "automatic admission rematches a changed worker within the original revision budget without another model call",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "an invalid requirement reference is corrected in the same user turn and reaches the real scheduler",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "existing backlog outweighs role preference and new assignments are balanced",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "first master request has one automatic planning path before admission; workers start contracted",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "automatic context stays bounded without mutating the authoritative analysis or constraints",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-dispatch.test.ts",
+      "title": "master tool menu hides implementation before first model step and restores it in independent mode",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "verification feedback names exact missing criteria and receipts; corrected submission closes without rerunning effects",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "a read-only cross-project check assigned to verifier is independently audited without impossible shell evidence",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "natural objective automatically rejects, repairs, verifies with a real process, accepts dependencies and emits one durable summary",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "two projects and model routes run concurrently and finish independent checks in their original bindings",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "explicit integration reads both accepted project outputs through the same scheduler and independent audits",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "missing assessment evidence and exhausted repairs block instead of claiming success",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "read-only research is independently checked against actual sources without adding command permission",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "pause retains receipts and resume completes without replay",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "busy master retains completion events and drains them once after its current turn",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "host audit approval can be declined; resume does not reinterpret refusal as authorization",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "restart with an unreviewed result waits for explicit resume then audits without replaying implementation",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "lost worker, takeover and uncertain effects never create blind repairs",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "cancelled objective cannot be revived by late results or repeated events",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "aggregate budget stops followthrough and actual permission denial cannot be bypassed",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "wall-clock budget expires visibly even while the queue is paused",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "temporary audit capacity waits and resumes without consuming failed coordination actions",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "cancellation during asynchronous proof validation cannot commit acceptance",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "explicit recovery after interrupted closure remains usable without reviving the old objective",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "restart remains paused, accepted work is retained and never repeated",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "two dependent deliveries close with exactly four host checks, including a superseded artifact",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "a final artifact change blocks automatic closure instead of reporting historic success",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/master-followthrough.test.ts",
+      "title": "planner receives redundant assurance feedback and resubmits only the delivery graph",
+      "status": "retired-file",
+      "coverage": [
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "title": "E4 completion waits for evidence review; dependent tasks remain queued until acceptance",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/orchestration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "title": "E4 real failures cannot be approved, repairs are linked and bounded, takeover prevents repair",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "title": "E4 role permissions block execution even when worker and master permit it",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/orchestration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "title": "E4 step/time/concurrency budgets stop work and preserve queued assignments",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/orchestration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "title": "E4 repaired dependency releases downstream work without rewriting failed attempt history",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/orchestration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "title": "audit: repairs retain original role limits and handoff constraints after configuration changes",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/orchestration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/orchestration.test.ts",
+      "title": "audit: repairs cannot silently move to a replacement worker session",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/orchestration.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "mode matrix, explicit deny/ask precedence, unknown tools and exact command rules",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/permissions.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "canonical paths catch junction escapes, siblings, device streams and fingerprint physical destinations",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/permissions.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "real Harness enforces plan, ask, edit, auto and model capability in final guard",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/permissions.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "session grants are exact, actor-local, revocable, not persisted, and cannot override explicit ask",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/permissions.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "mode changes while a tool runs expose transition and cannot auto-approve pending work",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/permissions.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "owned children inherit plan and an allow middleware cannot bypass the final guard",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/permissions.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "dispatch captures permission ceiling, source changes cancel worker approval, pane modes survive restore",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/permissions.test.ts",
+      "title": "old config backup and legacy custom Shift+Tab binding are preserved",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/permissions.test.ts"
+      ]
+    },
+    {
+      "file": "tests/phase5.test.ts",
+      "title": "old config migrates with safe defaults; key collisions and malformed templates are rejected",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/phase5.test.ts",
+      "title": "templates recreate independent projects/models, archive drafts and roll back staging failures",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/phase5.test.ts",
+      "title": "preferences persist without replacing other routes; incompatible model switching preserves history",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/phase5.test.ts",
+      "title": "real extension command/panel/tool works; disabling removes registrations and aborts active jobs",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/phase5.test.ts",
+      "title": "MCP fibers publish actual tools, survive one failed server, release names on disable and can reconnect",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/phase5.test.ts",
+      "title": "an external ESM extension loads by explicit absolute path and persists its enabled state",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/phase5.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-clarification.test.ts",
+      "title": "a real question answer reopens analysis, preserves constraints and dispatches to the worker once",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-clarification.test.ts",
+      "title": "cancelled and wrong-window answers do not unlock planning; stale clarification cannot change a new goal",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/planning-clarification.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-drafts.test.ts",
+      "title": "draft updates are versioned, expose incomplete coverage and preserve canonical requirements",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-drafts.test.ts",
+      "title": "partial admission rejects stale requirements, invalid criteria and unbounded edits",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-drafts.test.ts",
+      "title": "output truncation preserves a durable draft and explicit resume commits without reanalysis or duplicate effects",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-drafts.test.ts",
+      "title": "a new objective invalidates saved draft; cancelled writes and storage errors cannot admit work",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-drafts.test.ts",
+      "title": "draft CAS serializes overlapping edits and final admission rejects cycles and missing projects",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/planning-drafts.test.ts",
+      "title": "invalid immutable configuration is correctable before sealing and preflight still respects read denial",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/project-contract.test.ts",
+      "title": "R2 global criteria are preserved once and localized contributions cannot disappear or be copied across projects",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/project-contract.test.ts"
+      ]
+    },
+    {
+      "file": "tests/project-contract.test.ts",
+      "title": "R2 project identity supports plain folders/aliases and rejects stale junctions, IDs and escaping scopes",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/project-contract.test.ts"
+      ]
+    },
+    {
+      "file": "tests/project-contract.test.ts",
+      "title": "R2 local tasks reject other projects; explicit integration reads registered projects without writes or permission grants",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/project-contract.test.ts"
+      ]
+    },
+    {
+      "file": "tests/project-contract.test.ts",
+      "title": "R2 exact verification binds real process exit, project and input versions; foreign or stale receipts fail",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/project-contract.test.ts"
+      ]
+    },
+    {
+      "file": "tests/project-contract.test.ts",
+      "title": "read-only authority applies without parallel path locks and includes restored cross-project contracts",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/project-contract.test.ts"
+      ]
+    },
+    {
+      "file": "tests/project-contract.test.ts",
+      "title": "R2 inspection uses native bytes/listing and obeys ordinary read denial in independent sessions",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/project-contract.test.ts"
+      ]
+    },
+    {
+      "file": "tests/report-admission.test.ts",
+      "title": "an invalid artifact report stays correctable in the current turn without replaying completed writes",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/report-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "title": "R4 500/429 transport faults retry only the failed model request and keep durable attempt identities",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/request-recovery.test.ts"
+      ]
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "title": "R4 incomplete streamed tool arguments are discarded before retry and never execute",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/request-recovery.test.ts"
+      ]
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "title": "R4 exhausted retries and permanent errors terminate instead of replaying business tasks",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/request-recovery.test.ts"
+      ]
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "title": "malformed response discards every uncommitted call and recovers without repeating a returned write",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/request-recovery.test.ts"
+      ]
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "title": "R4 cancellation and original deadlines stop retry backoff; neither resets the turn budget",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/request-recovery.test.ts"
+      ]
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "title": "R4 loss after a returned write retries the following request only and never repeats that write",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/request-recovery.test.ts"
+      ]
+    },
+    {
+      "file": "tests/request-recovery.test.ts",
+      "title": "missing command is rejected before approval; a corrected call still requires its own permission",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/request-recovery.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "proposal purposes preserve user checks and reject redundant host assurance without keyword filtering",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "requirement references keep revisions bounded and preserve host constraints without text merging",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "stale/unknown references, omitted acceptance and invented authorization are rejected with retained IDs",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "suggestions preserve provenance and conflicts, but cannot become accepted requirements",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "legacy conversion uses the same admission and refuses text changes instead of appending them",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "continuations inherit omitted requirements; only explicit changes citing the new user message can amend them",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "v1 migration reads without mutation, backs up exact bytes before v2 write, and refuses corrupt/future records",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/requirements.test.ts",
+      "title": "recorded GLM failure analysis replays with stable IDs instead of overflowing the 12-constraint limit",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/requirements.test.ts"
+      ]
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "title": "parallel tools share wall time; approval and resource waits never count as execution",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/run-diagnostics.test.ts"
+      ]
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "title": "continuous output and repeated model starts do not reset cumulative stage deadlines",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/run-diagnostics.test.ts"
+      ]
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "title": "crash snapshots retain measured time only; future and corrupt diagnostic files are never overwritten",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/run-diagnostics.test.ts"
+      ]
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "title": "a silent provider reaches a distinct first-response deadline, aborts and does not retry",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/run-diagnostics.test.ts"
+      ]
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "title": "network failure after a returned write never replays the write or switches provider",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/run-diagnostics.test.ts"
+      ]
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "title": "a slow response within budget completes and records waiting separately from output",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/run-diagnostics.test.ts"
+      ]
+    },
+    {
+      "file": "tests/run-diagnostics.test.ts",
+      "title": "a blocked tool is diagnosed and cancellation waits until the tool has released its work",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/run-diagnostics.test.ts"
+      ]
+    },
+    {
+      "file": "tests/runtime-intake.test.ts",
+      "title": "live identity follows actual model and core switch; every normal input reaches native intake",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/runtime-intake.test.ts"
+      ]
+    },
+    {
+      "file": "tests/runtime-intake.test.ts",
+      "title": "semantic analysis upgrades an unrecognized task and enforces native plan admission before effects",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/runtime-intake.test.ts"
+      ]
+    },
+    {
+      "file": "tests/runtime-intake.test.ts",
+      "title": "a task without routing keywords cannot perform a write before core analysis",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/runtime-intake.test.ts"
+      ]
+    },
+    {
+      "file": "tests/runtime-intake.test.ts",
+      "title": "selecting a master makes an ordinary task create and run a worker plan through native tools",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "clock separates execution, approval, queue and pause; total elapsed remains bounded",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/scheduler-budgets.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "approval longer than execution allowance can still complete after approval",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/scheduler-budgets.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "approval wait has its own bounded timeout and does not execute the tool",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/scheduler-budgets.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "queued work behind an approval uses approval waiting rather than expiring its queue allowance",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/scheduler-budgets.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "queued task has a finite wait and exposes why it cannot start",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/scheduler-budgets.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "host allocated shared reads can overlap but writes and unknown tasks retain locks",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/scheduler-budgets.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "execution and planning watchdogs abort an unresponsive model without waiting for another step",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "a newer overlapping reader cannot bypass an older queued writer on another busy slot",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/scheduler-budgets.test.ts"
+      ]
+    },
+    {
+      "file": "tests/scheduler-budgets.test.ts",
+      "title": "approval waiting propagates through manual dependencies across three worker windows",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-admission.test.ts",
+      "title": "credential words redact diagnostics without rewriting executable contract keys or role values",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-admission.test.ts",
+      "title": "final admission handles twelve steps and rejects expanded path budgets before any execution",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-admission.test.ts",
+      "title": "execution context keeps constraints and background but only local acceptance is executable",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-admission.test.ts",
+      "title": "audit inheritance preserves all acceptance and deliverables without copying host instructions into context",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-admission.test.ts",
+      "title": "a task cannot run or be duplicate-acknowledged while its admission write is pending",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-admission.test.ts",
+      "title": "repair feedback stays visible beside a full original context and survives durable serialization",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-admission.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-failures.test.ts",
+      "title": "R4 exact read recovery keeps the failed observation and binds its fresh replacement across restart",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-failures.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-failures.test.ts",
+      "title": "R4 native input validation permits corrected read arguments without executing the rejected query",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-failures.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-failures.test.ts",
+      "title": "R4 unrelated reads, stale replacements, exhausted safe attempts and true failed commands remain unresolved",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-failures.test.ts"
+      ]
+    },
+    {
+      "file": "tests/task-failures.test.ts",
+      "title": "R4 legacy failures remain blocking and a structured unresolved failure cannot be hidden by empty legacy errors",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/task-failures.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "live team distinguishes model/project, permission, role preference and changing membership",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "an independent busy worker is not assignable and becomes available after its own turn",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "native accepted input is deduplicated; clarification stays attached; new objective gets a new record",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "restart restores preferences and durable intake paused without running or duplicating old objectives",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "intake persistence failure rolls back coordination and prevents the model turn",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "team query runs as a real read-only Harness tool in Plan mode without approval or task creation",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "busy assigned worker can queue work and preference changes never rewrite its existing contract",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-foundation.test.ts",
+      "title": "a permission change during capability lookup discards the stale window facts",
+      "status": "retired-file",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-reconfiguration.test.ts",
+      "title": "settled history does not permanently lock master selection or independent mode",
+      "status": "retired-file",
+      "coverage": [
+        "tests/independent-windows.test.ts",
+        "tests/tui-independent-windows.ts",
+        "tests/workspace.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-reconfiguration.test.ts",
+      "title": "all role-change entries preserve a queued task and allow additive team membership",
+      "status": "retired-file",
+      "coverage": [
+        "tests/independent-windows.test.ts",
+        "tests/tui-independent-windows.ts",
+        "tests/workspace.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-reconfiguration.test.ts",
+      "title": "active objective keeps its coordinator even between execution and automatic audit",
+      "status": "retired-file",
+      "coverage": [
+        "tests/independent-windows.test.ts",
+        "tests/tui-independent-windows.ts",
+        "tests/workspace.test.ts"
+      ]
+    },
+    {
+      "file": "tests/team-reconfiguration.test.ts",
+      "title": "pending host approval cannot be detached by changing the coordinator",
+      "status": "retired-file",
+      "coverage": [
+        "tests/independent-windows.test.ts",
+        "tests/tui-independent-windows.ts",
+        "tests/workspace.test.ts"
+      ]
+    },
+    {
+      "file": "tests/workspace-approvals.test.ts",
+      "title": "R3 three real cross-project approval queues allow, reject and cancel by native identity, regardless of focus or task label",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/workspace-approvals.test.ts",
+      "title": "R3 stale approvals cannot survive permission changes, takeover, window close or workspace restart",
+      "status": "replaced-or-retired-scenario",
+      "coverage": [
+        "tests/dispatch-admission.test.ts",
+        "tests/task-admission.test.ts",
+        "tests/core-planning.test.ts",
+        "tests/planning-clarification.test.ts",
+        "tests/requirements.test.ts",
+        "tests/task-history.test.ts",
+        "tests/core-memory.test.ts",
+        "tests/completion-evidence.test.ts",
+        "tests/code-data-integration.test.ts",
+        "tests/core-acceptance.test.ts",
+        "tests/core-execution.test.ts",
+        "tests/orchestration.test.ts",
+        "tests/scheduler-budgets.test.ts",
+        "tests/task-failures.test.ts",
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/workspace-approvals.test.ts",
+      "title": "R3 rejecting a tool prevents the model from re-asking the identical operation in the same turn",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/workspace-approvals.test.ts",
+      "title": "R3 native metadata follows read ask through the normal approval gate without running shell",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/workspace-approvals.test.ts",
+      "title": "R3 approval arguments remain immutable and changing the task run invalidates the pending decision before effects",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/workspace-approvals.test.ts"
+      ]
+    },
+    {
+      "file": "tests/workspace-approvals.test.ts",
+      "title": "R3 host decisions are discoverable without a running task and use the same identity command",
+      "status": "retained-on-current-host",
+      "coverage": [
+        "tests/workspace-approvals.test.ts"
+      ]
+    }
+  ]
+}

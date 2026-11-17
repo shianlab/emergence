@@ -43,7 +43,7 @@ try {
   const frame = t.captureCharFrame();
   assert.doesNotMatch(frame, /主控|协作模式|执行窗口/);
   assert.match(frame, /独立模式/);
-  assert.equal(ui.teamBar.box.visible, false);
+  assert.equal('teamBar' in ui, false);
   checks.push('independent panes, no master marker or coordination bar');
   const view = ui.views.get(first.id)!;
   view.input.setText('保留独立草稿');
@@ -58,8 +58,8 @@ try {
   for (let i = 0; i < 50 && w.panes.size < 3; i++) await delay(30);
   await flush();
   assert.equal(w.panes.size, 3);
-  assert.equal(w.collaboration.state.master, undefined);
-  assert.deepEqual(w.collaboration.state.workers, []);
+  assert.equal('master' in w.taskEngine.state, false);
+  assert.equal('workers' in w.taskEngine.state, false);
   assert.equal(ui.views.get(first.id)!.input.plainText, '保留独立草稿');
   checks.push('menu split opens independent session and preserves existing draft');
   await w.closePane(second.id);

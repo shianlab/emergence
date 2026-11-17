@@ -17,12 +17,8 @@ import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { saveConfig } from '../src/app/config.ts';
 import { SessionController } from '../src/app/controller.ts';
-import {
-  boundedText,
-  directoryChain,
-  instructionRoot,
-  loadInstructionSnapshot,
-} from '../src/app/instruction-files.ts';
+import { directoryChain, instructionRoot, loadInstructionSnapshot } from '../src/app/instruction-files.ts';
+import { boundedText } from '../src/platform/text-file.ts';
 import { prepareInstructionDraft, writeInstructionDraft } from '../src/app/instruction-init.ts';
 import { WorkspaceController } from '../src/app/workspace.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';

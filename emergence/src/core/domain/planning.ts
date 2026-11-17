@@ -4,34 +4,16 @@ import {
   requestSourceSchema,
   requirementsSchema,
   requirementSuggestionsSchema,
-  requirementChangesSchema,
   requirementBindingSchema,
 } from './requirements.ts';
-import type { TeamMember } from './team.ts';
 import type { ToolContract } from './tool-contract.ts';
 import { planSchema, type TaskPlan } from './task-plan.ts';
-import { workDraftSchema } from './work-draft.ts';
+import { workDraftSchema } from './legacy-work-draft.ts';
 export { planSchema, type TaskPlan } from './task-plan.ts';
 
+import { intentAnalysisSchema } from './intent.ts';
+
 const text = z.string().trim().min(1).max(1000);
-const texts = z.array(text).max(12);
-export const intentAnalysisSchema = z
-  .object({
-    objective: text,
-    reason: text,
-    intent: z.enum(['discuss', 'execute', 'clarify']).optional(),
-    constraints: texts.optional(),
-    acceptance: texts.optional(),
-    nonGoals: texts.optional(),
-    changes: requirementChangesSchema.optional(),
-    questions: z.array(text).max(4).optional(),
-  })
-  .strict();
-export const analysisRequestSchema = intentAnalysisSchema
-  .extend({
-    route: z.enum(['direct', 'focused', 'planned']),
-  })
-  .strict();
 export const planningConfigSchema = z
   .object({
     enabled: z.boolean().default(true),
@@ -61,7 +43,6 @@ export type PlanWindow = {
   model: string;
   dispatchable: boolean;
   capabilities: string[];
-  profile?: TeamMember;
   capabilityFacts?: Capability[];
 };
 export type Inventory = {

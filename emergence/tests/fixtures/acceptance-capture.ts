@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { z } from 'zod';
 import { taskSchema } from '../../src/core/domain/task.ts';
-import { coordinationSchema } from '../../src/core/domain/team.ts';
+import { coordinationSchema } from '../../src/core/domain/legacy-coordination.ts';
 import { runDiagnosticSchema } from '../../src/core/domain/run-diagnostics.ts';
 import type { ExecutionEffect } from '../../src/core/storage/execution-journal.ts';
 import { bytesHash, fixtureScript, type AcceptanceSnapshot } from './acceptance-oracle.ts';

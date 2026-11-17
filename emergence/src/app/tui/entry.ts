@@ -1,5 +1,5 @@
 import { createCliRenderer, type CliRenderer } from '@opentui/core';
-import type { LaunchConfig } from '../controller.ts';
+import type { LaunchConfig } from '../session-config.ts';
 import { mountWorkspaceUI } from '../workspace-ui.ts';
 import type { WorkspaceController } from '../workspace.ts';
 import { archiveSnapshot, hasSnapshot } from './home-state.ts';

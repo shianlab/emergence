@@ -9,13 +9,12 @@ test('an invalid artifact report stays correctable in the current turn without r
     const main = f.w.current,
       worker = await f.w.split('row');
     main.controller!.setPermissionMode('auto');
-    f.w.collaboration.configure(main.id, [worker.id]);
     let request = 0;
     f.provider.stream = async function* (): AsyncIterable<StreamChunk> {
       const n = request++;
       if (n > 2) throw new Error('A valid report should conclude the turn');
       if (n === 2) {
-        const task = f.w.collaboration.current(worker.id)!;
+        const task = f.w.taskEngine.current(worker.id)!;
         assert.equal(task.report, undefined, 'invalid paths never enter durable report state');
         assert.equal(task.status, 'running');
         assert.equal(f.writes(), 1);
@@ -36,8 +35,8 @@ test('an invalid artifact report stays correctable in the current turn without r
       yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name, arguments: raw } };
       yield { type: 'finish', reason: { kind: 'tool-calls' } };
     };
-    const task = await f.w.collaboration.enqueue(
-      main.id,
+    const task = await f.w.taskEngine.enqueue(
+      worker.id,
       worker.id,
       'report-admission',
       'write and report',
@@ -53,7 +52,7 @@ test('an invalid artifact report stays correctable in the current turn without r
     assert.deepEqual(task.result?.errors, []);
     assert.equal(f.writes(), 1);
     assert.equal(request, 3);
-    assert.ok(await f.w.collaboration.assurance.version(task));
+    assert.ok(await f.w.taskEngine.assurance.version(task));
     const events = JSON.stringify(worker.controller!.agent.session.snapshotEvents());
     assert.match(events, /INVALID_REPORT_ARTIFACTS/);
     assert.match(events, /artifacts.0/);

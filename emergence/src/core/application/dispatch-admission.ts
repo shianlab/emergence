@@ -64,8 +64,7 @@ export async function observeDispatch(
       window.model !== step.model
     )
       throw new AllocationChanged('计划窗口绑定已变化或快照失效，请重新分配');
-    if (step.window !== issuer && !window.dispatchable)
-      throw new AllocationChanged('目标可用性已变化：' + (window.profile?.reason ?? '目标窗口当前不可派发'));
+    if (step.window !== issuer) throw new AllocationChanged('仅可执行当前会话的计划步骤');
     if (step.capabilities.some((id) => !window.capabilities.includes(id)))
       throw new Error('CAPABILITY_UNAVAILABLE：目标窗口缺少计划要求的实际能力');
     if (!inventory.capabilities.some((item) => item.id === 'model:' + window.model && item.callable))
@@ -81,7 +80,7 @@ export async function observeDispatch(
         workspace.panes.get(issuer)?.controller !== source ||
         (source.planning.environment && revision !== allocationRevision(source.planning.environment()))
       )
-        throw new AllocationChanged('窗口、权限、团队或负载在提交前变化，请重新分配');
+        throw new AllocationChanged('窗口、权限或负载在提交前变化，请重新分配');
     },
   };
 }

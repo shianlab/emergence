@@ -8,7 +8,7 @@ import UserApproval from '@deepseek-ai/dsh-user-approval';
 import { executionFixture, until } from './fixtures/core-execution.ts';
 import { unresolvedTaskErrors } from '../src/core/domain/task-failure.ts';
 import { resolvedEvidenceCurrent } from '../src/core/application/task-failures.ts';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 
 async function fixture({
   different = false,
@@ -80,10 +80,8 @@ async function fixture({
     yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name: tool, arguments: raw } };
     yield { type: 'finish', reason: { kind: 'tool-calls' } };
   };
-  const master = f.w.current,
-    worker = await f.w.split('row');
-  f.w.collaboration.configure(master.id, [worker.id]);
-  const task = await f.w.collaboration.enqueue(master.id, worker.id, 'read-recovery', '检查当前文件');
+  const worker = await f.w.split('row');
+  const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'read-recovery', '检查当前文件');
   await until(() => {
     if (worker.controller?.pending) worker.controller.pending.respond('y');
     return !!task.endedAt;
@@ -104,11 +102,11 @@ test('R4 exact read recovery keeps the failed observation and binds its fresh re
     const restored = new WorkspaceController(f.ctx, f.launch);
     try {
       await restored.initialize();
-      const task = restored.collaboration.task(f.task.id);
+      const task = restored.taskEngine.task(f.task.id);
       assert.deepEqual(task.result, f.task.result);
       await writeFile(join(f.cwd, 'read.txt'), 'new bytes');
       assert.equal(await resolvedEvidenceCurrent(task), false, 'old success is not current evidence');
-      await assert.rejects(restored.collaboration.assurance.version(task), /替代证据/);
+      await assert.rejects(restored.taskEngine.assurance.version(task), /替代证据/);
     } finally {
       await restored.close();
     }
@@ -137,7 +135,7 @@ test('R4 unrelated reads, stale replacements, exhausted safe attempts and true f
     try {
       assert.equal(f.task.status, 'needs_review', JSON.stringify({ option, result: f.task.result }));
       assert.ok(unresolvedTaskErrors(f.task).length);
-      assert.equal(f.w.collaboration.state.tasks.length, 1, 'no whole-task retries');
+      assert.equal(f.w.taskEngine.state.tasks.length, 1, 'no whole-task retries');
       assert.equal(f.worker.controller!.busy, false);
     } finally {
       await f.close();

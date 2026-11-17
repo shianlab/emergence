@@ -24,7 +24,7 @@ try {
   await flush();
   const entries = f.w.interactions.list();
   assert.equal(f.w.focused, f.master.id);
-  await test.mockMouse.click(ui.teamBar.approval.x + 1, ui.teamBar.approval.y);
+  await f.w.send(f.master.id, '/approvals');
   await flush();
   assert.ok(ui.commandList.box.visible);
   assert.equal(f.writes(), 0);

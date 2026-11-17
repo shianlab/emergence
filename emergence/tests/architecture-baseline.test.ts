@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { executionFixture, until } from './fixtures/core-execution.ts';
 
 test('restart takes task truth from SQLite while retaining layout drafts, without accepting a stale JSON success', async () => {
@@ -10,9 +10,8 @@ test('restart takes task truth from SQLite while retaining layout drafts, withou
   try {
     const master = fixture.w.focused;
     const worker = await fixture.w.split('row');
-    fixture.w.collaboration.configure(master, [worker.id]);
-    const task = await fixture.w.collaboration.enqueue(
-      master,
+    const task = await fixture.w.taskEngine.enqueue(
+      worker.id,
       worker.id,
       'baseline-authority',
       'fixture:write',
@@ -36,13 +35,13 @@ test('restart takes task truth from SQLite while retaining layout drafts, withou
 
     restored = new WorkspaceController(fixture.ctx, fixture.launch);
     await restored.initialize();
-    const actual = restored.collaboration.task(task.id);
+    const actual = restored.taskEngine.task(task.id);
     assert.equal(actual.status, 'needs_review');
     assert.notEqual(actual.review?.accepted, true);
     assert.deepEqual(actual.receipts, task.receipts);
     assert.equal(restored.panes.get(master)?.draft, '保留未提交草稿');
-    assert.equal(restored.collaboration.state.mode, 'independent');
-    assert.equal(restored.collaboration.state.paused, true);
+    assert.equal('master' in restored.taskEngine.state, false);
+    assert.equal(restored.taskEngine.state.paused, false);
     assert.equal(fixture.writes(), writes);
   } finally {
     try {

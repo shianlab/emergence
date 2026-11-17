@@ -75,8 +75,8 @@ export class Settings {
       return true;
     }
     if (command === '/audit') {
-      const c = this.workspace.collaboration,
-        [action = 'list', id, kind, window] = args;
+      const c = this.workspace.taskEngine,
+        [action = 'list', id] = args;
       if (action === 'list')
         this.show(
           c.state.tasks
@@ -90,17 +90,7 @@ export class Settings {
           '执行结束、审查通过、验证通过和用户验收分别记录。\n' +
             JSON.stringify(await c.assurance.status(id), null, 2),
         );
-      else if (action === 'run' && id && ['review', 'verify'].includes(kind)) {
-        const task = await c.assurance.request(
-          id,
-          kind as 'review' | 'verify',
-          paneId,
-          window ? this.workspace.find(window).id : undefined,
-        );
-        this.show(
-          `独立${kind === 'review' ? '审查' : '验证'}已派发：${task.id}。命令仍需原权限确认；/audit show ${id} 查看证据。`,
-        );
-      } else if (action === 'history' && id) {
+      else if (action === 'history' && id) {
         const task = c.task(id),
           owner = this.workspace.panes.get(task.target)?.controller;
         const events =
@@ -138,7 +128,7 @@ export class Settings {
       return true;
     }
     if (command === '/recover') {
-      const c = this.workspace.collaboration;
+      const c = this.workspace.taskEngine;
       if (!args.length)
         this.show(
           c.state.tasks

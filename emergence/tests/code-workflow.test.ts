@@ -10,7 +10,7 @@ import { mkdir, mkdtemp, readFile, realpath, symlink, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { test } from 'node:test';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { evaluatePermission } from '../src/core/adapters/permissions.ts';
 import { resolvedEvidenceCurrent } from '../src/core/application/task-failures.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
@@ -241,17 +241,7 @@ async function realHarness() {
   await w.initialize();
   let seq = 0;
   const queue: { name: string; args: object; before?: () => Promise<void> }[] = [];
-  provider.stream = async function* (options): AsyncIterable<StreamChunk> {
-    // Master receipt turns share this provider but must not consume worker scripts.
-    const assigned = options.messages.some(
-      (message) =>
-        message.role === 'user' &&
-        message.content.some((block) => block.type === 'text' && block.text.startsWith('[Emergence task ')),
-    );
-    if (w.collaboration.state.mode === 'collaborate' && !assigned) {
-      yield { type: 'finish', reason: { kind: 'stop' } };
-      return;
-    }
+  provider.stream = async function* (): AsyncIterable<StreamChunk> {
     const step = queue.shift();
     if (!step) {
       yield { type: 'finish', reason: { kind: 'stop' } };
@@ -365,10 +355,8 @@ test('assigned coding task accepts repaired baseline without erasing failure rec
   process.env.PATH = dirname(process.execPath) + ';' + originalPath;
   const f = await realHarness();
   try {
-    const master = f.w.current;
     await f.w.split('row');
     const worker = f.w.current;
-    f.w.collaboration.configure(master.id, [worker.id]);
     f.queue.push(
       { name: 'emergence_code_work', args: { action: 'begin', objective: 'fix add' } },
       { name: 'pwsh', args: { command: 'npm run test', description: '运行项目测试', timeoutMs: 15000 } },
@@ -380,7 +368,7 @@ test('assigned coding task accepts repaired baseline without erasing failure rec
         args: { outcome: 'success', summary: '已复现并修复', artifacts: ['计算.js'] },
       },
     );
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'code-fix', '修复加法并执行测试');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'code-fix', '修复加法并执行测试');
     await until(() => ['succeeded', 'needs_review', 'failed'].includes(task.status));
     assert.equal(task.result?.errors.length, 0, JSON.stringify(task.result));
     assert.equal(task.executionIssues.length, 1, 'original failure remains in task audit');
@@ -404,7 +392,7 @@ test('assigned coding task accepts repaired baseline without erasing failure rec
       { name: 'read', args: { file_path: '计算.js' } },
       { name: 'emergence_report', args: { outcome: 'success', summary: '仅查看实现' } },
     );
-    const separate = await f.w.collaboration.enqueue(master.id, worker.id, 'read-next', '读取实现');
+    const separate = await f.w.taskEngine.enqueue(worker.id, worker.id, 'read-next', '读取实现');
     await until(() => ['succeeded', 'needs_review', 'failed'].includes(separate.status));
     assert.equal(separate.result?.errors.length, 0, JSON.stringify(separate.result));
     assert.equal(separate.result?.code, undefined, 'a later task must not inherit the previous change set');

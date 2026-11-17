@@ -22,14 +22,10 @@ export async function approvalFixture(count = 3, observe?: (args: Record<string,
     pane.controller!.setPermissionMode('ask');
     workers.push(pane);
   }
-  f.w.collaboration.configure(
-    master.id,
-    workers.map((p) => p.id),
-  );
   async function start() {
     const tasks = [];
     for (const p of workers)
-      tasks.push(await f.w.collaboration.enqueue(master.id, p.id, 'approval-' + p.id, 'fixture:write'));
+      tasks.push(await f.w.taskEngine.enqueue(p.id, p.id, 'approval-' + p.id, 'fixture:write'));
     await until(() => workers.every((p) => !!p.controller!.pending));
     return tasks;
   }

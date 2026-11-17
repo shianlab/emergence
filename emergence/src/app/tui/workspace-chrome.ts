@@ -37,25 +37,6 @@ export function sessionFooter(path: string, usage: string, width: number) {
 export function paneNumber(workspace: WorkspaceController, id: string) {
   return [...workspace.panes.keys()].indexOf(id) + 1;
 }
-export function paneRole(workspace: WorkspaceController, id: string, en: boolean) {
-  if (workspace.executionScope === 'session') return en ? 'Session' : '会话';
-  const state = workspace.collaboration.state;
-  return state.owned.includes(id)
-    ? en
-      ? 'Manual'
-      : '接管'
-    : state.master === id
-      ? en
-        ? 'Main'
-        : '主控'
-      : state.workers.includes(id)
-        ? en
-          ? 'Worker'
-          : '执行'
-        : en
-          ? 'Session'
-          : '会话';
-}
 export function paneState(pane: PaneState, en: boolean) {
   return pane.error
     ? en

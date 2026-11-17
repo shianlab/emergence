@@ -1,3 +1,4 @@
+import { digest } from '../src/core/storage/execution-journal.ts';
 import { ToolCallId, type StreamChunk } from '@deepseek-ai/dsh-llm';
 import * as FileTools from '@deepseek-ai/dsh-tool-fs';
 import { defineTool } from '@deepseek-ai/dsh-tools';
@@ -29,7 +30,7 @@ async function waitFor(predicate: () => boolean, limit = 30000) {
   throw new Error('mixed acceptance timed out');
 }
 
-test('two-window native KIM plan repairs Python then computes data and independently verifies both stages', async () => {
+test('single-session native KIM plan repairs Python then computes data after evidence acceptance', async () => {
   const f = await executionFixture();
   f.config.core.planning.submission = 'whole';
   f.w.current.controller!.launch.appConfig.core.planning.submission = 'whole';
@@ -38,7 +39,6 @@ test('two-window native KIM plan repairs Python then computes data and independe
     await f.ctx.plugin(FileTools, { write: false, edit: false, readImage: false });
     const root = f.w.current;
     await f.w.split('row');
-    await f.w.setMaster(root.id);
     const fixed =
       "import csv\nfrom pathlib import Path\nvalues=[int(r['amount']) for r in csv.DictReader(Path('raw.csv').open())]\ntotal=sum(values)\nassert total==8\nPath('clean.csv').write_text('amount\\n'+str(total)+'\\n')\nprint('VERIFIED 8')\n";
     await writeFile(join(f.cwd, 'prepare.py'), fixed.replace('sum(values)', 'sum(abs(v) for v in values)'));
@@ -82,41 +82,11 @@ test('two-window native KIM plan repairs Python then computes data and independe
       const incoming = messages.findLast((m) => m.role === 'user' && m.text.startsWith('[Emergence task '));
       if (incoming) {
         const id = incoming.text.match(/\[Emergence task ([^\]]+)\]/)![1],
-          t = f.w.collaboration.task(id),
+          t = f.w.taskEngine.task(id),
           n = positions.get(id) ?? 0;
         positions.set(id, n + 1);
-        const subject = t.assessment ? f.w.collaboration.task(t.assessment.subject) : t;
-        const data = subject.workflow?.step === 'analyze';
-        if (t.assessment) {
-          if (n === 0)
-            yield* call(
-              t.assessment.kind === 'review' ? 'read' : data ? 'emergence_data_analyze' : 'pwsh',
-              t.assessment.kind === 'review'
-                ? { file_path: data ? 'clean.csv' : 'prepare.py' }
-                : data
-                  ? { file_path: 'clean.csv', method: 'metric', params_json: '{"value":"amount"}' }
-                  : { command: 'npm run test' },
-              id + '-proof',
-            );
-          else if (n === 1)
-            yield* call(
-              'emergence_assess',
-              {
-                checks: [
-                  {
-                    criterion: 0,
-                    passed: true,
-                    receipts: [id + '-proof'],
-                    note: '独立读取或执行，核对退款保留与合计8',
-                  },
-                ],
-              },
-              id + '-assess',
-            );
-          else if (n === 2)
-            yield* call('emergence_report', { outcome: 'success', summary: '独立检查通过' }, id + '-report');
-          else yield { type: 'finish', reason: { kind: 'stop' } };
-        } else {
+        const data = t.workflow?.step === 'analyze';
+        {
           const sequence = data
             ? [
                 [
@@ -163,9 +133,9 @@ test('two-window native KIM plan repairs Python then computes data and independe
       else if (n === 1) yield* call('read', { file_path: 'prepare.py' }, 'mixed-read');
       else if (n === 2)
         yield* call(
-          'emergence_plan_work',
+          'emergence_plan',
           {
-            work: {
+            plan: {
               requirementRevision: root.controller!.planning.intake()!.requirements!.revision,
               unknowns: [],
               assumptions: [],
@@ -175,6 +145,10 @@ test('two-window native KIM plan repairs Python then computes data and independe
               steps: [
                 {
                   id: 'prepare',
+                  window: root.id,
+                  session: root.controller!.id,
+                  project: root.cwd,
+                  model: root.modelId,
                   objective: '修复prepare.py并运行现有测试生成clean.csv',
                   role: 'developer',
                   scope: ['prepare.py', 'raw.csv', 'clean.csv', 'package.json'],
@@ -185,6 +159,10 @@ test('two-window native KIM plan repairs Python then computes data and independe
                 },
                 {
                   id: 'analyze',
+                  window: root.id,
+                  session: root.controller!.id,
+                  project: root.cwd,
+                  model: root.modelId,
                   objective: '计算clean.csv合计并交付报告',
                   role: 'developer',
                   scope: ['clean.csv'],
@@ -198,50 +176,40 @@ test('two-window native KIM plan repairs Python then computes data and independe
           },
           'mixed-plan',
         );
+      else if (n === 3)
+        yield* call(
+          'emergence_execute_plan',
+          { plan_id: digest(root.controller!.planning.snapshot(root.controller!.agent)!.plan!) },
+          'mixed-execute',
+        );
       else yield { type: 'finish', reason: { kind: 'stop' } };
     };
     await f.w.send(root.id, '修复退款被转正的问题，生成数据后计算收入并交付报告。');
     await waitFor(() => {
-      for (const pane of f.w.panes.values())
-        if (pane.controller?.pending) {
-          const t = f.w.collaboration.current(pane.id);
-          if (t?.assessment?.kind === 'verify' || t?.workflow?.step === 'prepare')
-            pane.controller.pending.respond('y');
-        }
-      return ['completed', 'blocked', 'cancelled'].includes(f.w.team.records.at(-1)?.phase ?? '');
+      if (root.controller?.pending) root.controller.pending.respond('y');
+      return f.w.taskEngine.state.tasks[0]?.status === 'needs_review';
     });
-    const record = f.w.team.records.at(-1)!;
-    assert.equal(
-      record.phase,
-      'completed',
-      record.blockReason +
-        '\n' +
-        f.w.collaboration.describe() +
-        '\n' +
-        JSON.stringify(
-          root
-            .controller!.agent.session.snapshotEvents()
-            .filter((e) => e.type === 'tool/result' && e.data.message.isError),
-        ),
-    );
-    const tasks = f.w.collaboration.state.tasks,
+    const first = f.w.taskEngine.state.tasks[0];
+    assert.equal(first.result?.code?.verified, true, JSON.stringify(first.result));
+    assert.equal(f.w.taskEngine.state.tasks[1].status, 'queued');
+    await f.w.taskEngine.review(first.id, true, '已核对真实 Python 检查与输出文件');
+    await waitFor(() => f.w.taskEngine.state.tasks[1]?.status === 'needs_review');
+    const second = f.w.taskEngine.state.tasks[1];
+    assert.ok(second.receipts.some((r) => r.tool === 'emergence_data_analyze' && r.ok));
+    await f.w.taskEngine.review(second.id, true, '已核对实际数据计算回执与原始输入');
+    const tasks = f.w.taskEngine.state.tasks,
       code = tasks.find((t) => t.workflow?.step === 'prepare' && !t.assessment)!,
       data = tasks.find((t) => t.workflow?.step === 'analyze' && !t.assessment)!;
     assert.ok(data.startedAt! >= code.review!.at);
     assert.equal(code.result?.code?.verified, true);
-    const deliveries = f.w.collaboration.assurance.dataDeliveries(data);
+    const deliveries = f.w.taskEngine.assurance.dataDeliveries(data);
     assert.ok(deliveries.runs[0].files.some((v) => v.path.endsWith('report.html')));
-    assert.match(
-      record.followthrough!.summary!,
-      /report\.html/,
-      'host summary must include native data deliveries',
-    );
     assert.equal(await readFile(join(f.cwd, 'raw.csv'), 'utf8'), 'amount\n10\n-2\n');
     assert.equal(
       await readFile(join(f.cwd, 'clean.csv'), 'utf8'),
       process.platform === 'win32' ? 'amount\r\n8\r\n' : 'amount\n8\n',
     );
-    assert.equal(tasks.filter((t) => t.assessment && t.status === 'succeeded').length, 4);
+    assert.ok(tasks.every((t) => t.status === 'succeeded' && !t.assessment));
   } finally {
     await f.close();
   }
@@ -251,9 +219,7 @@ test('a downstream task refuses stale native data inputs even when no artifacts 
   const f = await executionFixture();
   try {
     await writeFile(join(f.cwd, 'data.csv'), 'amount\n10\n');
-    const master = f.w.current;
     const worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
     let step = 0;
     f.provider.stream = async function* (): AsyncIterable<StreamChunk> {
       if (step++ === 0)
@@ -266,12 +232,12 @@ test('a downstream task refuses stale native data inputs even when no artifacts 
         yield* call('emergence_report', { outcome: 'success', summary: 'computed' }, 'source-report');
       else yield { type: 'finish', reason: { kind: 'stop' } };
     };
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'source', '计算合计');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'source', '计算合计');
     await until(() => task.status === 'succeeded');
     await worker.controller!.agent.whenIdle();
     assert.equal(task.artifactVersions.length, 0);
     await writeFile(join(f.cwd, 'data.csv'), 'amount\n999\n');
-    const next = await f.w.collaboration.enqueue(master.id, worker.id, 'consumer', '基于上一分析继续', [
+    const next = await f.w.taskEngine.enqueue(worker.id, worker.id, 'consumer', '基于上一分析继续', [
       task.id,
     ]);
     await until(() => next.status === 'blocked');

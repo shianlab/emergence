@@ -8,16 +8,15 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { promisify } from 'node:util';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { planSchema } from '../src/core/domain/planning.ts';
 import { digest } from '../src/core/storage/execution-journal.ts';
 import { executionFixture, until } from './fixtures/core-execution.ts';
 
-test('complete local lifecycle: model plan, execution, independent rejection, bounded repair, verification, approved memory, restart and recall', async () => {
+test('complete local lifecycle: model plan, execution, user rejection, bounded repair, actual process verification, approved user memory, restart and recall', async () => {
   const f = await executionFixture();
   await f.ctx.plugin(UserApproval);
   let w = f.w,
-    repaired = '',
     planRead = '',
     calls = 0,
     approvals = 0;
@@ -86,7 +85,7 @@ test('complete local lifecycle: model plan, execution, independent rejection, bo
           project: f.cwd,
           model: 'deepseek',
           role: 'developer',
-          capabilities: ['tool:write'],
+          capabilities: ['tool:write', 'tool:pwsh'],
           dependsOn: [],
           scope: ['result.txt'],
           acceptance: ['result.txt 为 good'],
@@ -130,59 +129,20 @@ test('complete local lifecycle: model plan, execution, independent rejection, bo
           n === 2
             ? { plan: propose(plan(), w.current.controller!.planning.intake()!.requirements!) }
             : {
-                plan_id: digest(
-                  w.current.controller!.planning.state(w.current.controller!.agent).value.plan!,
-                ),
+                plan_id: digest(w.current.controller!.planning.snapshot(w.current.controller!.agent)!.plan!),
               };
     } else if (input.startsWith('[Emergence task ')) {
       const id = input.match(/\[Emergence task ([^\]]+)\]/)![1],
-        task = w.collaboration.task(id);
-      if (!task.assessment && n < 2) {
-        name = n === 0 ? 'write' : 'emergence_report';
+        task = w.taskEngine.task(id);
+      if (n < 3) {
+        name = ['write', 'pwsh', 'emergence_report'][n];
         args =
           n === 0
             ? { file_path: 'result.txt', content: task.repairOf ? 'good' : 'bad' }
-            : { outcome: 'success', summary: '实际写入已结束，等待独立检查', artifacts: ['result.txt'] };
-      } else if (task.assessment && n < 3) {
-        const good = (await readFile(join(f.cwd, 'result.txt'), 'utf8')) === 'good';
-        name =
-          n === 0
-            ? task.assessment.kind === 'review'
-              ? 'read'
-              : 'pwsh'
             : n === 1
-              ? 'emergence_assess'
-              : 'emergence_report';
-        args =
-          n === 0
-            ? name === 'read'
-              ? { file_path: 'result.txt' }
-              : { command: 'bounded node file check' }
-            : n === 1
-              ? {
-                  checks: [
-                    {
-                      criterion: 0,
-                      passed: good,
-                      receipts: [task.receipts[0].id],
-                      note: good ? '实际内容与检查符合验收要求' : '实际文件内容仍为 bad，验收未通过',
-                    },
-                  ],
-                }
-              : {
-                  outcome: good ? 'success' : 'failed',
-                  summary: good ? '独立证据通过' : '发现实际缺陷',
-                  artifacts: [],
-                };
+              ? { command: 'bounded node file check' }
+              : { outcome: 'success', summary: '写入与检查回执已记录', artifacts: ['result.txt'] };
       }
-    } else if (input.startsWith('CORE6_MEMORY') && n === 0) {
-      name = 'emergence_memory_propose';
-      args = {
-        scope: 'project',
-        kind: 'fact',
-        content: 'CORE6_EXPERIENCE：修复后重新独立核对文件与进程结果',
-        task_id: repaired,
-      };
     }
     if (!name) {
       yield { type: 'finish', reason: { kind: 'stop' } };
@@ -205,39 +165,32 @@ test('complete local lifecycle: model plan, execution, independent rejection, bo
   const settled = async (id: string) => {
     await until(() => {
       answer();
-      return ['needs_review', 'succeeded', 'failed'].includes(w.collaboration.task(id).status);
+      return ['needs_review', 'succeeded', 'failed'].includes(w.taskEngine.task(id).status);
     });
   };
   const started = performance.now();
   try {
     await w.send(root, '规划 CORE6_PLAN 实现并验证项目');
-    await until(() => !!w.collaboration.state.tasks[0]);
-    const task = w.collaboration.state.tasks[0];
+    await until(() => !!w.taskEngine.state.tasks[0]);
+    const task = w.taskEngine.state.tasks[0];
     await settled(task.id);
     assert.equal(task.status, 'needs_review');
     assert.equal(task.artifactVersions.length, 1);
-    const rejected = await w.collaboration.assurance.request(task.id, 'review', root);
-    await settled(rejected.id);
-    assert.equal((await w.collaboration.assurance.status(task.id)).review, false);
-    await w.collaboration.review(task.id, false, '独立读取发现实际内容错误，需要一次修复');
-    const repair = await w.collaboration.repair(task.id, '将 result.txt 修正为 good，保留原范围');
-    repaired = repair.id;
+    assert.equal(await readFile(join(f.cwd, 'result.txt'), 'utf8'), 'bad');
+    await assert.rejects(w.taskEngine.review(task.id, true, '不得忽略真实失败'), /真实失败/);
+    await w.taskEngine.review(task.id, false, '独立读取发现实际内容错误，需要一次修复');
+    const repair = await w.taskEngine.repair(task.id, '将 result.txt 修正为 good，保留原范围');
     await settled(repair.id);
     assert.equal(repair.repairCount, 1);
     assert.deepEqual(repair.permission, task.permission);
     assert.deepEqual(repair.rolePermission, task.rolePermission);
-    const review = await w.collaboration.assurance.request(repair.id, 'review', root);
-    await settled(review.id);
-    const verify = await w.collaboration.assurance.request(repair.id, 'verify', root);
-    await settled(verify.id);
-    const proof = await w.collaboration.assurance.status(repair.id);
-    assert.ok(proof.review && proof.verification, JSON.stringify(proof));
-    await w.collaboration.review(repair.id, true, '当前版本独立审查与验证均有实际回执', 'model');
-    await w.send(root, 'CORE6_MEMORY 请沉淀本项目经验');
-    await until(() => {
-      answer();
-      return !w.panes.get(root)!.controller!.busy;
-    });
+    assert.equal(await readFile(join(f.cwd, 'result.txt'), 'utf8'), 'good');
+    assert.ok(repair.receipts.some((r) => r.kind === 'command' && r.ok && r.exitCode === 0));
+    await w.taskEngine.review(repair.id, true, '用户已核对当前文件与实际进程检查');
+    await w.panes.get(root)!.controller!.agent.whenIdle();
+    await w.panes
+      .get(root)!
+      .controller!.memory.propose('project', 'fact', 'CORE6_EXPERIENCE：修复后重新核对文件与进程结果');
     const memory = w.panes.get(root)!.controller!.memory,
       entry = (await memory.store.list(await memory.identity(), true))[0];
     assert.ok(entry);
@@ -255,7 +208,7 @@ test('complete local lifecycle: model plan, execution, independent rejection, bo
     await w.panes.get(root)!.controller!.agent.whenIdle();
     assert.equal(calls, before + 1);
     assert.ok(requests.at(-1)!.includes('CORE6_EXPERIENCE'));
-    assert.equal(w.collaboration.task(repair.id).status, 'succeeded');
+    assert.equal(w.taskEngine.task(repair.id).status, 'succeeded');
     const report = {
       passed: true,
       provider: 'local deterministic fixture with real Harness/files/processes',
@@ -263,7 +216,7 @@ test('complete local lifecycle: model plan, execution, independent rejection, bo
       modelRequests: calls,
       repairAttempts: 1,
       approvals,
-      tasks: w.collaboration.state.tasks.map((t) => ({
+      tasks: w.taskEngine.state.tasks.map((t) => ({
         id: t.id,
         status: t.status,
         repairOf: t.repairOf,
@@ -272,7 +225,7 @@ test('complete local lifecycle: model plan, execution, independent rejection, bo
       checks: {
         modelPlan: true,
         actualWrite: true,
-        independentRejection: true,
+        userRejection: true,
         boundedRepair: true,
         actualVerification: true,
         candidateNeedsHuman: true,

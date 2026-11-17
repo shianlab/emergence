@@ -133,33 +133,25 @@ const catalog = new Map<string, ToolContract>([
     'ask_user_question',
     'todo_write',
     'list_subagent_models',
-    'emergence_tasks',
-    'emergence_wait',
     'emergence_report',
-    'emergence_review',
     'emergence_memory_search',
-    'emergence_assess',
     'emergence_receipts',
     'emergence_capabilities',
     'emergence_plan',
     'emergence_analyze',
-    'emergence_team',
-    'emergence_decide',
-    'emergence_plan_work',
-    'emergence_plan_step',
-    'emergence_plan_remove',
-    'emergence_plan_commit',
   ].map((name) => [name, control] as const),
-  ...['subagent', 'emergence_dispatch', 'emergence_repair', 'emergence_execute_plan', 'emergence_audit'].map(
-    (name) => [name, delegation] as const,
-  ),
+  ['subagent', delegation],
+  // Existing deny/ask rules for the former entry must still restrict local plan execution.
+  [
+    'emergence_execute_plan',
+    Object.freeze({ ...delegation, policyAliases: Object.freeze(['emergence_dispatch']) }),
+  ],
   ['emergence_memory_propose', mutation],
 ]);
 
 // These controls are already allowed inside a host-bounded file task.
 for (const name of [
   'emergence_report',
-  'emergence_assess',
   'emergence_memory_search',
   'ask_user_question',
   'todo_write',

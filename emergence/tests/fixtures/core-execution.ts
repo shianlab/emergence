@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './historical-orchestration.ts';
+import { WorkspaceController } from '../../src/app/workspace.ts';
 import { defaultConfig } from '../../src/core/domain/configuration.ts';
 import { harness } from './harness.ts';
 

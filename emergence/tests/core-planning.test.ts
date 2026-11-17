@@ -9,7 +9,7 @@ import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { SessionController } from '../src/app/controller.ts';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import {
   planSchema,
@@ -21,6 +21,7 @@ import {
 } from '../src/core/domain/planning.ts';
 import { digest } from '../src/core/storage/execution-journal.ts';
 import { PlanStore, planScope } from '../src/core/storage/plan-store.ts';
+import { assertRequirementIntegrity } from '../src/core/domain/requirements.ts';
 import { harness } from './fixtures/harness.ts';
 import { propose } from './fixtures/plan-proposal.ts';
 
@@ -303,7 +304,7 @@ test('multi-project plans bind real window identities; independent mode and inhe
     await f.w.send(p2.id, '/project ' + JSON.stringify(other));
     let i = await f.c.planning.inventory(),
       p = makePlan(i);
-    const target = i.windows.find((w) => w.id === p2.id)!;
+    const target = (await f.w.panes.get(p2.id)!.controller!.planning.inventory()).windows[0];
     p.steps[0] = {
       ...p.steps[0],
       window: target.id,
@@ -312,10 +313,9 @@ test('multi-project plans bind real window identities; independent mode and inhe
       model: target.model,
       capabilities: [],
     };
-    assert.ok(validatePlan(p, i, []).some((v) => v.includes('不能派发')));
-    f.w.collaboration.configure(i.currentWindow, [p2.id]);
+    assert.ok(validatePlan(p, i, []).length > 0);
     i = await f.c.planning.inventory();
-    assert.deepEqual(validatePlan(p, i, []), []);
+    assert.ok(validatePlan(p, i, []).length > 0);
     f.c.permissionConstraints = () => [{ ...f.c.permissionSnapshot(), mode: 'plan' }];
     i = await f.c.planning.inventory();
     assert.ok(!i.windows.find((w) => w.id === i.currentWindow)!.capabilities.includes('tool:write'));
@@ -394,7 +394,10 @@ test('capability inventory honors live activation, model-invocable skills and ac
       ),
     );
     let i = await f.c.planning.inventory();
-    assert.equal(i.capabilities.find((c) => c.id === 'tool:emergence_dispatch')?.callable, false);
+    assert.equal(
+      i.capabilities.some((c) => c.id === 'tool:emergence_dispatch'),
+      false,
+    );
     assert.equal(i.capabilities.find((c) => c.id === 'skill:local-proof')?.callable, true);
     assert.equal(i.capabilities.find((c) => c.id === 'skill:human-only')?.callable, false);
     const server = {
@@ -441,58 +444,23 @@ test('a ready plan cannot bypass later permission changes or stale worker bindin
     assert.deepEqual(f.calls, ['read']);
     assert.equal(results(f.c).at(-1)!.isError, true);
     f.c.setPermissionMode('edit');
-    const worker = await f.w.split('row');
-    f.w.collaboration.configure([...f.w.panes.keys()][0], [worker.id]);
-    // Exercise the explicit/manual plan API independently of automatic master admission.
-    const environment = f.c.planning.environment!;
-    f.c.planning.environment = () => ({ ...environment(), coordinating: false });
-    f.provider.action = async (n) => {
-      if (n === 4) return { name: 'read', args: { file_path: 'source.ts' } };
-      if (n === 5) {
-        const i = await f.c.planning.inventory(),
-          p = makePlan(i, ['receipt-4']),
-          w = i.windows.find((w) => w.id === worker.id)!;
-        p.steps.push({
-          ...p.steps[0],
-          id: 'worker',
-          window: w.id,
-          session: w.session,
-          model: w.model,
-          project: w.project,
-          capabilities: ['tool:read'],
-          role: 'researcher',
-        });
-        return { name: 'emergence_plan', args: { plan_json: JSON.stringify(p) } };
-      }
-      if (n === 6) {
-        await worker.controller!.open();
-        return {
-          name: 'emergence_execute_plan',
-          args: { plan_id: 'stale-binding-must-be-rejected-before-execution' },
-        };
-      }
-    };
-    await f.run('重新规划多个窗口的任务');
-    assert.deepEqual(f.calls, ['read', 'read']);
-    assert.ok(JSON.stringify(results(f.c).at(-1)).includes('已变化'));
+    const plan = makePlan(await f.c.planning.inventory());
+    plan.steps[0].session = 'stale-session';
+    await assert.rejects(f.w.taskEngine.executePlan(f.w.focused, plan), /绑定已变化/);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
   } finally {
     await f.close();
   }
 });
 
-test('accepted multi-window plans dispatch through the existing scheduler without a second execution loop', async () => {
+test('accepted single-session plans execute through the existing scheduler without a second execution loop', async () => {
   const f = await fixture();
   try {
-    const worker = await f.w.split('row'),
-      master = [...f.w.panes.keys()][0];
+    const worker = f.w.current;
     await worker.controller!.send('规划以前的个人任务');
     await worker.controller!.agent.whenIdle();
     assert.ok((await worker.controller!.planning.describe()).includes('结构化规划'));
     f.provider.captured = [];
-    f.w.collaboration.configure(master, [worker.id]);
-    // A host may use manual plan submission; automatic master flow is tested separately.
-    const environment = f.c.planning.environment!;
-    f.c.planning.environment = () => ({ ...environment(), coordinating: false });
     f.provider.action = async (n) => {
       if (n === 0) return { name: 'read', args: { file_path: 'source.ts' } };
       if (n === 1) {
@@ -513,24 +481,24 @@ test('accepted multi-window plans dispatch through the existing scheduler withou
       if (n === 2)
         return {
           name: 'emergence_execute_plan',
-          args: { plan_id: digest(f.c.planning.state(f.c.agent).value.plan!) },
+          args: { plan_id: digest(f.c.planning.snapshot(f.c.agent)!.plan!) },
         };
     };
     await f.run('规划并派发多窗口读取任务');
     for (
       let n = 0;
-      n < 100 && !f.w.collaboration.state.tasks.some((t) => ['needs_review', 'failed'].includes(t.status));
+      n < 100 && !f.w.taskEngine.state.tasks.some((t) => ['needs_review', 'failed'].includes(t.status));
       n++
     )
       await delay(10);
-    const task = f.w.collaboration.state.tasks[0];
+    const task = f.w.taskEngine.state.tasks[0];
     assert.ok(task);
     assert.equal(task.target, worker.id);
     assert.equal(task.status, 'needs_review');
     assert.equal(task.contract?.role, 'researcher');
     assert.equal(task.targetSession, worker.controller!.id);
-    assert.equal(f.w.collaboration.state.tasks.length, 1);
-    assert.ok((await worker.controller!.planning.describe()).includes('已接到主控任务'));
+    assert.equal(f.w.taskEngine.state.tasks.length, 1);
+    assert.ok((await worker.controller!.planning.describe()).includes('已接到计划任务'));
   } finally {
     await f.close();
   }
@@ -580,8 +548,8 @@ test('only admitted user input changes requirement provenance; failed revisions 
     f.provider.action = () => (remaining-- > 0 ? { name: 'emergence_analyze', args: analysis } : undefined);
     const input = '请规划并修复项目，不发布，并检查结果';
     await f.run(input);
-    const runtime = f.c.planning.state(f.c.agent),
-      first = structuredClone(runtime.value.requirements!);
+    const snapshot = () => f.c.planning.snapshot(f.c.agent)!,
+      first = structuredClone(snapshot().requirements!);
     assert.equal(first.source.hash, createHash('sha256').update(input).digest('hex'));
     assert.match(JSON.stringify(results(f.c)), /已有目标分析/);
     const candidate = makePlan(await f.c.planning.inventory());
@@ -593,11 +561,11 @@ test('only admitted user input changes requirement provenance; failed revisions 
       f.c.planning.submit(f.c.agent, invalid, new AbortController().signal),
       /STALE_REQUIREMENTS/,
     );
-    assert.equal(runtime.value.attempts, 2);
-    assert.deepEqual(runtime.value.requirements, first);
+    assert.equal(snapshot().attempts, 2);
+    assert.deepEqual(snapshot().requirements, first);
     remaining = 1;
     await f.run('继续完成原任务');
-    const second = runtime.value.requirements!;
+    const second = snapshot().requirements!;
     assert.notEqual(second.revision, first.revision);
     assert.equal(second.source.previousRevision, first.revision);
     assert.deepEqual(second.source.origin, { messageIds: first.source.messageIds, hash: first.source.hash });
@@ -606,10 +574,16 @@ test('only admitted user input changes requirement provenance; failed revisions 
       f.c.planning.submit(f.c.agent, work, new AbortController().signal),
       /STALE_REQUIREMENTS/,
     );
-    assert.equal(runtime.value.attempts, 1);
+    assert.equal(snapshot().attempts, 1);
     await f.c.planning.submit(f.c.agent, propose(candidate, second), new AbortController().signal);
-    runtime.value.plan!.constraints = [];
-    await assert.rejects(f.c.planning.readyPlan(), /REQUIREMENT_INTEGRITY/);
+    const admittedPlan = await f.c.planning.readyPlan();
+    const detached = snapshot();
+    detached.plan!.constraints = [];
+    assert.throws(
+      () => assertRequirementIntegrity(detached.requirements!, detached.plan!, detached.requirementBinding),
+      /REQUIREMENT_INTEGRITY/,
+    );
+    assert.deepEqual((await f.c.planning.readyPlan()).constraints, admittedPlan.constraints);
   } finally {
     await f.close();
   }

@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
 import { hydrateCredentials } from '../src/app/credentials.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
+import { liveFileEvidence } from './fixtures/live-tool-evidence.ts';
 
 if (!process.argv.includes('--live')) throw new Error('Explicit --live required');
 const dir = resolve('../artifacts/core-phase6');
@@ -32,6 +33,7 @@ for (const route of original.models.slice(0, 4)) {
     ...original,
     defaultModel: route.id,
     models: [{ ...route, maxTokens: 1024 }],
+    windowModels: { slots: {} },
     mcp: [],
     extensions: [],
     skillDirs: [],
@@ -88,12 +90,8 @@ for (const route of original.models.slice(0, 4)) {
       '仅在当前目录用 write 工具创建 core6-proof.txt，内容精确为 EMERGENCE_CORE6_FILE；然后用 read 工具读回。不要运行命令、访问网络或其他路径，完成后回复 CORE6_FILE_OK。',
     );
     const lines = chain.payload.transcript as string[];
-    if (
-      (await readFile(join(project, 'core6-proof.txt'), 'utf8')).trim() !== 'EMERGENCE_CORE6_FILE' ||
-      !lines.some((s) => s.startsWith('┌ 工具 write')) ||
-      !lines.some((s) => s.startsWith('┌ 工具 read')) ||
-      lines.some((s) => s.startsWith('└ 失败'))
-    )
+    const evidence = liveFileEvidence(lines);
+    if ((await readFile(join(project, 'core6-proof.txt'), 'utf8')).trim() !== 'EMERGENCE_CORE6_FILE')
       throw new Error('Real file chain evidence incomplete');
     const resumed = await run('/tools', chain.payload.sessionId);
     if (!(resumed.payload.transcript as string[]).some((s) => s.includes('EMERGENCE_CORE6_FILE')))
@@ -102,6 +100,7 @@ for (const route of original.models.slice(0, 4)) {
       ...base,
       status: 'passed',
       checks: { realReply: true, actualWrite: true, actualRead: true, crossProcessResume: true },
+      governanceGuardRecoveries: evidence.guardRecoveries,
       durationMs: reply.ms + chain.ms + resumed.ms,
       maxOutputTokensPerCall: 1024,
       project,

@@ -157,10 +157,8 @@ test('a silent provider reaches a distinct first-response deadline, aborts and d
       });
       throw new Error('test aborted');
     };
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'silent', 'fixture:write');
+    const worker = await f.w.split('row');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'silent', 'fixture:write');
     await until(() => task.status === 'cancelled');
     assert.equal(aborted, true);
     assert.equal(calls, 1);
@@ -169,7 +167,7 @@ test('a silent provider reaches a distinct first-response deadline, aborts and d
     const run = worker.controller!.diagnostics.forTask(task.id).at(-1)!;
     assert.equal(run.outcome, 'deadline');
     assert.ok(run.durations['model-wait'] >= 1000);
-    assert.match(f.w.collaboration.diagnose(task), /模型首段响应/);
+    assert.match(f.w.taskEngine.diagnose(task), /模型首段响应/);
   } finally {
     await f.close();
   }
@@ -187,13 +185,12 @@ test('network failure after a returned write never replays the write or switches
     };
     const master = f.w.current,
       worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'network', 'fixture:write');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'network', 'fixture:write');
     await until(() => ['failed', 'interrupted', 'needs_review'].includes(task.status));
     assert.equal(f.writes(), 1);
     assert.equal(calls, 2);
-    assert.ok(f.w.collaboration.journal.effects(task.id).length > 0);
-    assert.equal(f.w.collaboration.state.tasks.length, 1);
+    assert.ok(f.w.taskEngine.journal.effects(task.id).length > 0);
+    assert.equal(f.w.taskEngine.state.tasks.length, 1);
     assert.equal(worker.modelId, master.modelId);
     assert.ok(
       Object.values(modelProviders(f.config)).every((provider) => provider.retryPolicy.maxRetries === 2),
@@ -212,10 +209,8 @@ test('a slow response within budget completes and records waiting separately fro
       await delay(180, undefined, { signal: options.signal });
       yield* original(options);
     };
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'slow', 'fixture:write');
+    const worker = await f.w.split('row');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'slow', 'fixture:write');
     await until(() => task.status === 'succeeded');
     const run = worker.controller!.diagnostics.forTask(task.id).at(-1)!;
     assert.equal(run.outcome, 'ended');
@@ -258,10 +253,8 @@ test('a blocked tool is diagnosed and cancellation waits until the tool has rele
       yield { type: 'block-end', index: 0, block: { type: 'tool-call', id, name: 'read', arguments: args } };
       yield { type: 'finish', reason: { kind: 'tool-calls' } };
     };
-    const master = f.w.current,
-      worker = await f.w.split('row');
-    f.w.collaboration.configure(master.id, [worker.id]);
-    const task = await f.w.collaboration.enqueue(master.id, worker.id, 'blocked', '读取文件', [], {
+    const worker = await f.w.split('row');
+    const task = await f.w.taskEngine.enqueue(worker.id, worker.id, 'blocked', '读取文件', [], {
       role: 'researcher',
       scope: ['result.txt'],
       acceptance: ['读取完成'],

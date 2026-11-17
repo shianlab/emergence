@@ -4,8 +4,6 @@ import { contractSchema, roleSchema } from './orchestration.ts';
 import { permissionSnapshotSchema } from './permissions.ts';
 import { planSchema } from './planning.ts';
 import { budgetReasonSchema, runClockSchema } from './run-budget.ts';
-import { coordinationSchema } from './team.ts';
-import { goalContractSchema } from './project-contract.ts';
 import { taskFailureSchema } from './task-failure.ts';
 
 export const taskStatus = z.enum([
@@ -140,73 +138,6 @@ export function isReadOnlyTask(task: Pick<TaskRecord, 'role' | 'allocation' | 'c
     !!task.contract?.binding?.readProjects.length
   );
 }
-export const collaborationSchema = z
-  .object({
-    version: z.literal(1),
-    mode: z.enum(['independent', 'collaborate']),
-    paused: z.boolean(),
-    master: z.string().optional(),
-    workers: z.array(z.string()).max(15),
-    owned: z.array(z.string()).max(16),
-    tasks: z.array(taskSchema).max(500),
-    autoWorkers: z.boolean().optional(),
-    coordinations: z.array(coordinationSchema).max(500).optional(),
-    goalContracts: z
-      .array(z.object({ plan: z.string(), goal: goalContractSchema }).strict())
-      .max(500)
-      .optional(),
-  })
-  .strict()
-  .superRefine((value, ctx) => {
-    const ids = value.tasks.map((t) => t.id),
-      keys = value.tasks.map((t) => `${t.issuerSession}:${t.requestKey}`);
-    const coordinationIds = value.coordinations?.map((r) => r.id) ?? [];
-    const goalIds = value.goalContracts?.map((g) => g.plan) ?? [];
-    if (new Set(goalIds).size !== goalIds.length)
-      ctx.addIssue({ code: 'custom', message: '总目标契约重复登记' });
-    const requests =
-      value.coordinations?.flatMap((r) => r.requestIds.map((id) => `${r.session}:${id}`)) ?? [];
-    if (
-      new Set(coordinationIds).size !== coordinationIds.length ||
-      new Set(requests).size !== requests.length
-    )
-      ctx.addIssue({ code: 'custom', message: '主控请求重复登记' });
-    if (
-      new Set(ids).size !== ids.length ||
-      new Set(keys).size !== keys.length ||
-      new Set(value.workers).size !== value.workers.length ||
-      value.workers.includes(value.master ?? '') ||
-      value.tasks.some((t) => t.dependsOn.some((id) => !ids.includes(id) || id === t.id))
-    ) {
-      ctx.addIssue({ code: 'custom', message: '协作任务身份、请求标识或依赖无效' });
-    }
-    const visited = new Set<string>(),
-      active = new Set<string>();
-    const visit = (id: string) => {
-      if (active.has(id)) {
-        ctx.addIssue({ code: 'custom', message: '任务依赖或尝试链成环' });
-        return;
-      }
-      if (visited.has(id)) return;
-      visited.add(id);
-      active.add(id);
-      const t = value.tasks.find((t) => t.id === id);
-      for (const dep of t
-        ? [
-            ...t.dependsOn,
-            ...[t.repairOf, t.recoveryOf, t.assessment?.subject].filter((v): v is string => !!v),
-          ]
-        : []) {
-        if (!ids.includes(dep)) ctx.addIssue({ code: 'custom', message: '任务引用不存在' });
-        else visit(dep);
-      }
-      active.delete(id);
-    };
-    ids.forEach(visit);
-  });
-export type CollaborationState = Omit<z.infer<typeof collaborationSchema>, 'tasks'> & {
-  tasks: TaskRecord[];
-};
 export const settledTaskStatuses = new Set<TaskRecord['status']>([
   'succeeded',
   'failed',

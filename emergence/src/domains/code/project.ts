@@ -2,7 +2,9 @@ import { spawn } from 'node:child_process';
 import { rgPath } from '@vscode/ripgrep';
 import { access, lstat, opendir, realpath } from 'node:fs/promises';
 import { basename, delimiter, extname, isAbsolute, join, relative, resolve } from 'node:path';
-import { boundedText, digest, inside } from '../../app/instruction-files.ts';
+import { boundedText } from '../../platform/text-file.ts';
+import { digest } from '../../platform/content-hash.ts';
+import { inside } from '../../platform/path-policy.ts';
 
 export const codeLimits = Object.freeze({
   files: 256,

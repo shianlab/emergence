@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-import type { LaunchConfig } from '../src/app/controller.ts';
+import type { LaunchConfig } from '../src/app/session-config.ts';
 import { mountEntryUI } from '../src/app/tui/entry.ts';
 import { englishWordmark, homeLogo, smallHomeLogo, tinyHomeLogo } from '../src/app/tui/home-logo-data.ts';
 import { homeLayout, snapshotPath } from '../src/app/tui/home-state.ts';

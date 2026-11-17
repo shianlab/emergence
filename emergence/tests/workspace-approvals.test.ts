@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ToolCallId, type GenerateOptions, type StreamChunk } from '@deepseek-ai/dsh-llm';
-import { HistoricalOrchestrationWorkspace as WorkspaceController } from './fixtures/historical-orchestration.ts';
+import { WorkspaceController } from '../src/app/workspace.ts';
 import { approvalFixture } from './fixtures/workspace-approvals.ts';
 import { until } from './fixtures/core-execution.ts';
 import { approvalIdentity } from '../src/core/adapters/approval-identity.ts';
@@ -63,14 +63,14 @@ test('R3 three real cross-project approval queues allow, reject and cancel by na
   }
 });
 
-test('R3 stale approvals cannot survive permission changes, takeover, window close or workspace restart', async () => {
+test('R3 stale approvals cannot survive permission changes, cancellation, window close or workspace restart', async () => {
   const f = await approvalFixture();
   let restored: WorkspaceController | undefined;
   try {
     await f.start();
     const [a, b, c] = f.w.interactions.list();
     f.workers[0].controller!.setPermissionMode('plan');
-    await f.w.collaboration.takeover(b.ref.pane);
+    await f.w.taskEngine.cancel(b.request.binding!.taskId!);
     await f.w.closePane(c.ref.pane);
     for (const entry of [a, b, c])
       assert.throws(
@@ -229,7 +229,7 @@ test('R3 host decisions are discoverable without a running task and use the same
     const c = f.workers[0].controller!;
     const answer = c.confirmDecision('测试决策', () => true);
     const entry = f.w.interactions.list()[0];
-    assert.equal(f.w.collaboration.state.tasks.length, 0);
+    assert.equal(f.w.taskEngine.state.tasks.length, 0);
     assert.equal(entry.request.binding, undefined);
     await f.w.send(f.master.id, `/approval ${entry.ref.id} ${entry.ref.version} allow`);
     assert.equal(await answer, true);

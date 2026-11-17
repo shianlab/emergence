@@ -2,6 +2,7 @@
 **/node_modules/
 **/dist/
 **/.data-venv/
+**/.quality-tools/
 **/__pycache__/
 **/*.pyc
 **/.pytest_cache/

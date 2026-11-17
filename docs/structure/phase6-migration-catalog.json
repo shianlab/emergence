@@ -1,0 +1,415 @@
+{
+  "scope": "Stage 5 frozen inputs plus pre-format C#/Python/PowerShell snapshots. Newly inventoried release/probe/root files are not claimed as newly authored. Format-only patch is separate from reviewed Python lint fixes and tooling.",
+  "tools": {
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "dotnetSdk": "8.0.426",
+    "ruff": "0.14.10",
+    "scriptAnalyzer": "1.24.0"
+  },
+  "formatOnly": "artifacts/structure-phase6-20261117/format-only.patch",
+  "semanticCleanup": [
+    "Remove unused standard-library imports and split multi-import statements",
+    "Replace assigned lambdas with local named functions",
+    "Rename ambiguous reconciliation row counters"
+  ],
+  "retiredEntry": {
+    "from": "scripts/check-orchestration.ts",
+    "to": "scripts/check-typescript.ts",
+    "compatibility": "Only package format:orchestration alias remains; internal callers use the new entry"
+  },
+  "unchangedThirdParty": 20,
+  "changedThirdParty": [],
+  "files": [
+    {
+      "path": "../.gitattributes",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "8014ee5f788684598dda5d526c65002890d2f7661d745690c57769f5f4cbc592"
+    },
+    {
+      "path": "../.github/workflows/ci.yml",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "a6898a18f5b98fa887b54c0797076073481fc470051f34416294ecdbeb9880ad"
+    },
+    {
+      "path": "../.gitignore",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "bdf988717aae8087c37cb6582afac4078949876ad4531be9ee9ff23cdbdfa7d1"
+    },
+    {
+      "path": "../install.ps1",
+      "status": "modified",
+      "before": "161883c3ddd53dcd2da3d86e9b701598f9fd952be687b1bf89fd27717ed4d76a",
+      "after": "95fd4f71626df9f574d25f43eda93452cd1b18341bb944c952f7b17917a605b1"
+    },
+    {
+      "path": ".editorconfig",
+      "status": "added",
+      "before": null,
+      "after": "7257afd126af68fd6561983357e875aeaffe289d7457bf8f751038ca41e01d4b"
+    },
+    {
+      "path": "global.json",
+      "status": "added",
+      "before": null,
+      "after": "27f32db56696904b4739cfa792a6ef1205607ddd72d9876eea1f98b43b766835"
+    },
+    {
+      "path": "native/model-config/Choice.cs",
+      "status": "modified",
+      "before": "822608d2295c53fdee382cc37f935485e8e0cc0e14d427800ea4e37993e5f670",
+      "after": "38df805606fea44adc9b1e418927ce0fbeb67de74476a7b9cb5fecfb5823a41b"
+    },
+    {
+      "path": "native/model-config/ConfigurationActions.cs",
+      "status": "modified",
+      "before": "c72c49f156fc1246c7898134f649f1a700277c52e2dce4cc48123b5de15a4836",
+      "after": "b259d045ac481cc42da8178cda3c66737facf6f8968fac28f550fa06c421c038"
+    },
+    {
+      "path": "native/model-config/ConfigurationForm.cs",
+      "status": "modified",
+      "before": "837b30cb0b23c2e714bf6b18747a8c722ae39a16a7a72c824b4ac69ab1df1fbe",
+      "after": "79d46ec0ed678bc3391019610aeb5f9b2c5048b2020ba5f5c2332e23006146cf"
+    },
+    {
+      "path": "native/model-config/ConfigurationPages.cs",
+      "status": "modified",
+      "before": "a5e56733700fbd3b59d17a913a97e3770b608a33c7f42441babfaf4c21597ae8",
+      "after": "724c370eb58f9dc6343b30a60eed1284e04e95a3fe96267fe60b9a857988e0a3"
+    },
+    {
+      "path": "native/model-config/Connection.cs",
+      "status": "modified",
+      "before": "3864e4d68d6ab74c759966bfee43489e1caa005615cf761574840b11ed8b3366",
+      "after": "e54ed1a71083909ffaeb58049723879b42094c88875619737d0ce5ee32f16d56"
+    },
+    {
+      "path": "native/model-config/Json.cs",
+      "status": "modified",
+      "before": "85b2021a116e8ce80c1d2940584d45547e4045ec3088ac3a3fe3142566a273fb",
+      "after": "fb658ebc031402095e70421118fdeb0f9f25e0b81a3ceb976988afcb5e5a08ab"
+    },
+    {
+      "path": "native/model-config/ModelDraft.cs",
+      "status": "modified",
+      "before": "2d31e81be448f071e544f4ff8989d62c9fa8481f575c56d91cf1006766ff92d3",
+      "after": "379f75c85fdab40dc3223a99c17bcaeda6db0e9a23c249ae3056e06e2b5fed17"
+    },
+    {
+      "path": "native/model-config/Program.cs",
+      "status": "modified",
+      "before": "e5703aadf6389af070ac0836741c3e988634f3ca7a6bab921a996c31e99257a7",
+      "after": "2be44e1940a6c7ebcdd8fc79217600ac75417eb85e414af2e5f4639df76235d7"
+    },
+    {
+      "path": "package.json",
+      "status": "modified",
+      "before": "4185b06dee5b5d124e4be77a63d16f9ff1f7d908475577fffedb68cdcf13e0ef",
+      "after": "bf3f7969823ae967e1229dd0d4a27fff5c7b94e5cf2a759f4e88abfb8dd99581"
+    },
+    {
+      "path": "probes/aggregate-native.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "920c29442334eda0c4c1da06df7daa58218fa068260bca554af40ea440e3c292"
+    },
+    {
+      "path": "probes/aggregate-options.mjs",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "b1a78a30fb2c908ad62aa2c79f31db25c56cf33eed41a6d70a4c4101f383c593"
+    },
+    {
+      "path": "probes/aggregate-preview.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "b812c338c8d9f9288ea05538cabe45a46bbbb5ade323e7730b354ad2b35d002e"
+    },
+    {
+      "path": "probes/aggregate-tui-options.mjs",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "dec029b9874c1cb5cf5a219546e5c2aa4f76d6e660ae0395c65d958d7c88a941"
+    },
+    {
+      "path": "probes/composer-preview.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "a9faba474838a93eec66f24e499d443d77291cb269eba27f0fd18e186532b8e1"
+    },
+    {
+      "path": "probes/conversation-preview.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "969a8c1f23e0750fb6278a54c71cae42690837525b984f1daf8fd6d57904167c"
+    },
+    {
+      "path": "probes/harness.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "9fb9534aac6ab5a0592edb984423a701ba375c54f67aee076b4bc103b386736e"
+    },
+    {
+      "path": "probes/home-preview.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "55790ef930543cfb7b71cec2602ac56be56d882c3c5d8096926e44c824a26bab"
+    },
+    {
+      "path": "probes/markdown-check.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "67fde39c8efe5a2ebba5e7ab9590bd37b24d03dfd3a212541814bdefa24abdbb"
+    },
+    {
+      "path": "probes/message-roles-preview.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "8da0ca3944ea42724be364da1c28de4984dfb46d69fffa663ee0fde4ff7a50f5"
+    },
+    {
+      "path": "probes/typography-labels.ps1",
+      "status": "modified",
+      "before": "b0a3339e186d6287ef398d50c929ea571c0a1c9ae1c83f9af4e5b6594be6f3a2",
+      "after": "d65545987c752a406a63c53c83510b8338f8fe047ab31f7e9ac34387cf6fd6d8"
+    },
+    {
+      "path": "probes/typography-native.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "2f7594813a89c4b5de78d147680218f4f4df088828580096b9dfa3e3700a750e"
+    },
+    {
+      "path": "probes/typography-preview.cmd",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "a501f829200f50e15e14f907ad87a3240810eeb944f8a8918789e240fb9393e4"
+    },
+    {
+      "path": "probes/volcano-native-preview.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "4f475759ad255a2f8398c4e4b252f59e200fcba35917c2d82d8149639b2e979b"
+    },
+    {
+      "path": "probes/volcano-preview.mjs",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "3699dc6b39267c157282dab6f6b3e42d99386e78f189533eff7edd76c62a98c3"
+    },
+    {
+      "path": "probes/workspace-preview.ts",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "3e06d55478096295c6ad98f9119a69bc98d20397038e48a5019bd67acc7de833"
+    },
+    {
+      "path": "quality/powershell.psd1",
+      "status": "added",
+      "before": null,
+      "after": "8278a099c25559fa4d66c9975ab248724b7938b3c30e99247c3f441b9bf362ad"
+    },
+    {
+      "path": "quality/requirements.txt",
+      "status": "added",
+      "before": null,
+      "after": "2039097c82df8d02420f2987a81295136a7bebeb7c43e048ebc7cc6075cabea3"
+    },
+    {
+      "path": "quality/toolchain.json",
+      "status": "added",
+      "before": null,
+      "after": "805a5ff0d8288d41e2a06e015d6778e1c06c82050d116336a84436fdbef5cb68"
+    },
+    {
+      "path": "release/README.md",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "629341d8e819ef6c0cbdce610cc0e29e0f7ad1758aa244821b73b7ca0997e7ae"
+    },
+    {
+      "path": "release/emergence.cmd",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "39a6411461a90eb7c411724001afac75f5e717e7d15266b6b4c03a5eec3157f2"
+    },
+    {
+      "path": "release/emergence.ps1",
+      "status": "modified",
+      "before": "f9ffdb99f2519b4c3dce6e7f4719688e97bef565e5ffd9be446bb3bd43c64e73",
+      "after": "941b220b089a2daea77eb3e505734f0dd7b8bbf9a7001cad1c2f258c0779d17a"
+    },
+    {
+      "path": "release/install.ps1",
+      "status": "modified",
+      "before": "01fc02c3b2d1bf8e9c78157d7f5257acd65455deb280499adf19796a2de63897",
+      "after": "61539d3c585e411d0cb39089b4efecfb10d325aa23e937d981ac02c5f2fab9e0"
+    },
+    {
+      "path": "release/licenses/Node-LICENSE.txt",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "8e603aa87c70d36e497004f0dec63111511cb61b7d65ace12e10ea791599286c"
+    },
+    {
+      "path": "release/manage.cjs",
+      "status": "newly-inventoried",
+      "before": null,
+      "after": "03192606ff2e5802c9b09fa0a71f3f44d06f257c470d66056d7898892cf3c56b"
+    },
+    {
+      "path": "release/run-manager.ps1",
+      "status": "modified",
+      "before": "0283a8152a0d15a2a8e8080e2d08a9045b59faff9ab20e366f52b28992182db8",
+      "after": "e3de7a2d69a2377003c0359252d57315ad11bd0f9923cf83198eab1f0ff3bfd1"
+    },
+    {
+      "path": "release/uninstall.ps1",
+      "status": "modified",
+      "before": "162b3b5c799633a06b37dbdc206f75a79cf1a24d0bce26162de9e56105cf9cce",
+      "after": "b48a2213776513cdbed9316db472b31e82a36c8480d5014dc6ede244de63f4e4"
+    },
+    {
+      "path": "ruff.toml",
+      "status": "added",
+      "before": null,
+      "after": "fe93fc5b275fe639a8b298fd295f5d73043d5430302d8d44a76359ddc0079ced"
+    },
+    {
+      "path": "scripts/build-home-brand.ps1",
+      "status": "modified",
+      "before": "24a9b6958aced6058077decb0395ad3a78d96a55c0a158506146531d522e3b70",
+      "after": "a4b2f290e9f25018dfd3a0fa622832071556430eaa7034f068050bff5f295e08"
+    },
+    {
+      "path": "scripts/check-languages.ts",
+      "status": "added",
+      "before": null,
+      "after": "c6f1a60dc06351bae7e4e03c37cb47265723568c507d183fa6bf4fdf3eb46dc1"
+    },
+    {
+      "path": "scripts/check-orchestration.ts",
+      "status": "removed",
+      "before": "d2e4c771ccb2744ef740b2ac443833de138b466d799bc8731260bc01ae374f5b",
+      "after": null
+    },
+    {
+      "path": "scripts/check-powershell.ps1",
+      "status": "added",
+      "before": null,
+      "after": "638ee072705599f0755302d205d447b7637bfffefacc218151c21026ccd45bd8"
+    },
+    {
+      "path": "scripts/check-typescript.ts",
+      "status": "added",
+      "before": null,
+      "after": "d2e4c771ccb2744ef740b2ac443833de138b466d799bc8731260bc01ae374f5b"
+    },
+    {
+      "path": "scripts/extract-wordmark.ps1",
+      "status": "modified",
+      "before": "98b35bc2f68a099eec1e657bd3c30819bb8dc41fa7cf3726a0daff8ee9eb332c",
+      "after": "1d2df874def9241177e9c34670d72c618aa206b850d922d5c1ae60399f13f53e"
+    },
+    {
+      "path": "scripts/import-meta-kim.py",
+      "status": "modified",
+      "before": "0a8ced3d8413791723c04f9bbd6936e4c90a0caf02c97bc8e6c70fbfe3e84752",
+      "after": "5e266c48bb068baa72d0520725ec2981e45df649136dbd4ed4ab202b0a92879d"
+    },
+    {
+      "path": "scripts/inspect-architecture.ts",
+      "status": "modified",
+      "before": "f2628813d57e896e19d33f437f9df6b00d1674751d60241150de7260824c3161",
+      "after": "4b1a291c9fc717874ea6ea52d145e72277d155e1baeae9139057e66d32c93649"
+    },
+    {
+      "path": "scripts/inspect-full.ts",
+      "status": "modified",
+      "before": "c1f2681d2c6c5366b60f4bb11c28d0578a19696e31dd09ad2dbaa129e54ca18e",
+      "after": "4400c2899e38b9850d5c7dc74106ba1e9758a76dfab724326c69c5c549f8225e"
+    },
+    {
+      "path": "scripts/lock-data-runtime.py",
+      "status": "modified",
+      "before": "1975fe2458e44f87b4615e7d1f7539d0dcdc96ffc547ba068e8ce54c8903ac6e",
+      "after": "4b23e876e01171fb4b88570c27be669cb422b63cb9dcb2b2dc4ede92e2d852fa"
+    },
+    {
+      "path": "scripts/pixel-wordmark.ps1",
+      "status": "modified",
+      "before": "25b1fbb8760e0f1ebfff840221583545dbc9909f4318c4349d3fd9d4cc52c684",
+      "after": "671d8b81c3b2d882c5e78c845c444a2d38d863f78fa3e01a694ab54aa0aa2d1b"
+    },
+    {
+      "path": "scripts/setup-data.ps1",
+      "status": "modified",
+      "before": "35052f5361a3599fa7a30bf555d928444e774fa985ad6f9698a767c11e5981fc",
+      "after": "69ad2dfa81e1f276b58e49755428efac5aa2b858865009df9d9d85b0ff594aec"
+    },
+    {
+      "path": "scripts/setup-quality.ps1",
+      "status": "added",
+      "before": null,
+      "after": "87d9581c364b1e8c9be7edeac1535b0a195b6ae2c8556f1ae6ccf58da83d1d7a"
+    },
+    {
+      "path": "scripts/source-files.ts",
+      "status": "modified",
+      "before": "2db2950ba9edecf674927cead175d2734ea379cd122f71b13ff426bb07f2ebae",
+      "after": "d7331e43fa22294ea0c92a2c8c2c39304471076b9b9ed4dc4c9a2443c62c7653"
+    },
+    {
+      "path": "src/domains/data/analytics.py",
+      "status": "modified",
+      "before": "8d3943fcc6be8ae27f7c0e6d93b0e32f54f4e9adc07baa06eb44a76e50398b9b",
+      "after": "63e0f5c9ab6544b606e13f980afa1bda746b9d9261e8d1046bb264edcdea9183"
+    },
+    {
+      "path": "src/domains/data/probe.py",
+      "status": "modified",
+      "before": "66da279cba86ce1689c0bd8bd7aaf3e2232e35061a7d2fec0d995a506dcde636",
+      "after": "40e6872b65cdbd75e3ab089dac257bedcd65954de4fa16df3dcd17998a643fbf"
+    },
+    {
+      "path": "src/domains/data/worker.py",
+      "status": "modified",
+      "before": "5a1247d06c4c43dcb4ce7cf5499c40b7e9a7d364d5b9e4266b457fd8f9dcd868",
+      "after": "e2481bfd1a4ba3356629f91582692c765d290edd3e9146dc81718902cb14ed2b"
+    },
+    {
+      "path": "tests/fixtures/NativeModelConfigurationTests.cs",
+      "status": "modified",
+      "before": "aee16e74a431411e723b3f925ede665590c7ef630aa8fde71ff9a9c473dac7fb",
+      "after": "0a01935c0e9d3535378a7f2d3e7709c633b392152ff52554d049d96448e8b59a"
+    },
+    {
+      "path": "tests/fixtures/data-analysis-cases.py",
+      "status": "modified",
+      "before": "0909c0e3f33c1ebd1af8a41610f98220615ba0640de36ba4d458539f5c50473a",
+      "after": "e62653e06694a12a17a5a53e05c06b7581c30aa70fe84175440076401a11b039"
+    },
+    {
+      "path": "tests/fixtures/data-memory-run.py",
+      "status": "modified",
+      "before": "26b5275144430c02b2a5b130bcfc293d2339d0966dcad786a774c95c3c96e43a",
+      "after": "c9a9cab76aee6a6394414c0ec67d4f91e436837c68f4f68da4e8ff3b463e0c0b"
+    },
+    {
+      "path": "tests/fixtures/data-performance-phase6.py",
+      "status": "modified",
+      "before": "d31d15fb9c2d20b05f8e16a1757c275386c5f47e01354e1a62117d31816cc602",
+      "after": "656bef47fb2af61e447649464d430ff242d94764a6f272273e35fd6bb336b16a"
+    },
+    {
+      "path": "tests/release-bootstrap.ps1",
+      "status": "modified",
+      "before": "c2c17866852d809a3ecf54078c0f65cb21ffc6b92548325f6031a503f2d3b56c",
+      "after": "8246c0d4a297972d17bca748126c93769a5884ebb0baaf9fe07d4e48c0094069"
+    }
+  ]
+}
