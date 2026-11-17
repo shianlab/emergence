@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, access, realpath, symlink } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -10,6 +12,9 @@ const manager = createRequire(import.meta.url)('../release/manage.cjs') as {
   validateFiles(root: string, files: unknown): void;
   verify(root: string, files: unknown): Promise<void>;
   copyRelease(source: string, destination: string, files: unknown): Promise<void>;
+};
+const { removeOwned } = createRequire(import.meta.url)('../release/installation/files.cjs') as {
+  removeOwned(root: string, target: string): Promise<void>;
 };
 const required = [
   'release.json',
@@ -75,4 +80,41 @@ test('bounded deployment copies only declared files and verifies destination byt
   assert.deepEqual(await readFile(join(stage, 'runtime/node.exe')), data);
   await writeFile(join(stage, 'app/dist/cli.mjs'), 'damaged');
   await assert.rejects(manager.verify(stage, files), /integrity/);
+});
+
+test('owned cleanup accepts Windows short names and preserves ownership boundaries', async (t) => {
+  if (process.platform !== 'win32') return t.skip('Windows path aliases');
+  const folder = await mkdtemp(join(tmpdir(), 'emergence-owned-cleanup-'));
+  const { stdout } = await promisify(execFile)(
+    'powershell.exe',
+    [
+      '-NoLogo',
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      '$fso = New-Object -ComObject Scripting.FileSystemObject; $fso.GetFolder($env:EMERGENCE_PATH_TEST).ShortPath',
+    ],
+    {
+      windowsHide: true,
+      env: { ...process.env, EMERGENCE_PATH_TEST: await realpath(folder) },
+      timeout: 15000,
+    },
+  );
+  const alias = stdout.trim();
+  if (alias.toLowerCase() === (await realpath(folder)).toLowerCase())
+    return t.skip('8.3 names disabled on the temporary volume');
+  const root = join(alias, 'owned'),
+    target = join(root, 'obsolete'),
+    outside = join(alias, 'outside');
+  await mkdir(target, { recursive: true });
+  await mkdir(outside);
+  await writeFile(join(outside, 'keep.txt'), 'user data');
+  await assert.rejects(removeOwned(root, root), /拒绝清理/);
+  await assert.rejects(removeOwned(root, outside), /拒绝清理/);
+  await symlink(outside, join(root, 'redirect'), 'junction');
+  await assert.rejects(removeOwned(root, join(root, 'redirect')), /link/);
+  await removeOwned(root, target);
+  await assert.rejects(access(target));
+  assert.equal(await readFile(join(outside, 'keep.txt'), 'utf8'), 'user data');
+  await access(root);
 });

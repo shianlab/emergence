@@ -193,13 +193,12 @@ async function removeOwned(root, target) {
   await ancestors(target);
   const canonicalRoot = await fs.realpath(root),
     canonicalTarget = await fs.realpath(target);
-  if (
-    !inside(canonicalRoot, canonicalTarget) ||
-    path.resolve(target).toLowerCase() !== canonicalTarget.toLowerCase()
-  )
+  if (!inside(path.resolve(root), path.resolve(target)) || !inside(canonicalRoot, canonicalTarget))
     throw new Error('拒绝清理不属于安装目录的路径');
+  // Windows 8.3 names can differ from realpath without being links. Both paths
+  // must stay inside the owner; ancestors/noLinks reject redirected directories.
   await noLinks(target);
-  await fs.rm(target, { recursive: true });
+  await fs.rm(canonicalTarget, { recursive: true });
 }
 module.exports = {
   versionPattern,
