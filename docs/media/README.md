@@ -1,6 +1,7 @@
 # Media provenance
 
-- `emergence-1.00-cover.png`: generated with the built-in imagegen tool for this release. It is brand artwork, not a product screenshot. No change to the application's approved Chinese wordmark or logo.
+- `emergence-1.00-cover.png`: original release cover generated with the built-in image tool.
+- `emergence-1.03-cover.png`: edit of the original cover with the label updated to 1.03. Both covers are brand artwork. The application uses its own approved wordmark and logo.
 - `home.svg`, `commands.svg`: exported from current OpenTUI renderer cells with demo configuration by `emergence/scripts/capture-readme.ts`. No real API calls, credentials, or developer paths. Text uses viewer fonts; terminal font/graphics behavior can differ.
 
 Cover prompt: "Premium GitHub release cover for Emergence, an independent terminal agent for coding and data analysis. Wide 2:1. Monochrome near-black, charcoal, graphite and light grey. Restrained editorial typography. Exact text: EMERGENCE; 1.00; CODE. DATA. YOUR TERMINAL.; OPEN SOURCE / MIT. Right side: a subtle flowing field of small white/grey square cells suggesting ordered computation. Generous margins and thin rules. No new logo, Chinese calligraphy, fake screenshots, mascots, neon, or watermark."

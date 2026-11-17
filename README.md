@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/media/emergence-1.00-cover.png" alt="Emergence 1.03 — Code. Data. Your terminal." width="100%"></p>
+<p align="center"><img src="docs/media/emergence-1.03-cover.png" alt="Emergence 1.03 — Code. Data. Your terminal." width="100%"></p>
 
 <h1 align="center">涌现 · Emergence</h1>
 <p align="center"><strong>在终端里，把想法变成代码，把数据变成答案。</strong></p>
@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">简体中文 · <a href="README.en.md">English</a></p>
-<p align="center"><a href="#快速开始">快速开始</a> · <a href="#能做什么">能力</a> · <a href="docs/installation.md">安装与升级</a> · <a href="CONTRIBUTING.md">参与开发</a> · <a href="https://github.com/shianlab/emergence/issues">反馈问题</a></p>
+<p align="center"><a href="#快速开始">快速开始</a> · <a href="#界面一览">界面</a> · <a href="#能做什么">能力</a> · <a href="#更新与维护">更新与维护</a> · <a href="CONTRIBUTING.md">参与开发</a></p>
 
 ---
 
@@ -28,20 +28,21 @@ Emergence 把任务理解、上下文、工具执行、权限和结果记录连�
 irm https://raw.githubusercontent.com/shianlab/emergence/main/install.ps1 | iex
 ```
 
-安装器验证官方签名清单和 SHA-256，支持重试与下载缓存，验证程序能启动后再启用。**无需管理员权限，无需预装 Node.js 或 npm。** 执行前可[查看安装脚本](install.ps1)；也支持[手动安装和离线安装](docs/installation.md)。旧版 1.00/1.01 用户使用同一命令迁移一次，之后可在 `/update` 查看更新、选择安装或关闭自动检查。
+发行包自带运行环境，**无需管理员权限或预装 Node.js、npm**。安装器校验签名及 SHA-256，支持下载重试和缓存复用，在验证程序能启动后切换入口。执行前可查看 [安装脚本](install.ps1) 或选择 [手动安装与离线安装](docs/installation.md)。
 
 进入项目目录，启动：
 
 ```powershell
-cd D:\my-project
+cd "D:\my-project"
+emergence --version
 emergence
 ```
 
-1. 输入 `/model-config`，在原生配置窗口添加模型、API 地址与密钥。
-2. 保存后选择模型，输入你要完成的任务。
-3. 输入 `/` 查看中文命令；用 `Shift+Tab` 切换执行权限。
+1. 输入 `/model-config`，在原生配置窗口添加供应商、模型、API 地址和密钥，测试连接并保存。[模型配置指南](docs/model-configuration.md)
+2. 输入 `/model`，为当前窗口选择刚保存的模型。确认首页显示的是你的项目目录。
+3. 发送第一条任务，比如「先读一下这个项目，告诉我它怎么启动、测试从哪里跑」。输入 `/` 搜索中文命令，用 `Shift+Tab` 切换执行权限。
 
-> 1.03 支持 Windows x64，推荐 Windows 11 + Windows Terminal；模型配置工具需要 .NET Framework 4.8。模型服务和 API 额度由用户自行提供。数据分析另需 Python 3.14 x64。程序版本为 `1.0.3`，发布名称为 **1.03**。
+> 1.03 支持 Windows x64，推荐 Windows 11 + Windows Terminal。原生模型配置需要 .NET Framework 4.8，模型服务使用你自己的 API 凭据。只有数据分析工具需要单独准备 CPython 3.14 x64。
 
 ## 界面一览
 
@@ -68,7 +69,7 @@ emergence
 | **可扩展上下文** | 项目规则 `EMERGENCE.md`、Skills、MCP 和本地扩展接入同一工作台 |
 | **可见的执行过程** | 流式回复、状态反馈、工具详情、键盘审批、取消与会话历史 |
 
-### 编程：从理解到验证
+### 在现有项目里改代码
 
 ```text
 先分析这个项目的登录流程，给出修改方案，暂时不要改文件。
@@ -80,7 +81,9 @@ emergence
 
 计划、工具回执和验证结果保留在会话中。模型的总结不替代实际执行记录；执行工具仍受当前窗口的权限规则约束。
 
-### 数据：从文件到结论
+经常需要遵守的项目约定可以写进 `EMERGENCE.md`。用 `/init` 预览项目规则文件，把构建命令、测试入口和修改范围写在里面，方便以后在同一项目继续工作。
+
+### 分析数据并生成报告
 
 安装 CPython 3.14 x64 后，在终端执行一次：
 
@@ -124,10 +127,23 @@ emergence data-init --python "C:\Python314\python.exe"
 | `/skills`、`/mcp` | 查看已发现的技能与 MCP 服务 |
 | `/context`、`/permissions` | 查看上下文和执行权限 |
 | `/code`、`/doctor` | 编程回执、运行环境诊断 |
+| `/update` | 检查稳定版、查看说明、选择更新 |
 | `Enter`、`Shift+Enter` | 发送、换行 |
 | `Ctrl+C` | 清空草稿或停止；空闲时连续两次退出 |
 
 配置默认保存在 `%USERPROFILE%\.emergence`，API 密钥使用当前 Windows 用户的 DPAPI 加密。恢复历史不会自动重放执行操作。高级配置见[应用手册](emergence/README.md)。
+
+## 更新与维护
+
+**1.00 / 1.01** 用户先用上方安装命令迁移一次。**1.02 及以后**可通过 `/update` 或下面的命令检查和安装。自定义安装目录、离线维护与代理设置见 [安装与升级指南](docs/installation.md)。
+
+```powershell
+emergence update --check
+emergence update
+emergence rollback
+```
+
+更新会先验证新版本，再让新启动的窗口使用它。已打开的窗口可继续当前任务。安装器保留可用的上一版本用于回退，配置、密钥和会话由独立的用户目录保存。1.03 修复了 Windows 文件替换期间的偶发读取失败，以及审批拒绝后可能多发一次模型请求的问题。[1.03 发布说明](docs/releases/1.0.3.md) · [更新日志](CHANGELOG.md)
 
 ## 从源码开发
 

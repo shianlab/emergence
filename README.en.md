@@ -1,9 +1,10 @@
-<p align="center"><img src="docs/media/emergence-1.00-cover.png" alt="Emergence 1.03 — Code. Data. Your terminal." width="100%"></p>
+<p align="center"><img src="docs/media/emergence-1.03-cover.png" alt="Emergence 1.03 — Code. Data. Your terminal." width="100%"></p>
 <h1 align="center">Emergence · 涌现</h1>
 <p align="center"><strong>Turn ideas into code. Turn data into answers.</strong></p>
 <p align="center">An open-source terminal agent for coding and data analysis, with an independent Harness, a Chinese-first TUI, and a native model configuration app.</p>
 <p align="center"><a href="README.md">简体中文</a> · English</p>
 <p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.3">Release 1.03</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
+<p align="center"><a href="#install">Install</a> · <a href="#a-terminal-workspace">Workspace</a> · <a href="#work-with-code-and-data">Examples</a> · <a href="#updates-and-maintenance">Updates</a> · <a href="#develop">Develop</a></p>
 
 ## Install
 
@@ -13,22 +14,32 @@ Run in **PowerShell on Windows x64**:
 irm https://raw.githubusercontent.com/shianlab/emergence/main/install.ps1 | iex
 ```
 
-The installer verifies the signed release manifest and SHA-256, retries interrupted downloads, reuses verified cache, and checks startup before activation. No administrator access or preinstalled Node/npm is required. Users of 1.00/1.01 must run this command once to migrate; then `/update` provides update checks, release notes and explicit installation choices. [Review the script](install.ps1) or use the [manual installation instructions](docs/installation.md).
+The installer verifies the signed release manifest and SHA-256, retries interrupted downloads, reuses verified downloads, and checks startup before activation. The release includes its own runtime and installs under your Windows user account. [Review the script](install.ps1) · [Manual and offline installation](docs/installation.md)
 
 ```powershell
-cd D:\my-project
+cd "D:\my-project"
+emergence --version
 emergence
 ```
 
-Enter `/model-config` to configure a provider, model, endpoint and API key. Then describe a task. Type `/` for commands; `Shift+Tab` switches execution permissions.
+1. Enter `/model-config` to configure a provider, model, endpoint and API key. Test the connection and save. [Model configuration guide](docs/model-configuration.md)
+2. Use `/model` to select it for the current pane. Check the project directory on the home screen.
+3. Send a first task such as “Read this project and tell me how to start it and run its tests.” Type `/` to find commands. Use `Shift+Tab` to switch permission modes.
 
-**Supported release:** Windows x64; Windows 11 with Windows Terminal is recommended. The native configuration tool requires .NET Framework 4.8. Supply your own model API credentials. Data analysis additionally requires CPython 3.14 x64. The public name is **1.03**; the package version and tag are `1.0.3` and `v1.0.3`.
+Windows 11 and Windows Terminal are recommended for the Windows x64 release. The native configuration tool requires .NET Framework 4.8. Supply your own model API credentials. The optional data analysis tools require CPython 3.14 x64.
 
 ## A terminal workspace
 
 ![Home screen exported from the actual TUI renderer](docs/media/home.svg)
 
 The frame uses demo configuration and a demo project path. The cover is generated brand artwork.
+
+<details>
+<summary>View the command menu</summary>
+
+![Slash command suggestions in the terminal](docs/media/commands.svg)
+
+</details>
 
 | Capability | What it provides |
 | --- | --- |
@@ -51,6 +62,8 @@ Understand the authentication flow and propose a fix before editing any files.
 ```text
 Fix the boundary condition, run the relevant tests, and explain the verification results.
 ```
+
+Use `/init` to preview `EMERGENCE.md`. Add your project's build commands, test entry points, and editing conventions so future sessions in that project can reuse them.
 
 For data tools, install CPython 3.14 x64 and initialize the managed environment:
 
@@ -75,6 +88,18 @@ Use `F2` / `F3` to split, `Tab` to switch and `F6` to close panes. **Panes are i
 `Enter` sends, `Shift+Enter` inserts a newline. `/help` and `Ctrl+P` discover commands; `/sessions` opens history; `/init` prepares project instructions; `/skills`, `/mcp`, `/context` and `/doctor` inspect capabilities and runtime state. Restoring a session does not replay side effects.
 
 Credentials use Windows DPAPI for the current user. Configuration and history default to `%USERPROFILE%\.emergence`. The CLI/TUI is Chinese-first and supports `/language en`; documentation and translation improvements are welcome.
+
+## Updates and maintenance
+
+Users on **1.00 or 1.01** can migrate with the installer above. Starting with **1.02**, open `/update` to check the stable channel and choose when to install, or run these commands from PowerShell. [Installation and proxy setup](docs/installation.md)
+
+```powershell
+emergence update --check
+emergence update
+emergence rollback
+```
+
+New windows use the update after the installer verifies it. Open windows can finish their current tasks. A healthy previous version is kept for rollback. Your configuration, keys, and sessions live separately from application versions. Release 1.03 fixes intermittent Windows reads during file replacement and an extra model request that could occur after an approval was denied. [Release notes](docs/releases/1.0.3.md) · [Changelog](CHANGELOG.md)
 
 ## Develop
 
