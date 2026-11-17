@@ -24,6 +24,7 @@ npm test
 | 语言 | 格式 | 静态检查 | 固定位置 |
 | --- | --- | --- | --- |
 | TypeScript | Prettier 3.9.10 | TS 5.9.3 严格类型、未用变量/参数、项目架构与状态写入检查 | package/lock、tsconfig、.prettierrc |
+| JavaScript / CJS / MJS | 同一 Prettier 3.9.10 入口 | 安装管理模块由真实加载、故障测试和发行包验收覆盖；不声称具有 TS 严格类型保证 | check-typescript.ts 自动发现自有 JS 文件 |
 | Python | Ruff 0.14.10 | E4/E7/E9/F：导入错误、语法问题、未定义/未用名称和容易混淆的写法 | ruff.toml、quality/requirements.txt 的 Windows x64 wheel 哈希 |
 | C# | SDK 8.0.426 自带 dotnet format whitespace | 系统 Framework 编译器，C# 5、warning level 4、所有编译警告视为错误 | global.json、.editorconfig、check-languages.ts |
 | PowerShell | PSScriptAnalyzer 1.24.0 格式器 | 5.1 语法解析与明确规则集，含动态字符串执行、明文口令写法、空 catch、未用变量及排版 | quality/toolchain.json、quality/powershell.psd1 |

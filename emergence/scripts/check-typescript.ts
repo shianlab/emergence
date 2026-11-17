@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import * as prettier from 'prettier';
-import { ownedTypeScriptFiles } from './source-files.ts';
+import { ownedSourceFiles } from './source-files.ts';
 
-const files = await ownedTypeScriptFiles();
+const files = await ownedSourceFiles(['.ts', '.tsx', '.js', '.mjs', '.cjs']);
 const write = process.argv.includes('--write');
 let changed = 0;
 for (const file of files) {
@@ -15,6 +15,6 @@ for (const file of files) {
   else console.error(`Format required: ${file}`);
 }
 console.log(
-  `${files.length} owned TypeScript files checked; ${changed} ${write ? 'formatted' : 'need formatting'}`,
+  `${files.length} owned TypeScript/JavaScript files checked; ${changed} ${write ? 'formatted' : 'need formatting'}`,
 );
 if (changed && !write) process.exitCode = 1;

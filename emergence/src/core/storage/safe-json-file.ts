@@ -4,11 +4,25 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 /** File mechanics only. Callers own directory validation, schema, locking and recovery. */
 export async function readJsonFile(path: string, maxBytes: number, invalidMessage: string): Promise<unknown> {
-  const info = await lstat(path);
-  if (info.isSymbolicLink() || !info.isFile() || info.size > maxBytes) throw new Error(invalidMessage);
-  const bytes = await readFile(path);
-  if (bytes.length > maxBytes) throw new Error(invalidMessage);
-  return JSON.parse(bytes.toString('utf8'));
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const info = await lstat(path);
+      if (info.isSymbolicLink() || !info.isFile() || info.size > maxBytes) throw new Error(invalidMessage);
+      const bytes = await readFile(path);
+      if (bytes.length > maxBytes) throw new Error(invalidMessage);
+      return JSON.parse(bytes.toString('utf8'));
+    } catch (error) {
+      // Windows replacement can briefly hide a directory entry from a concurrent
+      // reader. Recheck this path and all validation; never substitute empty data.
+      if (
+        process.platform !== 'win32' ||
+        attempt >= 3 ||
+        !['ENOENT', 'EPERM', 'EACCES', 'EBUSY'].includes((error as NodeJS.ErrnoException).code ?? '')
+      )
+        throw error;
+      await delay(5 * 2 ** attempt);
+    }
+  }
 }
 
 export async function replaceJsonFile(

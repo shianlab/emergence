@@ -31,6 +31,7 @@ import {
 import { Settings } from './settings.ts';
 import { readTemplate, type WorkspaceTemplate } from './templates.ts';
 import { executeWorkspaceCommand } from './workspace-commands.ts';
+import type { UpdateService } from './updates/service.ts';
 
 const paneSchema = z
   .object({
@@ -97,6 +98,7 @@ export class WorkspaceController extends EventEmitter {
   overlay = '';
   taskPanel = false;
   openModelConfiguration?: () => Promise<void>;
+  updates?: UpdateService;
   readonly taskEngine: TaskEngine;
   readonly interactions = new WorkspaceInteractions(this);
   readonly capabilities: Capabilities;

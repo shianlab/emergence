@@ -10,6 +10,7 @@ export interface CommandItem {
 type Entry = [string, string, string, string?];
 const entries: Entry[] = [
   ['/help', '使用帮助：按用途查找操作和例子', 'Help and examples'],
+  ['/update', '版本更新：检查、说明、安装与提醒设置', 'Updates and notification preferences'],
   ['/model', '切换模型：选择当前窗口使用的模型', 'Select model', '[配置 ID]'],
   ['/model-config', '打开可视化模型配置与窗口分配', 'Open model configuration'],
   ['/doctor', '只读诊断：项目、Git、模型凭据与数据环境', 'Read-only runtime diagnostics'],
@@ -124,7 +125,9 @@ export function normalizeHelp(value: string) {
 export function homeCommands(en: boolean, saved: boolean): CommandItem[] {
   return entries
     .filter(([command]) =>
-      ['/help', '/doctor', '/model', '/model-config', '/sessions', '/new', '/exit'].includes(command),
+      ['/help', '/update', '/doctor', '/model', '/model-config', '/sessions', '/new', '/exit'].includes(
+        command,
+      ),
     )
     .map(([command, zh, english, usage]) => ({ command, description: en ? english : zh, usage }))
     .concat(

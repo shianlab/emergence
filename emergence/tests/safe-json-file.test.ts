@@ -15,6 +15,16 @@ import { executionFixture } from './fixtures/core-execution.ts';
 
 const options = { invalidMessage: 'Invalid snapshot', maxBytes: 10000 };
 
+test('bounded reads preserve missing, invalid and oversized snapshot errors', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'emergence-json-invalid-'));
+  const path = join(dir, 'snapshot.json');
+  await assert.rejects(readJsonFile(path, 10000, 'Invalid snapshot'), { code: 'ENOENT' });
+  await writeFile(path, '{incomplete');
+  await assert.rejects(readJsonFile(path, 10000, 'Invalid snapshot'), SyntaxError);
+  await writeFile(path, JSON.stringify({ data: 'x'.repeat(10001) }));
+  await assert.rejects(readJsonFile(path, 10000, 'Invalid snapshot'), /Invalid snapshot/);
+});
+
 test(
   'workspace persistence shares bounded atomic replacement and recovers its write queue after a locked target',
   { skip: process.platform !== 'win32', timeout: 15000 },

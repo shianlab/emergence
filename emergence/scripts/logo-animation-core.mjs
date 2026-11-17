@@ -13,7 +13,7 @@ export const MONOCHROME_PALETTE = [
 
 export function decodeLogo(text) {
   const lines = text.replace(/\r/g, '').replace(/\n$/, '').split('\n');
-  const width = Math.max(...lines.map(line => line.length));
+  const width = Math.max(...lines.map((line) => line.length));
   const height = lines.length * 2;
   const pixels = [];
   for (let row = 0; row < lines.length; row++) {
@@ -37,11 +37,13 @@ export function appearance(x, y, width, height, elapsed) {
 export function logoColor(x, y, width, height, elapsed) {
   // The latest design uses white-to-gray lightness with no hue tint.
   const drift = Math.sin(elapsed / 6500) * 0.035;
-  const position = Math.max(0, Math.min(1, x / width * 0.12 + y / height * 0.86 + drift));
+  const position = Math.max(0, Math.min(1, (x / width) * 0.12 + (y / height) * 0.86 + drift));
   const scaled = position * (MONOCHROME_PALETTE.length - 1);
   const index = Math.min(MONOCHROME_PALETTE.length - 2, Math.floor(scaled));
   const blend = scaled - index;
-  return MONOCHROME_PALETTE[index].map((value, channel) => Math.round(value + (MONOCHROME_PALETTE[index + 1][channel] - value) * blend));
+  return MONOCHROME_PALETTE[index].map((value, channel) =>
+    Math.round(value + (MONOCHROME_PALETTE[index + 1][channel] - value) * blend),
+  );
 }
 
 export function pixelColor(x, y, width, height, elapsed, still = false) {
@@ -56,16 +58,24 @@ export function terminalFrame(logo, elapsed, still = false, indent = 0) {
   let frame = '';
   for (let y = 0; y < logo.height; y += 2) {
     frame += escape + '0m' + ' '.repeat(indent);
-    let lastForeground = '', lastBackground = '';
+    let lastForeground = '',
+      lastBackground = '';
     for (let x = 0; x < logo.width; x++) {
       const upper = pixels.has(y * logo.width + x);
       const lower = pixels.has((y + 1) * logo.width + x);
       const top = upper ? pixelColor(x, y, logo.width, logo.height, elapsed, still) : BACKGROUND;
       const bottom = lower ? pixelColor(x, y + 1, logo.width, logo.height, elapsed, still) : BACKGROUND;
       // Independent foreground/background colors preserve both half-pixels.
-      const foreground = top.join(';'), background = bottom.join(';');
-      if (foreground !== lastForeground) { frame += escape + '38;2;' + foreground + 'm'; lastForeground = foreground; }
-      if (background !== lastBackground) { frame += escape + '48;2;' + background + 'm'; lastBackground = background; }
+      const foreground = top.join(';'),
+        background = bottom.join(';');
+      if (foreground !== lastForeground) {
+        frame += escape + '38;2;' + foreground + 'm';
+        lastForeground = foreground;
+      }
+      if (background !== lastBackground) {
+        frame += escape + '48;2;' + background + 'm';
+        lastBackground = background;
+      }
       frame += upper || lower ? '▀' : ' ';
     }
     frame += escape + '0m\r\n';
