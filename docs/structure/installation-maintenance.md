@@ -73,4 +73,4 @@ npm run test:installation:migration -- "完整的已发布1.0.1发行目录"
 
 修改发行布局时必须同步更新 `validateFiles` 的必要文件、`release-pack` 的复制清单/输入指纹，以及真实安装验收。不要为减包体直接删上游依赖：Code 域运行时使用 TypeScript，上游 profile 和扩展存在动态包解析。
 
-尚未发布的新安装器不可当成 GitHub 当前下载行为。1.02 本地候选的根引导默认读取签名稳定通道；指定 `-Version` 仍选择固定发行物。GitHub 当前入口保持 1.01，完成外部验收和发布后才同步切换。候选和验证状态见[第四阶段报告](../installation-phase4-report-2026-11-17.md)。
+1.02 根引导默认读取 `releases/stable.json` 签名稳定通道；指定 `-Version` 仍选择固定发行物。后续发布仍须先上传并验证资产，再切换稳定通道。历史候选见[第四阶段报告](../installation-phase4-report-2026-11-17.md)，正式包及发布核验见[发行记录](../release-audit-1.0.2-2026-11-17.md)。清理同时验证逻辑路径与真实路径在安装根目录内，允许 Windows 8.3 短路径，祖先和子树的链接检查仍然生效。

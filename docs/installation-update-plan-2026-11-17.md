@@ -2,6 +2,8 @@
 
 日期：2026-11-17。基线：已发布 1.01（包版本 1.0.1）。
 
+后续进展：第四阶段本机验收已完成，用户确认外部电脑安装、模型配置和任务正常。正式 1.02 的发布修正、检查和包指纹见[发行核验](release-audit-1.0.2-2026-11-17.md)。下方状态和阶段定义保留为规划基线。
+
 状态：第一至第三阶段代码和本机隔离验收已完成，见[第一阶段](installation-phase1-report-2026-11-17.md)、[第二阶段](installation-phase2-report-2026-11-17.md)及[第三阶段报告](installation-phase3-report-2026-11-17.md)；外部电脑与正式发行验收留待第四阶段。建议下一正式版本为 1.02 / 1.0.2，不替换已发布的 1.0.1 资产。当前职责见[安装维护说明](structure/installation-maintenance.md)与[在线更新维护](structure/update-maintenance.md)。
 
 ## 一、目标与核查结论
