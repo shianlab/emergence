@@ -181,10 +181,35 @@ try {
   } finally {
     await writeFile(candidateWorker, workerBytes);
   }
+  // A hash-valid package can still fail to launch. It must never become the active version.
+  const nativeFile = join(source, '涌现模型配置.exe');
+  const nativeBytes = await readFile(nativeFile);
+  const validManifest = await readFile(join(source, 'manifest.sha256.json'), 'utf8');
+  try {
+    const broken = Buffer.from('not a Windows executable');
+    await writeFile(nativeFile, broken);
+    const entries = JSON.parse(validManifest);
+    const native = entries.find((entry: { path: string }) => entry.path === '涌现模型配置.exe');
+    native.bytes = broken.length;
+    native.sha256 = createHash('sha256').update(broken).digest('hex');
+    await writeFile(join(source, 'manifest.sha256.json'), JSON.stringify(entries));
+    const failed = await ps(join(source, 'install.ps1'), ['-InstallRoot', install, '-NoPath']);
+    assert.equal(failed.code, 1, failed.stdout);
+    assert.equal(await readFile(join(install, 'current.json'), 'utf8'), activeBeforeFailure);
+    assert.equal((await ps(installedEntry, ['--version'])).stdout.trim(), rc);
+    checks.hashValidButUnrunnableCandidateRejected = true;
+  } finally {
+    await writeFile(nativeFile, nativeBytes);
+    await writeFile(join(source, 'manifest.sha256.json'), validManifest);
+  }
   console.log('Upgrading to the final build and checking preserved history…');
   const upgrade = await ps(join(source, 'install.ps1'), ['-InstallRoot', install, '-NoPath']);
   assert.equal(upgrade.code, 0, upgrade.stderr + upgrade.stdout);
   assert.equal((await ps(installedEntry, ['--version'])).stdout.trim(), record.version);
+  const repeat = await ps(join(source, 'install.ps1'), ['-InstallRoot', install, '-NoPath']);
+  assert.equal(repeat.code, 0, repeat.stderr + repeat.stdout);
+  assert.equal((await ps(installedEntry, ['--version'])).stdout.trim(), record.version);
+  checks.repeatInstallChecksActualStartup = true;
   assert.equal(JSON.parse(await readFile(join(install, 'current.previous.json'), 'utf8')).version, rc);
   const requests = server.calls.length,
     resumed = await ps(installedEntry, [

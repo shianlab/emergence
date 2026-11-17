@@ -2,13 +2,55 @@ import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 // Design-only SVG study. Does not import or modify the terminal renderer.
-const body = 'M356 210 C438 210 504 275 504 355 C504 402 482 438 461 464 C439 491 440 525 468 544 C489 558 512 552 536 532 C567 506 601 494 642 494 C723 494 788 559 788 642 C788 725 722 790 642 790 C594 790 552 765 524 742 C508 729 488 729 472 740 C439 765 405 790 356 790 C274 790 208 724 208 642 C208 598 227 561 249 536 C272 509 269 484 249 459 C222 427 208 392 208 355 C208 275 275 210 356 210 Z';
+const body =
+  'M356 210 C438 210 504 275 504 355 C504 402 482 438 461 464 C439 491 440 525 468 544 C489 558 512 552 536 532 C567 506 601 494 642 494 C723 494 788 559 788 642 C788 725 722 790 642 790 C594 790 552 765 524 742 C508 729 488 729 472 740 C439 765 405 790 356 790 C274 790 208 724 208 642 C208 598 227 561 249 536 C272 509 269 484 249 459 C222 427 208 392 208 355 C208 275 275 210 356 210 Z';
 const versions = [
-  { id:'a', name:'A · 原图比例', desc:'保留三个圆团的融合关系，右上圆点与主体接近等大。', r:136, x:656, y:346, anim:'breathe', note:'圆点缓慢变亮，思考时轻轻上浮；整体最接近参考图。' },
-  { id:'b', name:'B · 紧凑卫星', desc:'主体不变，独立圆点缩小一点，留出更明确的间隙。', r:112, x:650, y:338, anim:'float', note:'圆点轻微上下浮动，活动范围控制在原有边界内。' },
-  { id:'c', name:'C · 轻盈圆点', desc:'独立圆点更小、更靠右上，主体与状态点的主次更明确。', r:88, x:669, y:321, anim:'pulse', note:'圆点以明暗表达状态，移动最少，视觉更安静。' },
+  {
+    id: 'a',
+    name: 'A · 原图比例',
+    desc: '保留三个圆团的融合关系，右上圆点与主体接近等大。',
+    r: 136,
+    x: 656,
+    y: 346,
+    anim: 'breathe',
+    note: '圆点缓慢变亮，思考时轻轻上浮；整体最接近参考图。',
+  },
+  {
+    id: 'b',
+    name: 'B · 紧凑卫星',
+    desc: '主体不变，独立圆点缩小一点，留出更明确的间隙。',
+    r: 112,
+    x: 650,
+    y: 338,
+    anim: 'float',
+    note: '圆点轻微上下浮动，活动范围控制在原有边界内。',
+  },
+  {
+    id: 'c',
+    name: 'C · 轻盈圆点',
+    desc: '独立圆点更小、更靠右上，主体与状态点的主次更明确。',
+    r: 88,
+    x: 669,
+    y: 321,
+    anim: 'pulse',
+    note: '圆点以明暗表达状态，移动最少，视觉更安静。',
+  },
 ];
-const symbol = v => `<svg viewBox="180 180 640 640" role="img" aria-label="${v.name}圆润聚合标记"><path fill="#eeeeec" d="${body}"/><circle class="satellite ${v.anim}" cx="${v.x}" cy="${v.y}" r="${v.r}"/></svg>`;
-await writeFile(resolve('../artifacts/brand/aggregate-preview.html'), `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>涌现 · 聚合标记候选设计</title><style>
+const symbol = (v) =>
+  `<svg viewBox="180 180 640 640" role="img" aria-label="${v.name}圆润聚合标记"><path fill="#eeeeec" d="${body}"/><circle class="satellite ${v.anim}" cx="${v.x}" cy="${v.y}" r="${v.r}"/></svg>`;
+await writeFile(
+  resolve('../artifacts/brand/aggregate-preview.html'),
+  `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>涌现 · 聚合标记候选设计</title><style>
 *{box-sizing:border-box}body{margin:0;background:#101112;color:#eeeeec;font:14px/1.7 system-ui,'Microsoft YaHei UI',sans-serif}main{max-width:1240px;margin:auto;padding:40px 30px}header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}h1{font-size:24px;font-weight:550;margin:4px 0 10px}p{color:#93979b;margin:6px 0}.eyebrow{font:11px Consolas,monospace;letter-spacing:3px;color:#888}.badge{border:1px solid #35383b;color:#b0b3b5;border-radius:20px;padding:5px 14px;white-space:nowrap;font-size:12px}nav{display:flex;gap:8px;flex-wrap:wrap;margin:28px 0}button{font:inherit;background:transparent;color:#959a9e;border:1px solid #33383c;border-radius:6px;padding:7px 15px;cursor:pointer}button[aria-pressed=true]{background:#e5e6e6;color:#151617;border-color:#e5e6e6}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}article{border:1px solid #303336;border-radius:12px;overflow:hidden;background:#151718}.canvas{height:260px;display:grid;place-items:center;background:#121415}.canvas svg{width:164px;height:164px}.info{padding:20px}h2{font-size:17px;font-weight:550;margin:0 0 8px}.desc{min-height:48px;font-size:13px}.terminal{margin:22px 0 12px;border-top:1px solid #303336;padding:20px 0;display:flex;gap:16px;align-items:center;font:13px/16px Consolas,'Microsoft YaHei UI',monospace;color:#969b9e}.terminal svg{width:46px;height:46px;flex-shrink:0}.terminal b{color:#eee;font-size:14px}.caption{font-size:11px;color:#6f777d}.satellite{fill:#eeeeec;transform-box:fill-box;transform-origin:center;transition:fill .6s}body[data-state=thinking] .float{animation:float 2.8s ease-in-out infinite}body[data-state=thinking] .breathe{animation:breathe 3s ease-in-out infinite}body[data-state=thinking] .pulse{animation:pulse 3.6s ease-in-out infinite}body[data-state=tool] .satellite{fill:#cbbd9d}body[data-state=done] .satellite{fill:#fff}body[data-state=error] .satellite{fill:#c58d86}@keyframes float{50%{transform:translateY(-14px);opacity:.65}}@keyframes breathe{50%{transform:translateY(-8px);opacity:.6}}@keyframes pulse{50%{opacity:.45}}footer{margin-top:26px;padding-top:18px;border-top:1px solid #303336;color:#8e9499;font-size:12px}@media(max-width:800px){.cards{grid-template-columns:1fr}.canvas{height:210px}header{flex-direction:column}.desc{min-height:0}}@media(prefers-reduced-motion:reduce){.satellite{animation:none!important}}
-</style><body data-state="idle"><main><header><div><div class="eyebrow">EMERGENCE / FORM STUDY</div><h1>圆润的聚合体，独立的状态点。</h1><p>三版均使用连续圆弧。主体固定，动效只发生在右上圆点。</p></div><span class="badge">候选设计 · 尚未接入终端</span></header><nav aria-label="状态预览">${[['idle','静止'],['thinking','思考中'],['tool','调用工具'],['done','完成'],['error','错误']].map(([id,name])=>`<button data-state="${id}" aria-pressed="${id==='idle'}">${name}</button>`).join('')}</nav><section class="cards">${versions.map(v=>`<article><div class="canvas">${symbol(v)}</div><div class="info"><h2>${v.name}</h2><p class="desc">${v.desc}</p><div class="terminal">${symbol(v)}<div><b>Emergence</b><br>独立模式<br>1 会话 · <span class="state-label">就绪</span></div></div><div class="caption">小尺寸比例示意 · 非实际终端截图</div><p style="font-size:12px;margin-top:12px">${v.note}</p></div></article>`).join('')}</section><footer>这是轮廓与动效设计稿。普通终端的块字符无法在三行高度内还原这样的圆弧；正式实现需要核实终端图形能力，不会将此网页效果冒充为终端效果。</footer></main><script>document.querySelectorAll('button').forEach(b=>b.onclick=()=>{document.body.dataset.state=b.dataset.state;document.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('.state-label').forEach(x=>x.textContent=b.textContent)});</script></body></html>`);
+</style><body data-state="idle"><main><header><div><div class="eyebrow">EMERGENCE / FORM STUDY</div><h1>圆润的聚合体，独立的状态点。</h1><p>三版均使用连续圆弧。主体固定，动效只发生在右上圆点。</p></div><span class="badge">候选设计 · 尚未接入终端</span></header><nav aria-label="状态预览">${[
+    ['idle', '静止'],
+    ['thinking', '思考中'],
+    ['tool', '调用工具'],
+    ['done', '完成'],
+    ['error', '错误'],
+  ]
+    .map(([id, name]) => `<button data-state="${id}" aria-pressed="${id === 'idle'}">${name}</button>`)
+    .join(
+      '',
+    )}</nav><section class="cards">${versions.map((v) => `<article><div class="canvas">${symbol(v)}</div><div class="info"><h2>${v.name}</h2><p class="desc">${v.desc}</p><div class="terminal">${symbol(v)}<div><b>Emergence</b><br>独立模式<br>1 会话 · <span class="state-label">就绪</span></div></div><div class="caption">小尺寸比例示意 · 非实际终端截图</div><p style="font-size:12px;margin-top:12px">${v.note}</p></div></article>`).join('')}</section><footer>这是轮廓与动效设计稿。普通终端的块字符无法在三行高度内还原这样的圆弧；正式实现需要核实终端图形能力，不会将此网页效果冒充为终端效果。</footer></main><script>document.querySelectorAll('button').forEach(b=>b.onclick=()=>{document.body.dataset.state=b.dataset.state;document.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('.state-label').forEach(x=>x.textContent=b.textContent)});</script></body></html>`,
+);

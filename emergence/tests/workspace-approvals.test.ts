@@ -96,6 +96,8 @@ test('R3 stale approvals cannot survive permission changes, cancellation, window
 
 test('R3 rejecting a tool prevents the model from re-asking the identical operation in the same turn', async () => {
   const f = await approvalFixture(1);
+  const save = f.w.save.bind(f.w);
+  let releaseSave = () => {};
   try {
     let calls = 0;
     f.provider.stream = async function* (options: GenerateOptions): AsyncIterable<StreamChunk> {
@@ -122,7 +124,18 @@ test('R3 rejecting a tool prevents the model from re-asking the identical operat
     };
     const tasks = await f.start(),
       entry = f.w.interactions.list()[0];
+    const gate = new Promise<void>((resolve) => (releaseSave = resolve));
+    f.w.save = async () => {
+      await gate;
+      return save();
+    };
     f.w.interactions.respond(entry.ref, { action: 'submit', selected: ['deny'] });
+    // Hold cancellation persistence until the agent stops (or incorrectly asks
+    // again). This reproduces the race without relying on disk speed or sleeps.
+    await until(() => f.workers[0].controller!.agent.status !== 'running' || calls > 1);
+    assert.equal(calls, 1, 'pending cancellation persistence must not permit another model request');
+    releaseSave();
+    f.w.save = save;
     await until(() => !!tasks[0].endedAt);
     assert.equal(calls, 1, 'denial ends the dispatched task before another model request');
     assert.equal(tasks[0].status, 'cancelled');
@@ -134,6 +147,8 @@ test('R3 rejecting a tool prevents the model from re-asking the identical operat
       1,
     );
   } finally {
+    releaseSave();
+    f.w.save = save;
     await f.close();
   }
 });

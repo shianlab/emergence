@@ -92,5 +92,9 @@ export function mountCommandList(renderer: CliRenderer, accept: (item: CommandIt
       if (items.length) selected = (selected + delta + items.length) % items.length;
       paint();
     },
+    resetSelection() {
+      selected = 0;
+      paint();
+    },
   };
 }

@@ -1,32 +1,69 @@
 ﻿$ErrorActionPreference = 'Stop'
-# CRT quoting preserves JSON, quotes, spaces and trailing backslashes in Windows PowerShell 5.1 too.
-function Quote-NativeArgument([string]$Value) {
-    if ($Value.Length -gt 0 -and $Value -notmatch '[\s"]') {
-        return $Value
+$portable = Test-Path -LiteralPath (Join-Path $PSScriptRoot 'release.json')
+$root = if ($portable) {
+    $PSScriptRoot
+}
+else {
+    Split-Path -Parent $PSScriptRoot
+}
+$pinnedRelease = $null
+if ($portable -and (Split-Path -Leaf (Split-Path -Parent $PSScriptRoot)) -eq 'versions') {
+    $managedRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    if (Test-Path -LiteralPath (Join-Path $managedRoot 'installation.json')) {
+        $pinnedRelease = $PSScriptRoot
+        $root = $managedRoot
+        $portable = $false
     }
-    $escaped = [regex]::Replace($Value, '(\\*)"', '$1$1\"')
-    $escaped = [regex]::Replace($escaped, '(\\+)$', '$1$1')
-    return '"' + $escaped + '"'
 }
-$releaseRoot = $PSScriptRoot
-if (-not (Test-Path -LiteralPath (Join-Path $releaseRoot 'release.json'))) {
-    $installRoot = Split-Path -Parent $PSScriptRoot
-    $current = Get-Content -LiteralPath (Join-Path $installRoot 'current.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($current.product -ne 'emergence' -or $current.version -notmatch '^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$') {
-        throw 'Invalid Emergence activation manifest.'
+. (Join-Path $root 'launch-support.ps1')
+$gate = $null
+$lease = $null
+try {
+    $releaseRoot = $root
+    if (!$portable) {
+        Assert-ManagedPath $root
+        $transaction = Join-Path $root 'install-transaction.json'
+        Assert-ManagedPath $transaction
+        if (Test-Path -LiteralPath $transaction) {
+            & (Join-Path $root 'run-manager.ps1') -Action recover -InstallRoot $root -NoPath -Quiet
+            if ($LASTEXITCODE -ne 0) {
+                throw '安装恢复未完成；请重新运行完整发行包中的 install.ps1。'
+            }
+        }
+        $gate = Open-LaunchGate $root
+        $pointerFile = Join-Path $root 'current.json'
+        Assert-ManagedPath $pointerFile
+        $current = Get-Content -LiteralPath $pointerFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $releaseRoot = Resolve-VersionDirectory $root $current
+        if ($pinnedRelease) {
+            Assert-ManagedPath $pinnedRelease; $releaseRoot = $pinnedRelease
+        }
+        $lease = Open-VersionLease $root (Split-Path -Leaf $releaseRoot)
     }
-    $releaseRoot = Join-Path (Join-Path $installRoot 'versions') $current.version
+    $node = Join-Path $releaseRoot 'runtime\node.exe'
+    $entry = Join-Path $releaseRoot 'app\bin\emergence.cjs'
+    if (!(Test-Path -LiteralPath $node) -or !(Test-Path -LiteralPath $entry)) {
+        throw '应用文件缺失，请使用完整发行包执行修复安装。'
+    }
+    $start = New-Object System.Diagnostics.ProcessStartInfo
+    $start.FileName = $node
+    $start.UseShellExecute = $false
+    $nativeArguments = @($entry) + @($args | ForEach-Object { [string]$_ })
+    $start.Arguments = ($nativeArguments | ForEach-Object { Quote-NativeArgument $_ }) -join ' '
+    $process = [System.Diagnostics.Process]::Start($start)
+    if ($gate) {
+        $gate.Dispose(); $gate = $null
+    }
+    $process.WaitForExit()
+    $code = $process.ExitCode
 }
-$node = Join-Path $releaseRoot 'runtime\node.exe'
-$entry = Join-Path $releaseRoot 'app\bin\emergence.cjs'
-if (-not (Test-Path -LiteralPath $node) -or -not (Test-Path -LiteralPath $entry)) {
-    throw 'Incomplete Emergence installation. Run install.ps1 from a complete release.'
+finally {
+    if ($gate) {
+        $gate.Dispose()
+    }
+    if ($lease) {
+        $lease.handle.Dispose()
+        Remove-Item -LiteralPath $lease.record -Force -ErrorAction SilentlyContinue
+    }
 }
-$start = New-Object System.Diagnostics.ProcessStartInfo
-$start.FileName = $node
-$start.UseShellExecute = $false
-$nativeArguments = @($entry) + @($args | ForEach-Object { [string]$_ })
-$start.Arguments = ($nativeArguments | ForEach-Object { Quote-NativeArgument $_ }) -join ' '
-$process = [System.Diagnostics.Process]::Start($start)
-$process.WaitForExit()
-exit $process.ExitCode
+exit $code

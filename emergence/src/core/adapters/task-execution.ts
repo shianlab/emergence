@@ -423,10 +423,13 @@ export class TaskExecution {
     disposers.push(
       ctx.on('agent/pre-step', async ({ agent }, next) => {
         const bound = this.childTasks.get(agent);
-        if (bound && (this.host.current(bound.target) !== bound || this.host.stopped))
+        if (bound && (this.host.current(bound.target) !== bound || bound.cancelReason || this.host.stopped))
           throw new Error('子代理所属任务已失效');
         const pane = [...workspace.panes.values()].find((p) => p.controller?.owns(agent));
         const task = pane && this.host.current(pane.id);
+        // Cancellation is authoritative before its asynchronous persistence and
+        // shutdown complete; no further model step may cross this boundary.
+        if (task?.cancelReason) throw new Error(task.cancelReason);
         if (task?.contract) {
           if (task.steps >= task.contract.maxSteps) throw new Error('任务模型步数预算已耗尽');
           this.host.lifecycle.amend(task, { steps: task.steps + 1 });

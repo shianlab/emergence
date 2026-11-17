@@ -7,6 +7,7 @@ import { configSchema } from '../core/domain/configuration.ts';
 import { dataRuntime } from '../domains/data/service.ts';
 import { checkDataRuntime, checkGit, type HealthCheck } from './runtime-health.ts';
 import { MIN_NODE, VERSION } from './version.ts';
+import { createUpdateService } from './updates/runtime.ts';
 
 const require = createRequire(import.meta.url);
 export function runtimeSupported(version = process.versions.node) {
@@ -119,8 +120,12 @@ export async function diagnose(home: string, cwd: string) {
         })),
     ])),
   );
+  const updates = await createUpdateService();
+  const update = { source: updates.location.kind, ...(await updates.inspect()) };
+  updates.dispose();
   return {
     version: VERSION,
+    update,
     ok: !checks.some((c) => c.status === 'error'),
     timestamp: new Date().toISOString(),
     platform: process.platform,
@@ -163,6 +168,7 @@ export function formatDiagnosis(report: Awaited<ReturnType<typeof diagnose>>) {
   return [
     `Emergence ${report.version} · ${report.ok ? '运行诊断完成' : '存在需要修复的故障'}`,
     `当前项目：${report.cwd}`,
+    `版本更新：${report.update.source} · ${report.update.message}${report.update.checkedAt ? ' · 上次检查 ' + new Date(report.update.checkedAt).toISOString() : ''}`,
     ...report.checks.map(
       (check) => `[${statuses[check.status]}] ${names[check.name] ?? check.name}：${check.detail}`,
     ),

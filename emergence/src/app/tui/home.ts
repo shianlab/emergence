@@ -16,6 +16,7 @@ import { diagnose, formatDiagnosis } from '../doctor.ts';
 import { modelConfigurationIntent } from '../model-configuration.ts';
 import { terminalActions } from '../terminal-actions.ts';
 import { VERSION } from '../version.ts';
+import { updateAction, updateChoices, updateHint } from '../updates/presentation.ts';
 import { mountCommandList } from './command-list.ts';
 import { sizeEditor } from './composer.ts';
 import { englishWordmark, homeLogo, smallHomeLogo, tinyHomeLogo } from './home-logo-data.ts';
@@ -42,6 +43,7 @@ export interface HomeRequest {
   sessionId?: string;
 }
 export interface HomeActions {
+  updates?: import('../updates/service.ts').UpdateService;
   open(request: HomeRequest): Promise<void>;
   sessions(): Promise<readonly HomeSession[]>;
   exit(): void;
@@ -106,7 +108,7 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
     modelId = launch.modelId,
     branch = '',
     lastLaunchModelId = launch.modelId;
-  let menu: 'models' | 'sessions' | 'help' | undefined,
+  let menu: 'models' | 'sessions' | 'help' | 'updates' | undefined,
     selection = 0,
     history: readonly HomeSession[] = [];
   let suppressedQuery: string | undefined,
@@ -246,7 +248,26 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
     }
   };
   const choose = () => {
-    if (menu === 'models') {
+    if (menu === 'updates') {
+      submitGuard = performance.now() + 350;
+      const selected = updateChoices(actions.updates)[selection];
+      menu = undefined;
+      input.focus();
+      refresh();
+      if (selected)
+        void updateAction(actions.updates, selected.value)
+          .then((message) => {
+            if (disposed) return;
+            if (selected.value === 'notes') {
+              helpContent = message;
+              helpPage = 0;
+              menu = 'help';
+              input.blur();
+            } else notice.content = message;
+            refresh();
+          })
+          .catch(showError);
+    } else if (menu === 'models') {
       modelId = launch.appConfig.models[selection]?.id ?? modelId;
       menu = undefined;
       notice.content = en ? 'Model selected for the next conversation' : '已选择下一会话的模型';
@@ -285,6 +306,14 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
     }
     if (text === '/exit') {
       actions.exit();
+      return;
+    }
+    if (text === '/update') {
+      menu = 'updates';
+      selection = 0;
+      input.setText('');
+      input.blur();
+      refresh();
       return;
     }
     if (text === '/model-config' || modelConfigurationIntent(text)) {
@@ -439,6 +468,8 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
     modelLine.content = safeError(
       `${model.provider} / ${model.model}  ·  ${opening ? (en ? 'Opening' : '打开中') : en ? 'Ready' : '就绪'}`,
     );
+    if (!menu && !opening && updateHint(actions.updates?.snapshot))
+      modelLine.content = updateHint(actions.updates?.snapshot);
     for (const choice of choices) {
       choice.button.visible = choice.command !== '/continue' || saved;
       const label = en
@@ -472,12 +503,14 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
       const rows = Math.max(2, Math.min(10, height - 12));
       menuPage = Math.floor(selection / rows) * rows;
       const entries =
-        menu === 'models'
-          ? launch.appConfig.models.map((m) => `${m.id} · ${m.provider}/${m.model}`)
-          : history.map((s) => `${s.id} · ${s.cwd}`);
+        menu === 'updates'
+          ? updateChoices(actions.updates).map((item) => item.command + ' · ' + item.description)
+          : menu === 'models'
+            ? launch.appConfig.models.map((m) => `${m.id} · ${m.provider}/${m.model}`)
+            : history.map((s) => `${s.id} · ${s.cwd}`);
       const count = entries.length;
       info.content = safeError(
-        `${menu === 'models' ? '选择模型' : '历史会话'}  ${count ? `${selection + 1}/${count}` : ''}\n` +
+        `${menu === 'updates' ? '版本更新' : menu === 'models' ? '选择模型' : '历史会话'}  ${count ? `${selection + 1}/${count}` : ''}\n` +
           (entries
             .slice(menuPage, menuPage + rows)
             .map((line, i) => `${menuPage + i === selection ? '›' : ' '} ${line}`)
@@ -628,12 +661,18 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
     }
     if (key.name === 'escape') {
       key.preventDefault();
+      if (menu === 'updates') void actions.updates?.preference(undefined, true).catch(showError);
       menu = undefined;
       input.focus();
       refresh();
     } else if (key.name === 'up' || key.name === 'down') {
       key.preventDefault();
-      const count = menu === 'models' ? launch.appConfig.models.length : history.length;
+      const count =
+        menu === 'updates'
+          ? updateChoices(actions.updates).length
+          : menu === 'models'
+            ? launch.appConfig.models.length
+            : history.length;
       if (count) selection = (selection + (key.name === 'up' ? count - 1 : 1)) % count;
       refresh();
     } else if (key.name === 'return') {
@@ -651,6 +690,7 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
   renderer.keyInput.on('keypress', keypress);
   renderer.on('resize', refresh);
   renderer.on('frame', frame);
+  actions.updates?.on('change', refresh);
   if (!animationFinished) animation = setInterval(refresh, 50);
   void gitBranch(launch.cwd, abort.signal).then((value) => {
     if (!disposed) {
@@ -672,6 +712,7 @@ export function mountHome(renderer: CliRenderer, launch: LaunchConfig, saved: bo
     dispose() {
       if (disposed) return;
       disposed = true;
+      actions.updates?.off('change', refresh);
       terminal.dispose();
       clearInterval(animation);
       abort.abort();

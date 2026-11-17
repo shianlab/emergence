@@ -86,6 +86,7 @@ const checks: Array<[string, string[]]> = [
     'tui-core-phase5',
     'tui-intent',
     'tui-independent-windows',
+    'tui-updates',
     'tui-aggregate',
     'tui-typography',
     'tui-typography-audit',
