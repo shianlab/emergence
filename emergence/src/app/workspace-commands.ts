@@ -13,6 +13,7 @@ import type { PaneState, WorkspaceController } from './workspace.ts';
 type CommandHost = Pick<
   WorkspaceController,
   | 'closed'
+  | 'updates'
   | 'applyingTemplate'
   | 'panes'
   | 'emit'
@@ -68,6 +69,15 @@ export async function executeWorkspaceCommand(host: CommandHost, id: string, tex
   }
   if (text.startsWith('/')) {
     const [command, ...args] = commandTokens(text);
+    if (command === '/update') {
+      if (args.length) throw Error('输入 /update 打开版本更新菜单');
+      if (host.listenerCount('navigation')) host.emit('navigation', id, 'updates', '');
+      else {
+        host.overlay = host.updates?.snapshot.message ?? '当前运行方式未连接更新服务';
+        host.changed();
+      }
+      return;
+    }
     if (
       [
         '/mode',

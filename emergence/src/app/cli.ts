@@ -18,6 +18,7 @@ import { startModelConfiguration } from './model-config.ts';
 import { windowModel } from './model-configuration.ts';
 import { cleanStaleProfiles, markProfile, removeProfile } from './profiles.ts';
 import { VERSION } from './version.ts';
+import { runInstallationCommand } from './installation-command.ts';
 
 const appRoot = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const require = createRequire(import.meta.url);
@@ -31,6 +32,12 @@ emergence config                     显示配置文件路径
 emergence model-config               打开可视化模型配置窗口
 emergence config ui                  同上；关闭小窗即退出独立配置服务
 emergence doctor [项目目录] --json    只读诊断运行时、配置与依赖
+emergence update                    检查并安全更新到官方稳定版
+emergence update --check            仅检查版本并输出 JSON
+emergence update --source <目录>     从完整发行包离线升级
+emergence repair --source <目录>     修复当前版本，保留用户配置
+emergence rollback                  回退到通过验证的上一版本
+emergence installation status|cleanup|recover  安装状态、清理旧版、恢复中断操作
 emergence data-init --python <路径>   初始化数据环境（Windows x64 / Python 3.14）
 emergence config migrate             备份并补齐旧配置的默认设置
 emergence auth --key-file <路径>      加密保存当前模型的密钥（Windows）
@@ -72,6 +79,8 @@ async function main() {
       output: { type: 'string' },
       'native-service': { type: 'boolean' },
       python: { type: 'string' },
+      source: { type: 'string' },
+      check: { type: 'boolean' },
       'wheel-dir': { type: 'string' },
       offline: { type: 'boolean' },
       'force-data-init': { type: 'boolean' },
@@ -83,6 +92,10 @@ async function main() {
   }
   if (values.version) {
     console.log(VERSION);
+    return;
+  }
+  if (['update', 'repair', 'rollback', 'installation'].includes(positionals[0])) {
+    await runInstallationCommand(appRoot, positionals, values.source, values.check);
     return;
   }
   if (values.template && (values.resume || values.print || values.model))

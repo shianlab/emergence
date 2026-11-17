@@ -2,8 +2,9 @@ import { safeError } from '../../core/adapters/redaction.ts';
 import { taskLabels } from '../../core/domain/task.ts';
 import type { CommandItem } from '../commands.ts';
 import type { WorkspaceController } from '../workspace.ts';
+import { updateChoices } from '../updates/presentation.ts';
 
-export type NavigationKind = 'history' | 'models' | 'tasks' | 'approvals';
+export type NavigationKind = 'history' | 'models' | 'tasks' | 'approvals' | 'updates';
 export interface NavigationItem extends CommandItem {
   value: string;
 }
@@ -28,6 +29,7 @@ export function navigationItems(
   pane: string,
   kind: NavigationKind,
 ): NavigationItem[] {
+  if (kind === 'updates') return updateChoices(workspace.updates);
   if (kind === 'approvals')
     return workspace.interactions.list().map((entry) => ({
       command: entry.ref.id,
@@ -56,6 +58,7 @@ export function navigationItems(
     }));
 }
 export const navigationLabels: Record<NavigationKind, [string, string]> = {
+  updates: ['版本更新 · ↑↓ 选择 · Enter 确认 · Esc 稍后', 'Updates · Enter select · Esc later'],
   approvals: [
     '待确认 · Enter 进入所属窗口，不代为批准',
     'Pending requests · Enter opens owner, never approves',

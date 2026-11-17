@@ -19,6 +19,28 @@ namespace Emergence.ModelConfiguration
         {
             try
             {
+                using (var lease = new VersionLease())
+                    Run(args);
+            }
+            catch (IOException)
+            {
+                using (var writer = new StreamWriter(Console.OpenStandardError(), new UTF8Encoding(false)))
+                    writer.WriteLine("版本正在维护或不可访问，请重新从涌现打开模型配置。");
+                Environment.ExitCode = 1;
+            }
+        }
+        static void Run(string[] args)
+        {
+            if (args.SequenceEqual(new[] { "--installation-check" }))
+            {
+                // Validate Framework/WinForms dependencies without opening a window or service.
+                using (var control = new TabControl())
+                using (var writer = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(false)))
+                    writer.WriteLine("{\"ok\":" + (control.TabCount == 0 ? "true" : "false") + "}");
+                return;
+            }
+            try
+            {
                 SetProcessDpiAwarenessContext(new IntPtr(-4));
             }
             catch (EntryPointNotFoundException) { }

@@ -35,6 +35,7 @@ import { workspaceBrand } from './tui/workspace-brand.ts';
 import { fitCells, paneNumber, paneState, projectName } from './tui/workspace-chrome.ts';
 import { workspaceInput, type WorkspaceModalState } from './tui/workspace-input.ts';
 import type { PaneState, WorkspaceController } from './workspace.ts';
+import { updateAction, updateHint } from './updates/presentation.ts';
 
 export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceController, exit: () => void) {
   const modal: WorkspaceModalState = {
@@ -81,7 +82,21 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     overflow: 'hidden',
   });
   heading.add(navigationBar);
-  heading.add(new BoxRenderable(renderer, { height: 1, flexShrink: 0 }));
+  const updateNotice = new TextRenderable(renderer, {
+    height: 1,
+    flexShrink: 0,
+    content: '',
+    wrapMode: 'none',
+    truncate: true,
+    onMouseDown(event) {
+      if (event.button === 0) {
+        event.preventDefault();
+        event.stopPropagation();
+        openNavigation(workspace.focused, 'updates');
+      }
+    },
+  });
+  heading.add(updateNotice);
   const tabs = new Map<string, TextRenderable>();
   const overflow = new TextRenderable(renderer, { height: 1, selectable: false, content: '' });
   navigationBar.add(overflow);
@@ -219,6 +234,8 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
   );
   body.add(inspector.box);
   function closeCommands() {
+    if (modal.navigation?.kind === 'updates')
+      void workspace.updates?.preference(undefined, true).catch(() => {});
     modal.navigation = undefined;
     modal.commandMode = false;
     commandInput.blur();
@@ -278,6 +295,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     commandInput.setText(query);
     commandInput.visible = true;
     refresh();
+    if (kind === 'updates') commandList.resetSelection();
     commandInput.focus();
   }
   function chooseNavigation(item: NavigationItem) {
@@ -298,6 +316,20 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     );
     if (!current) {
       refreshHeader();
+      return;
+    }
+    if (state.kind === 'updates') {
+      modal.modalSubmitUntil = performance.now() + 350;
+      closeCommands();
+      refresh();
+      void updateAction(workspace.updates, item.value)
+        .then((message) => {
+          if (disposed) return;
+          if (item.value === 'notes') workspace.overlay = message;
+          else workspace.notice = message;
+          workspace.changed();
+        })
+        .catch((reason) => error(workspace.focused, reason));
       return;
     }
     if (state.kind === 'approvals') {
@@ -571,6 +603,15 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     error,
   });
   const refreshHeader = (redact = createRedactor()) => {
+    const updateIdle = ![...workspace.panes.values()].some(
+      (pane) => pane.controller?.busy || pane.controller?.pending,
+    );
+    const updateState = workspace.updates?.snapshot;
+    updateNotice.content =
+      updateState?.status === 'installing' || (updateIdle && !modal.commandMode)
+        ? updateHint(updateState)
+        : '';
+    updateNotice.fg = palette(workspace.launch.appConfig.ui).muted;
     const ui = workspace.launch.appConfig.ui,
       en = ui.language === 'en',
       colors = palette(ui);
@@ -946,6 +987,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
   workspace.on('message-view-command', messageViewCommand);
   workspace.on('permission-menu', openPermissionMenu);
   workspace.on('change', refresh);
+  workspace.updates?.on('change', refresh);
   workspace.on('session-change', sessionChanged);
   workspace.on('exit', exit);
   renderer.on('resize', refresh);
@@ -994,6 +1036,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       for (const [id, view] of views)
         workspace.updateView(id, view.input.plainText, savedScroll(id, view.scroll));
       workspace.off('change', refresh);
+      workspace.updates?.off('change', refresh);
       workspace.off('session-change', sessionChanged);
       workspace.off('exit', exit);
       workspace.off('navigation', openNavigation);

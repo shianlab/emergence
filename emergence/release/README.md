@@ -1,4 +1,4 @@
-# 涌现 · Emergence 1.01
+# 涌现 · Emergence 1.02
 
 Windows x64 发行包，内含 Node 26.13.0 与锁定生产依赖。无需预装 Node/npm。推荐 Windows 11 + Windows Terminal；原生模型配置需要 .NET Framework 4.8。发行仓库：https://github.com/shianlab/emergence
 
@@ -35,7 +35,21 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 
 ## 升级与卸载
 
-解压新发行包，执行新的 `install.ps1`，选择相同目录。安装器校验、部署完整版本后切换入口，保留旧版本和用户数据。回退可重新安装旧版。
+解压新发行包，执行新的 `install.ps1`，选择相同目录。安装器先验证完整候选，再切换入口；正在运行的窗口继续使用原版本，下次启动生效。新版安装管理器还支持：
+
+```powershell
+emergence update --source "D:\Downloads\Emergence-新版本-win32-x64"
+emergence update --check
+emergence update
+emergence repair --source "D:\Downloads\Emergence-当前版本-win32-x64"
+emergence rollback
+emergence installation status
+emergence installation cleanup
+```
+
+`--source` 指向已解压的完整发行包。托管安装可用 `update --check` 检查官方签名稳定版清单，或用 `update` 下载并更新；`/update` 在首页和对话页提供中文菜单，支持 Enter 确认、Esc 稍后及关闭自动检查。自动检查每 6 小时最多一次，网络不通不阻塞聊天，自动化 JSON 输出不出现提醒。检查仅使用官方签名稳定版清单，不接受未签名更新。首次从旧安装迁移，请运行本发行包的 `install.ps1`，旧版程序没有上述维护命令。便携或开发入口不会自动覆盖源码。
+
+修复使用新的版本目录，不就地覆盖占用文件。回退要求上一版本通过健康检查、数据格式兼容；仅回退程序，不回滚配置和历史。自动清理保留当前、上一份可用版本及管理器自身；使用中的版本、占用不明、未知文件或旧式启动器版本会延后清理。未提交的中断事务在下次启动时恢复；若启动入口本身损坏，重新运行完整发行包的 `install.ps1`。
 
 关闭实例后卸载：
 

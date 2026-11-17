@@ -4,8 +4,11 @@ import { mountWorkspaceUI } from '../workspace-ui.ts';
 import type { WorkspaceController } from '../workspace.ts';
 import { archiveSnapshot, hasSnapshot } from './home-state.ts';
 import { mountHome, type HomeActions, type HomeRequest } from './home.ts';
+import { createUpdateService } from '../updates/runtime.ts';
+import type { UpdateService } from '../updates/service.ts';
 
 export interface EntryActions {
+  updates?: UpdateService;
   open(config: LaunchConfig): Promise<WorkspaceController>;
   sessions: HomeActions['sessions'];
   modelConfiguration?: HomeActions['modelConfiguration'];
@@ -13,6 +16,7 @@ export interface EntryActions {
 }
 
 export async function mountEntryUI(renderer: CliRenderer, config: LaunchConfig, actions: EntryActions) {
+  const updates = actions.updates ?? (await createUpdateService());
   let disposed = false,
     opening: Promise<void> | undefined;
   let home: ReturnType<typeof mountHome> | undefined,
@@ -24,6 +28,7 @@ export async function mountEntryUI(renderer: CliRenderer, config: LaunchConfig, 
       if (disposed) return;
       const workspace = await actions.open(launch);
       if (disposed) return;
+      workspace.updates = updates;
       if (prompt !== undefined) workspace.updateView(workspace.focused, prompt, 0);
       home?.dispose();
       home = undefined;
@@ -57,12 +62,15 @@ export async function mountEntryUI(renderer: CliRenderer, config: LaunchConfig, 
         sessions: actions.sessions,
         exit: actions.exit,
         modelConfiguration: actions.modelConfiguration,
+        updates,
       });
   } catch (error) {
     home?.dispose();
     workspaceView?.dispose();
+    updates.dispose();
     throw error;
   }
+  updates.start();
   return {
     get home() {
       return home;
@@ -81,6 +89,7 @@ export async function mountEntryUI(renderer: CliRenderer, config: LaunchConfig, 
       disposed = true;
       home?.dispose();
       workspaceView?.dispose();
+      updates.dispose();
     },
   };
 }

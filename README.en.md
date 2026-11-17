@@ -1,9 +1,9 @@
-<p align="center"><img src="docs/media/emergence-1.00-cover.png" alt="Emergence 1.01 — Code. Data. Your terminal." width="100%"></p>
+<p align="center"><img src="docs/media/emergence-1.00-cover.png" alt="Emergence 1.02 — Code. Data. Your terminal." width="100%"></p>
 <h1 align="center">Emergence · 涌现</h1>
 <p align="center"><strong>Turn ideas into code. Turn data into answers.</strong></p>
 <p align="center">An open-source terminal agent for coding and data analysis, with an independent Harness, a Chinese-first TUI, and a native model configuration app.</p>
 <p align="center"><a href="README.md">简体中文</a> · English</p>
-<p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.1">Release 1.01</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
+<p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.2">Release 1.02</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
 
 ## Install
 
@@ -13,7 +13,7 @@ Run in **PowerShell on Windows x64**:
 irm https://raw.githubusercontent.com/shianlab/emergence/main/install.ps1 | iex
 ```
 
-The installer downloads a versioned release, verifies SHA-256, and installs for the current user. No administrator access or preinstalled Node/npm required. [Review the script](install.ps1) or use the [manual installation instructions](docs/installation.md).
+The installer verifies the signed release manifest and SHA-256, retries interrupted downloads, reuses verified cache, and checks startup before activation. No administrator access or preinstalled Node/npm is required. Users of 1.00/1.01 must run this command once to migrate; then `/update` provides update checks, release notes and explicit installation choices. [Review the script](install.ps1) or use the [manual installation instructions](docs/installation.md).
 
 ```powershell
 cd D:\my-project
@@ -22,7 +22,7 @@ emergence
 
 Enter `/model-config` to configure a provider, model, endpoint and API key. Then describe a task. Type `/` for commands; `Shift+Tab` switches execution permissions.
 
-**Supported release:** Windows x64; Windows 11 with Windows Terminal is recommended. The native configuration tool requires .NET Framework 4.8. Supply your own model API credentials. Data analysis additionally requires CPython 3.14 x64. The public name is **1.01**; the package version and tag are `1.0.1` and `v1.0.1`.
+**Supported release:** Windows x64; Windows 11 with Windows Terminal is recommended. The native configuration tool requires .NET Framework 4.8. Supply your own model API credentials. Data analysis additionally requires CPython 3.14 x64. The public name is **1.02**; the package version and tag are `1.0.2` and `v1.0.2`.
 
 ## A terminal workspace
 
@@ -88,10 +88,10 @@ npm run build
 npm start
 ```
 
-Run `npm run check`, `npm test` and relevant integration checks. Data tests require the Python environment. See [CONTRIBUTING.md](CONTRIBUTING.md), [installation and upgrades](docs/installation.md), [release notes](docs/releases/1.0.1.md) and the [application manual](emergence/README.md).
+Run `npm run check`, `npm test` and relevant integration checks. Data tests require the Python environment. See [CONTRIBUTING.md](CONTRIBUTING.md), [installation and upgrades](docs/installation.md), [release notes](docs/releases/1.0.2.md) and the [application manual](emergence/README.md).
 
 ## License and support
 
 Own code is [MIT](LICENSE). Third-party code and derived assets retain their original licenses and notices. See [attributions](emergence/THIRD_PARTY_NOTICES.md).
 
-Report reproducible bugs through [GitHub Issues](https://github.com/shianlab/emergence/issues), without keys or private project data. Follow the [security policy](SECURITY.md) for vulnerabilities. macOS, Linux and ARM64 are not released or certified in 1.01.
+Report reproducible bugs through [GitHub Issues](https://github.com/shianlab/emergence/issues), without keys or private project data. Follow the [security policy](SECURITY.md) for vulnerabilities. macOS, Linux and ARM64 are not released or certified in 1.02.

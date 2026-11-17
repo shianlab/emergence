@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "keys": [
+    {
+      "id": "emergence-2026-01",
+      "status": "active",
+      "pem": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAxo3MVOsLSvN8+5yfTB4w\nosUP51zp+qp6E2X2Nv6lS0Iyd8zDd3pQDl7DcaFW436gRMWptzoGUmdqlWqCiY7i\n4ozIjXMAG5HCFJyg0kQEnfo+ApYmkdylqxlHAdj3JKPiyY3KxFdV4KTMaZOu0Wpw\npUAxD+uossuNYvfHCuq/oxklKOK/iR0sfPaPBof8q7h8ZvhetAnS6+uAmT9bdqDF\nVqCCxalOecU37trrTXTtTr5/D5pJuBRy7I9UemgINoEyL1lIs8NR/ule9Ud8FhrJ\na/SuFHqKgk4sOw3TcfqyT+Bfaw3DZ8gmpqHdaoT7WXM2ZYL4SYyc3guMFKdgElp7\nUksWuqIBsoEWzkNFkSfc+UWIop5qoDjxTZoNwUVYd0/CZDREFfr8zYpWeCtjiFYK\n6Y3L2p4JeOupmqhx5onYHBEPgy5xFtpdaKawvviDV26IlRkSmlEmwA2K109T5H1z\nxXXXKvIP1FtGI63Le1Qi755whBnBL3WTsFUMVgIXKPpjAgMBAAE=\n-----END PUBLIC KEY-----\n",
+      "modulus": "xo3MVOsLSvN8+5yfTB4wosUP51zp+qp6E2X2Nv6lS0Iyd8zDd3pQDl7DcaFW436gRMWptzoGUmdqlWqCiY7i4ozIjXMAG5HCFJyg0kQEnfo+ApYmkdylqxlHAdj3JKPiyY3KxFdV4KTMaZOu0WpwpUAxD+uossuNYvfHCuq/oxklKOK/iR0sfPaPBof8q7h8ZvhetAnS6+uAmT9bdqDFVqCCxalOecU37trrTXTtTr5/D5pJuBRy7I9UemgINoEyL1lIs8NR/ule9Ud8FhrJa/SuFHqKgk4sOw3TcfqyT+Bfaw3DZ8gmpqHdaoT7WXM2ZYL4SYyc3guMFKdgElp7UksWuqIBsoEWzkNFkSfc+UWIop5qoDjxTZoNwUVYd0/CZDREFfr8zYpWeCtjiFYK6Y3L2p4JeOupmqhx5onYHBEPgy5xFtpdaKawvviDV26IlRkSmlEmwA2K109T5H1zxXXXKvIP1FtGI63Le1Qi755whBnBL3WTsFUMVgIXKPpj",
+      "exponent": "AQAB"
+    }
+  ]
+}

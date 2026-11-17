@@ -67,6 +67,10 @@ for (const path of [
   'uninstall.ps1',
   'run-manager.ps1',
   'manage.cjs',
+  'health.cjs',
+  'installation',
+  'launch-support.ps1',
+  'maintenance.ps1',
   'emergence.ps1',
   'emergence.cmd',
   'README.md',
@@ -75,6 +79,15 @@ for (const path of [
   await cp(join('release', path), join(bundle, path), { recursive: true });
 await copyFile('THIRD_PARTY_NOTICES.md', join(bundle, 'THIRD_PARTY_NOTICES.md'));
 await copyFile('LICENSE', join(bundle, 'LICENSE'));
+const trust = JSON.parse(await readFile('src/app/updates/trust.json', 'utf8'));
+const bootstrap = await readFile('../install.ps1', 'utf8');
+const embeddedTrust = /\$encodedTrust = '([^']+)'/.exec(bootstrap)?.[1];
+if (
+  !embeddedTrust ||
+  JSON.stringify(JSON.parse(Buffer.from(embeddedTrust, 'base64').toString('utf8'))) !== JSON.stringify(trust)
+)
+  throw Error('Installer and application signing trust anchors differ');
+await copyFile('../install.ps1', join(bundle, 'bootstrap.ps1'));
 const sbom: Array<{
   name: string;
   version: string;
@@ -127,6 +140,7 @@ await writeFile(
       platform: 'win32-x64',
       createdAt: new Date().toISOString(),
       configSchema: 1,
+      installationSchema: 2,
       node: '26.13.0',
       lockHash: production.lockHash,
     },
@@ -193,9 +207,20 @@ const inputHashes = Object.fromEntries(
       'dist/cli.mjs.map',
       'dist/plugin.mjs.map',
       'release/install.ps1',
+      '../install.ps1',
+      'src/app/updates/trust.json',
       'release/uninstall.ps1',
       'release/run-manager.ps1',
       'release/manage.cjs',
+      'release/health.cjs',
+      'release/installation/files.cjs',
+      'release/installation/windows.cjs',
+      'release/installation/transaction.cjs',
+      'release/installation/service.cjs',
+      'release/installation/retention.cjs',
+      'release/installation/diagnostics.cjs',
+      'release/launch-support.ps1',
+      'release/maintenance.ps1',
       'release/emergence.ps1',
       'release/emergence.cmd',
       'release/README.md',
