@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { permissionModeSchema } from './permissions.ts';
 import { planningConfigSchema } from './planning.ts';
 
 export const coreConfigSchema = z
@@ -148,10 +149,7 @@ export type CoreCatalog = z.infer<typeof catalogSchema>;
 
 export const permissionFactSchema = z
   .object({
-    modes: z
-      .array(z.enum(['plan', 'ask', 'edit', 'auto']))
-      .min(1)
-      .max(32),
+    modes: z.array(permissionModeSchema).min(1).max(32),
     toolKind: z.enum(['read', 'write', 'shell', 'delegate', 'other']),
     legacyDecision: z.enum(['allow', 'ask', 'deny']),
   })

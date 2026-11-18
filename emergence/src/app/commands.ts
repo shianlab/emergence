@@ -24,7 +24,7 @@ const entries: Entry[] = [
     '/permission',
     '执行权限：选择计划、询问、编辑或自动',
     'Permission mode',
-    '[plan|ask|edit|auto|rules|revoke|default <模式>|rule allow/ask/deny <工具> [path/command 范围]|remove <编号>]',
+    '[plan|ask|edit|auto|rage|rules|revoke|default <常规模式>|rule allow/ask/deny <工具> [path/command 范围]|remove <编号>]',
   ],
   ['/new', '开始新会话', 'New session'],
   ['/history', '搜索当前会话输入历史，回填草稿', 'Search input history', '[关键词]'],

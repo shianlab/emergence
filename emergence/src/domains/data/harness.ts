@@ -106,7 +106,7 @@ export class DataFoundation {
       defineTool({
         name: 'emergence_data_definition',
         description:
-          '项目级版本化业务口径：get读取；save需用户在原生确认界面明确同意。definition_json 含 name,method,params,formula,grain,numerator,denominator,filters,timezone,unit,source,assumptions；已确认method/params必须与计算完全一致。',
+          '项目级版本化业务口径：get读取；save 按当前权限确认。definition_json 含 name,method,params,formula,grain,numerator,denominator,filters,timezone,unit,source,assumptions；已确认method/params必须与计算完全一致。',
         parameters: {
           action: { type: 'string', enum: ['get', 'save'], required: true },
           name: { type: 'string', required: true },
@@ -136,17 +136,15 @@ export class DataFoundation {
                 ...this.c.permissionConstraints(exec.agent),
               ]);
           return JSON.stringify(
-            await store.save(
-              definition,
-              existing?.version ?? null,
-              async () =>
-                valid() &&
-                (await this.c.confirmDecision(
-                  '确认保存数据口径（只影响此项目）\n' + JSON.stringify(definition, null, 2),
-                  valid,
-                )) &&
-                valid(),
-            ),
+            await store.save(definition, existing?.version ?? null, async () => {
+              if (!valid()) return false;
+              const confirmation = await this.c.confirmToolDecision(
+                exec,
+                '确认保存数据口径（只影响此项目）\n' + JSON.stringify(definition, null, 2),
+                valid,
+              );
+              return valid() && confirmation;
+            }),
           );
         },
       }),

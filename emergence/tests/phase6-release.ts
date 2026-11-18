@@ -75,6 +75,8 @@ try {
     assert.equal(unpacked.code, 0, unpacked.stderr);
   } else await cp(record.bundle, join(extracted, basename(record.bundle)), { recursive: true });
   const source = join(extracted, basename(record.bundle));
+  await assert.rejects(access(join(source, 'app/node_modules/picomatch')), { code: 'ENOENT' });
+  checks.disabledHmrGlobDependencyExcluded = true;
   const entry = join(source, 'emergence.ps1');
   const portable = await ps(entry, ['--version']);
   assert.equal(portable.code, 0, portable.stderr);

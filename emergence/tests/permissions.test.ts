@@ -27,6 +27,7 @@ import { configSchema, defaultConfig } from '../src/core/domain/configuration.ts
 import { type PermissionSnapshot } from '../src/core/domain/permissions.ts';
 import { toolContract } from '../src/core/domain/tool-contract.ts';
 import { effectiveKeys, keyAction, uiSchema } from '../src/core/domain/ui-preferences.ts';
+import { Definitions } from '../src/domains/data/definitions.ts';
 import { harness } from './fixtures/harness.ts';
 
 test('retired tool names cannot grant read authority; legacy dispatch rules still restrict plan execution', () => {
@@ -174,6 +175,84 @@ async function fixture() {
     },
   };
 }
+
+test('rage covers tool approvals, including a native ask, and exiting restores the configured rules', async () => {
+  const f = await fixture();
+  try {
+    f.config.toolPolicy.deny.push('pwsh');
+    f.config.toolPolicy.confirm.push('mcp__fixture__effect');
+    const stop = f.ctx.on('tools/pre-execute', async (exec, next) =>
+      exec.name === 'mcp__fixture__effect' ? { kind: 'ask', reason: 'Fixture native approval' } : next(),
+    );
+    try {
+      await f.controller.command('/permission rage');
+      for (const [name, args] of [
+        ['pwsh', { command: 'inert fixture' }],
+        ['write', { file_path: join(f.root, 'outside.txt') }],
+        ['mcp__fixture__effect', {}],
+        [
+          'emergence_data_definition',
+          {
+            action: 'save',
+            name: 'fixture revenue',
+            definition_json: JSON.stringify({
+              name: 'fixture revenue',
+              method: 'metric',
+              params: {},
+              formula: 'sum(total)',
+              grain: 'transaction',
+              numerator: 'total',
+              denominator: '',
+              filters: '',
+              timezone: 'UTC',
+              unit: 'CNY',
+              source: 'fixture.csv',
+              assumptions: [],
+            }),
+          },
+        ],
+      ] as const) {
+        f.start(name, args);
+        await until(() => f.controller.agent.status !== 'running' || !!f.controller.pending);
+        assert.equal(f.controller.pending, undefined);
+        await f.controller.agent.whenIdle();
+      }
+      assert.deepEqual(f.calls, ['pwsh', 'write', 'mcp__fixture__effect']);
+      const saved = await new Definitions(f.home, f.cwd).get('fixture revenue');
+      assert.equal(saved?.status, 'auto-approved');
+      assert.ok(
+        f.controller.agent.session
+          .snapshotEvents()
+          .some((event) => event.type === 'approval/decided' && event.data.outcome === 'allowed-once'),
+      );
+    } finally {
+      stop();
+    }
+    await f.controller.command('/permission auto');
+    await f.run('pwsh', { command: 'inert fixture' });
+    assert.equal(f.calls.length, 3);
+    f.start('mcp__fixture__effect');
+    await until(() => !!f.controller.pending);
+    f.controller.pending!.respond('n');
+    await f.controller.agent.whenIdle();
+    assert.equal(f.calls.length, 3);
+  } finally {
+    await f.close();
+  }
+});
+
+test('rage acknowledges inherited asks while retaining prohibitions and path validation', () => {
+  const root = process.cwd();
+  const rage: PermissionSnapshot = { mode: 'rage', root, rules: [], deny: [], confirm: [] };
+  const call = { name: 'pwsh', arguments: { command: 'inert' }, cwd: root, actor: 'fixture' };
+  assert.equal(evaluatePermissions([rage, { ...rage, mode: 'ask' }], call).effect, 'allow');
+  assert.equal(evaluatePermissions([rage, { ...rage, mode: 'plan' }], call).effect, 'deny');
+  assert.equal(evaluatePermissions([{ ...rage, mode: 'ask' }, rage], call).effect, 'ask');
+  assert.equal(
+    evaluatePermissions([rage], { ...call, name: 'write', arguments: { file_path: 'invalid\0file' } }).effect,
+    'deny',
+  );
+});
 
 test('mode matrix, explicit deny/ask precedence, unknown tools and exact command rules', async () => {
   const root = await mkdtemp(join(tmpdir(), 'emergence-policy-'));

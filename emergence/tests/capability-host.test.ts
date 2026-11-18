@@ -64,7 +64,7 @@ test('native Code/Data run on minimal ports without an app controller and observ
     get permissionMode() {
       return mode;
     },
-    confirmDecision: async () => {
+    confirmToolDecision: async () => {
       confirmations++;
       return false;
     },

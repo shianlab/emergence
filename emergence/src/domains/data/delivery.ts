@@ -161,7 +161,11 @@ export async function deliverAnalysis(
   const record = definition as { status?: string; definition?: Record<string, unknown> };
   const metadata = record.definition ?? {};
   const status =
-    record.status === 'user-confirmed' ? '已保存用户确认口径' : '本次口径尚未保存确认，请核对假设';
+    record.status === 'user-confirmed'
+      ? '已保存用户确认口径'
+      : record.status === 'auto-approved'
+        ? '口径由狂暴模式自动批准，请核对假设'
+        : '本次口径尚未保存确认，请核对假设';
   const summary = Object.entries(analysis.summary)
     .map(([k, v]) => `<li><b>${escape(label(k))}</b>：${escape(display(v))}</li>`)
     .join('');

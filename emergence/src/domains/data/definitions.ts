@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, readFile, realpath } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
+import type { ToolConfirmation } from '../../core/domain/permissions.ts';
 import { withLease } from '../../core/storage/lease.ts';
 import { readJsonFile, replaceJsonFile } from '../../core/storage/safe-json-file.ts';
 export const definitionSchema = z
@@ -25,7 +26,7 @@ const recordSchema = z
     schemaVersion: z.literal(1),
     project: z.string(),
     definition: definitionSchema,
-    status: z.literal('user-confirmed'),
+    status: z.enum(['user-confirmed', 'auto-approved']),
     version: z.string(),
     confirmedAt: z.string(),
   })
@@ -70,18 +71,19 @@ export class Definitions {
     await this.get(name);
     return { path, hash: hash(await readFile(path, 'utf8')), state: 'present' as const };
   }
-  async save(definition: Definition, previous: string | null, approve: () => Promise<boolean>) {
+  async save(definition: Definition, previous: string | null, approve: () => Promise<ToolConfirmation>) {
     const value = definitionSchema.parse(definition),
       path = await this.path(value.name);
     return withLease('data-definition:' + path, '数据口径', async () => {
       const existing = await this.get(value.name);
       if ((existing?.version ?? null) !== previous) throw new Error('口径已被其他窗口修改，请重新读取');
-      if (!(await approve())) throw new Error('口径确认已取消');
+      const confirmation = await approve();
+      if (!confirmation) throw new Error('口径确认已取消');
       const record = {
         schemaVersion: 1 as const,
         project: await realpath(this.project),
         definition: value,
-        status: 'user-confirmed' as const,
+        status: confirmation,
         version: hash(JSON.stringify(value)),
         confirmedAt: new Date().toISOString(),
       };

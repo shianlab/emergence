@@ -174,7 +174,7 @@ export class SessionController extends EventEmitter {
       get permissionMode() {
         return controller.permissionMode;
       },
-      confirmDecision: (title, valid) => this.confirmDecision(title, valid),
+      confirmToolDecision: (tool, title, valid) => this.permissions.confirmToolDecision(tool, title, valid),
     });
     this.disposers.push(...this.data.mount());
     this.code = new CodeUnderstanding(access);
@@ -382,7 +382,7 @@ export class SessionController extends EventEmitter {
           this.notice = '已撤销会话授权和待处理确认';
         } else if (args[0]) this.setPermissionMode(permissionModeSchema.parse(args[0]));
         else
-          this.notice = `当前权限：${permissionLabels[this.permissionMode]}\n/permission plan|ask|edit|auto · /permission revoke`;
+          this.notice = `当前权限：${permissionLabels[this.permissionMode]}\n/permission plan|ask|edit|auto|rage · /permission revoke`;
         break;
       case '/help':
         this.notice = commandHelp(

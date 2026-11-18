@@ -1,11 +1,11 @@
-<p align="center"><img src="docs/media/emergence-1.03-cover.png" alt="Emergence 1.03 — Code. Data. Your terminal." width="100%"></p>
+<p align="center"><img src="docs/media/emergence-1.04-cover.png" alt="Emergence 1.04 — Code. Data. Your terminal." width="100%"></p>
 
 <h1 align="center">涌现 · Emergence</h1>
 <p align="center"><strong>在终端里，把想法变成代码，把数据变成答案。</strong></p>
 <p align="center">面向编程与数据分析的开源 CLI Agent，拥有独立 Harness、中文 TUI 和原生模型配置工具。</p>
 
 <p align="center">
-  <a href="https://github.com/shianlab/emergence/releases/tag/v1.0.3"><img alt="Release 1.03" src="https://img.shields.io/badge/release-1.03-e5e5e5?style=flat-square&labelColor=181818"></a>
+  <a href="https://github.com/shianlab/emergence/releases/tag/v1.0.4"><img alt="Release 1.04" src="https://img.shields.io/badge/release-1.04-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="docs/installation.md"><img alt="Windows x64" src="https://img.shields.io/badge/platform-Windows_x64-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml"><img alt="Windows CI" src="https://github.com/shianlab/emergence/actions/workflows/ci.yml/badge.svg"></a>
@@ -40,9 +40,9 @@ emergence
 
 1. 输入 `/model-config`，在原生配置窗口添加供应商、模型、API 地址和密钥，测试连接并保存。[模型配置指南](docs/model-configuration.md)
 2. 输入 `/model`，为当前窗口选择刚保存的模型。确认首页显示的是你的项目目录。
-3. 发送第一条任务，比如「先读一下这个项目，告诉我它怎么启动、测试从哪里跑」。输入 `/` 搜索中文命令，用 `Shift+Tab` 切换执行权限。
+3. 发送第一条任务，比如「先读一下这个项目，告诉我它怎么启动、测试从哪里跑」。输入 `/` 搜索中文命令，用 `Shift+Tab` 切换执行权限。1.04 可用 `/permission rage` 让当前窗口自动批准工具调用。
 
-> 1.03 支持 Windows x64，推荐 Windows 11 + Windows Terminal。原生模型配置需要 .NET Framework 4.8，模型服务使用你自己的 API 凭据。只有数据分析工具需要单独准备 CPython 3.14 x64。
+> 1.04 支持 Windows x64，推荐 Windows 11 + Windows Terminal。原生模型配置需要 .NET Framework 4.8，模型服务使用你自己的 API 凭据。只有数据分析工具需要单独准备 CPython 3.14 x64。
 
 ## 界面一览
 
@@ -103,7 +103,7 @@ emergence data-init --python "C:\Python314\python.exe"
 
 `F2` 左右分屏，`F3` 上下分屏，`Tab` 切换，`F6` 关闭。窗口可以使用同一项目，也可以使用不同项目和模型。
 
-1.03 的窗口相互独立，**不提供主窗口控制、跨窗口派活或自动协作**。同一项目中的并行编辑需自行协调；需要隔离修改时使用 Git worktree。
+1.04 的窗口相互独立，**不提供主窗口控制、跨窗口派活或自动协作**。同一项目中的并行编辑需自行协调；需要隔离修改时使用 Git worktree。
 
 ## 你掌握执行权限
 
@@ -143,7 +143,7 @@ emergence update
 emergence rollback
 ```
 
-更新会先验证新版本，再让新启动的窗口使用它。已打开的窗口可继续当前任务。安装器保留可用的上一版本用于回退，配置、密钥和会话由独立的用户目录保存。1.03 修复了 Windows 文件替换期间的偶发读取失败，以及审批拒绝后可能多发一次模型请求的问题。[1.03 发布说明](docs/releases/1.0.3.md) · [更新日志](CHANGELOG.md)
+更新会先验证新版本，再让新启动的窗口使用它。已打开的窗口可继续当前任务。安装器保留可用的上一版本用于回退，配置、密钥和会话由独立的用户目录保存。1.04 新增狂暴模式，并支持用 Shift+Tab 在五种权限模式之间循环。[1.04 发布说明](docs/releases/1.0.4.md) · [更新日志](CHANGELOG.md)
 
 ## 从源码开发
 
@@ -167,9 +167,9 @@ npm run inspect:full   # Harness、TUI、ConPTY 完整本机矩阵
 
 ## 版本与支持
 
-- **1.03**：Windows x64 安装与更新维护版，增加重试续传、签名版本检测、中文更新菜单、事务修复及回退。macOS、Linux、ARM64 尚无正式发行物。
+- **1.04**：新增狂暴模式和五档权限快捷键切换。macOS、Linux、ARM64 尚无正式发行物。
 - 下载、校验、更新、卸载与故障排查：[安装指南](docs/installation.md)。
-- 变更与已知限制：[CHANGELOG.md](CHANGELOG.md) · [1.03 发布说明](docs/releases/1.0.3.md)。
+- 变更与已知限制：[CHANGELOG.md](CHANGELOG.md) · [1.04 发布说明](docs/releases/1.0.4.md)。
 - 问题反馈：[GitHub Issues](https://github.com/shianlab/emergence/issues)；安全问题请使用[私密报告流程](SECURITY.md)。
 
 欢迎复现问题、改进文档和提交聚焦的 PR。请勿把 API 密钥、真实会话或私有项目内容附到公开 issue 中。

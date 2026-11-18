@@ -9,7 +9,7 @@ import { safeError } from '../core/adapters/redaction.ts';
 import { replaceJsonFile } from '../core/storage/safe-json-file.ts';
 import { TaskEngine } from '../core/application/task-engine.ts';
 import { WorkspaceInteractions } from '../core/application/workspace-interactions.ts';
-import { permissionModeSchema, type PermissionMode } from '../core/domain/permissions.ts';
+import { standardPermissionModeSchema, type PermissionMode } from '../core/domain/permissions.ts';
 import type { TaskRecord } from '../core/domain/task.ts';
 import { storedTaskStateSchema } from '../core/storage/task-history.ts';
 import { emptyTaskState } from '../core/domain/task-state.ts';
@@ -39,7 +39,7 @@ const paneSchema = z
     sessionId: z.string().optional(),
     cwd: z.string(),
     modelId: z.string(),
-    permissionMode: permissionModeSchema.optional(),
+    permissionMode: standardPermissionModeSchema.optional(),
     rolePreference: rolePreferenceSchema.optional(),
     draft: z.string().max(100000),
     scrollTop: z.number().min(0),
@@ -618,15 +618,18 @@ export class WorkspaceController extends EventEmitter {
       layout: this.layout,
       collaboration: this.taskEngine.state,
       integrations: this.integrations,
-      panes: [...this.panes.values()].map((p) => ({
-        id: p.id,
-        sessionId: p.controller?.id ?? p.sessionId,
-        cwd: p.controller?.cwd ?? p.cwd,
-        modelId: p.controller?.launch.modelId ?? p.modelId,
-        permissionMode: p.controller?.permissionMode ?? p.permissionMode,
-        draft: p.draft,
-        scrollTop: p.scrollTop,
-      })),
+      panes: [...this.panes.values()].map((p) => {
+        const mode = p.controller?.permissionMode ?? p.permissionMode;
+        return {
+          id: p.id,
+          sessionId: p.controller?.id ?? p.sessionId,
+          cwd: p.controller?.cwd ?? p.cwd,
+          modelId: p.controller?.launch.modelId ?? p.modelId,
+          permissionMode: mode === 'rage' ? undefined : mode,
+          draft: p.draft,
+          scrollTop: p.scrollTop,
+        };
+      }),
     };
     // Zod copies the snapshot before it enters the serialized write queue.
     const snapshot = workspaceSchema.parse(data);
