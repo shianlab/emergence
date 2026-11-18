@@ -12,7 +12,7 @@ import {
 } from '@opentui/core';
 import stringWidth from 'string-width';
 import { createRedactor, safeError } from '../core/adapters/redaction.ts';
-import { permissionLabels, permissionModes } from '../core/domain/permissions.ts';
+import { permissionDescriptions, permissionLabels, permissionModes } from '../core/domain/permissions.ts';
 import { palette } from '../core/domain/ui-preferences.ts';
 import { slashSuggestions, workspaceCommands, type CommandItem } from './commands.ts';
 import { geometry } from './layout.ts';
@@ -162,7 +162,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
   }
 
   const modePicker = new TextRenderable(renderer, {
-    height: 6,
+    height: permissionModes.length + 1,
     visible: false,
     content: '',
     selectable: false,
@@ -623,7 +623,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
         permissionModes
           .map(
             (mode, i) =>
-              `${modal.permissionMenu!.selected === i ? '›' : ' '} ${permissionLabels[mode]} (${mode}) — ${['只读分析，禁止命令和派发', '副作用操作需确认', '项目内编辑自动，命令需确认', '按显式规则自动执行，未知操作需确认'][i]}`,
+              `${modal.permissionMenu!.selected === i ? '›' : ' '} ${permissionLabels[mode]} (${mode}) — ${permissionDescriptions[mode]}`,
           )
           .join('\n');
     page.backgroundColor = colors.background;

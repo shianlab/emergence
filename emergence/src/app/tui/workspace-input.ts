@@ -91,7 +91,8 @@ export function workspaceInput(host: InputHost) {
         host.modal.modalSubmitUntil = performance.now() + 350;
       } else if (key.name === 'up' || key.name === 'down')
         host.modal.permissionMenu.selected =
-          (host.modal.permissionMenu.selected + (key.name === 'up' ? 3 : 1)) % 4;
+          (host.modal.permissionMenu.selected + (key.name === 'up' ? permissionModes.length - 1 : 1)) %
+          permissionModes.length;
       else if (key.name === 'return') {
         const menu = host.modal.permissionMenu;
         host.modal.permissionMenu = undefined;

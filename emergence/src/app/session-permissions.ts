@@ -17,6 +17,7 @@ import {
   permissionModes,
   type PermissionMode,
   type PermissionSnapshot,
+  type ToolConfirmation,
 } from '../core/domain/permissions.ts';
 import { stableDigest } from '../core/storage/execution-journal.ts';
 import { InteractionQueue } from './interactions.ts';
@@ -137,7 +138,7 @@ export class SessionPermissions {
         interpolate: false,
         text: ({ agent }) =>
           this.host.owns(agent)
-            ? `Emergence permission mode: ${this.permissionMode}. Project boundary: ${this.host.launch.cwd}. Plan: read and reason only; no writes, shell or executing delegation. Ask: request approval for side effects. Edit: project edits allowed, commands and unknown tools need approval. Auto: only configured allow rules and project edits run automatically. Runtime constraints, explicit deny/ask rules and inherited task limits remain authoritative. Do not bypass a denied operation using another tool.`
+            ? `Emergence permission mode: ${this.permissionMode}. Project boundary: ${this.host.launch.cwd}. Plan: read and reason only; no writes, shell or executing delegation. Ask: request approval for side effects. Edit: project edits allowed, commands and unknown tools need approval. Auto: only configured allow rules and project edits run automatically. Rage: the user has enabled automatic tool approvals in this window, overriding its configured tool rules. Runtime constraints and inherited task limits still apply. Do not bypass a denied operation using another tool.`
             : '',
       }),
     );
@@ -186,6 +187,14 @@ export class SessionPermissions {
           this.confirmed.add(key);
           return 'allowed-once' as const;
         };
+        if (
+          this.mode === 'rage' &&
+          identity.nativeId &&
+          (record
+            ? this.permissionState(record.exec).decision.effect === 'allow'
+            : this.host.permissionConstraints(req.agent).every((constraint) => constraint.mode === 'rage'))
+        )
+          return this.transitioning ? 'cancelled' : approveOnce();
         if (
           record &&
           ['pwsh', 'bash'].includes(req.toolName) &&
@@ -324,20 +333,35 @@ export class SessionPermissions {
   }
 
   cyclePermission() {
-    this.setPermissionMode(
-      permissionModes[(permissionModes.indexOf(this.permissionMode) + 1) % permissionModes.length],
-    );
+    const index = permissionModes.indexOf(this.mode);
+    this.setPermissionMode(permissionModes[(index + 1) % permissionModes.length]);
+  }
+
+  async confirmToolDecision(
+    tool: ToolExecution,
+    title: string,
+    valid: () => boolean,
+  ): Promise<ToolConfirmation> {
+    if (this.host.closed || tool.signal.aborted || !this.host.owns(tool.agent)) return false;
+    if (this.mode === 'rage') {
+      const decision = this.permissionState(tool).decision;
+      if (decision.effect === 'deny') return false;
+      if (decision.effect === 'allow') return !this.transitioning && valid() && 'auto-approved';
+    }
+    return (await this.confirmDecision(title, valid)) && 'user-confirmed';
   }
 
   async confirmDecision(title: string, valid: () => boolean = () => true): Promise<boolean> {
     if (this.host.closed || this.host.launch.prompt !== undefined) return false;
-    const session = this.host.current()?.session.id,
+    const owner = this.host.current();
+    if (!owner) return false;
+    const session = owner.session.id,
       epoch = this.permissionEpoch;
     return this.interactions.request(
       {
         kind: 'permission',
-        sessionId: this.host.current()!.session.id,
-        agentId: this.host.current()!.id,
+        sessionId: session,
+        agentId: owner.id,
         title,
         options: [
           { id: 'cancel', label: '暂不执行', value: 'n' },

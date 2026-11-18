@@ -61,6 +61,8 @@ test('real Harness workspace retains hidden tasks, isolates cancellation, resume
   const ctx = new Context(),
     provider = new Provider();
   let bodyCalls = 0;
+  const firstWriteStarted = Promise.withResolvers<void>();
+  const releaseFirstWrite = Promise.withResolvers<void>();
   const previous = process.env.WORKSPACE_TEST_KEY;
   process.env.WORKSPACE_TEST_KEY = 'local-fixture';
   const config = structuredClone(defaultConfig);
@@ -98,8 +100,10 @@ test('real Harness workspace retains hidden tasks, isolates cancellation, resume
           parameters: { file_path: { type: 'string', required: true } },
           output: { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: value }] },
           async execute() {
-            bodyCalls++;
-            await delay(150);
+            if (++bodyCalls === 1) {
+              firstWriteStarted.resolve();
+              await releaseFirstWrite.promise;
+            }
             return 'written';
           },
         }),
@@ -150,13 +154,23 @@ test('real Harness workspace retains hidden tasks, isolates cancellation, resume
     assert.equal(workspace.panes.get(b.id)!.controller!.launch.modelId, 'two');
     const first = await workspace.split('row', cwd, 'tool-one'),
       second = await workspace.split('column', cwd, 'tool-two');
+    await workspace.send(second.id, '/permission rage');
     await workspace.send(first.id, '并发修改');
+    await Promise.race([
+      firstWriteStarted.promise,
+      delay(6000, undefined, { ref: false }).then(() => {
+        throw new Error('first writer did not acquire the file');
+      }),
+    ]);
     await workspace.send(second.id, '并发修改');
-    await Promise.all([first.controller!.agent.whenIdle(), second.controller!.agent.whenIdle()]);
-    assert.equal(bodyCalls, 1, 'second writer is refused before dispatch');
+    await second.controller!.agent.whenIdle();
+    assert.equal(bodyCalls, 1, 'rage still refuses a second writer while the file is held');
     assert.ok(
       [first, second].some((p) => p.controller!.transcript().some((line) => line.includes('正由窗格'))),
     );
+    releaseFirstWrite.resolve();
+    await first.controller!.agent.whenIdle();
+    await workspace.send(second.id, '/permission edit');
     await assert.rejects(workspace.send(first.id, `/resume ${restored.controller!.id}`), /已绑定其他窗格/);
     await assert.rejects(workspace.send(first.id, `/resume\t${restored.controller!.id}`), /已绑定其他窗格/);
     const previousA = restored.controller!.id,
@@ -211,6 +225,7 @@ test('real Harness workspace retains hidden tasks, isolates cancellation, resume
     await assert.rejects(opening, /已退出/);
     await closing;
   } finally {
+    releaseFirstWrite.resolve();
     await workspace?.close();
     await ctx.fiber.dispose();
     if (previous === undefined) delete process.env.WORKSPACE_TEST_KEY;

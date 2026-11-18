@@ -134,6 +134,12 @@ try {
   await answer('\x1b[A\r');
   await until('menu applied', () => screen().includes('权限已切换：自动编辑'));
   checks.menuArrowsEnter = true;
+  await command('/permission auto');
+  child.write('\x1b[Z');
+  await until('Shift Tab enters rage', () => screen().includes('权限已切换：狂暴模式'));
+  child.write('\x1b[Z');
+  await until('Shift Tab leaves rage', () => screen().includes('权限已切换：计划'));
+  checks.legacyShiftTabCyclesRage = true;
   await command('/exit');
   assert.equal(
     await Promise.race([

@@ -48,7 +48,27 @@ for (const [name, expected] of Object.entries(dataAssets)) {
   await mkdir(dirname(join(app, 'dist/data', name)), { recursive: true });
   await copyFile(source, join(app, 'dist/data', name));
 }
-await cp(join(production.path, 'node_modules'), join(app, 'node_modules'), { recursive: true });
+// Emergence disables the upstream HMR row in every generated profile.
+// Omit its sole vulnerable glob dependency from the release (GHSA-fc5q-39xc-vjpf).
+const runtimeModules = join(production.path, 'node_modules');
+const unusedGlob = join(runtimeModules, 'picomatch');
+const globConsumers = Object.entries(lock.packages)
+  .filter(([, entry]) =>
+    ['dependencies', 'optionalDependencies', 'peerDependencies'].some(
+      (kind) => (entry as Record<string, Record<string, string>>)[kind]?.picomatch,
+    ),
+  )
+  .map(([name]) => name);
+if (
+  globConsumers.length !== 1 ||
+  globConsumers[0] !== 'node_modules/@deepseek-ai/dsh-hmr' ||
+  lock.packages['node_modules/picomatch']?.version !== '4.0.7'
+)
+  throw new Error('Recheck the HMR glob dependency exclusion for this lockfile');
+await cp(runtimeModules, join(app, 'node_modules'), {
+  recursive: true,
+  filter: (source) => source !== unusedGlob,
+});
 await writeFile(join(app, 'package.json'), JSON.stringify({ ...pkg, emergencePortable: true }, null, 2));
 await mkdir(join(bundle, 'runtime'));
 await copyFile('node_modules/node/bin/node.exe', join(bundle, 'runtime/node.exe'));

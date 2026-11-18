@@ -6,7 +6,11 @@ import { stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { safeError } from '../core/adapters/redaction.ts';
 import { extensionSchema, type AppConfig } from '../core/domain/configuration.ts';
-import { permissionModeSchema, permissionRuleSchema } from '../core/domain/permissions.ts';
+import {
+  permissionModeSchema,
+  permissionRuleSchema,
+  standardPermissionModeSchema,
+} from '../core/domain/permissions.ts';
 import { actions, effectiveKeys, uiSchema } from '../core/domain/ui-preferences.ts';
 import { commandHelp, workspaceCommands } from './commands.ts';
 import { loadConfig, updateConfig } from './config.ts';
@@ -236,7 +240,7 @@ export class Settings {
         w.emit('permission-menu', paneId);
         return true;
       }
-      if (['plan', 'ask', 'edit', 'auto', 'next', 'revoke'].includes(args[0])) {
+      if (permissionModeSchema.safeParse(args[0]).success || ['next', 'revoke'].includes(args[0])) {
         await controller.command('/permission ' + args[0]);
         w.changed();
         return true;
@@ -245,7 +249,8 @@ export class Settings {
         const release = w.beginConfigurationChange();
         try {
           await this.update((c) => {
-            if (args[0] === 'default') c.permissions.defaultMode = permissionModeSchema.parse(args[1]);
+            if (args[0] === 'default')
+              c.permissions.defaultMode = standardPermissionModeSchema.parse(args[1]);
             else if (args[0] === 'remove') {
               const n = Number(args[1]);
               if (!Number.isInteger(n) || n < 1 || n > c.permissions.rules.length)
@@ -263,7 +268,7 @@ export class Settings {
               );
             } else
               throw new Error(
-                '用法：/permission plan|ask|edit|auto；rules；rule allow|ask|deny <工具> [path|command "范围"]；remove <编号>；default <模式>；revoke',
+                '用法：/permission plan|ask|edit|auto|rage；rules；rule allow|ask|deny <工具> [path|command "范围"]；remove <编号>；default <常规模式>；revoke',
               );
           }, true);
         } finally {

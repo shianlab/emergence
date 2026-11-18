@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { permissionModeSchema, permissionRuleSchema } from './permissions.ts';
+import { standardPermissionModeSchema, permissionRuleSchema } from './permissions.ts';
 import { budgetPolicySchema, orchestrationLimits } from './run-budget.ts';
 import { projectBindingSchema } from './project-contract.ts';
 
@@ -8,7 +8,7 @@ export const roleSchema = z
     id: z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/),
     description: z.string().min(1).max(500),
     prompt: z.string().min(1).max(6000),
-    mode: permissionModeSchema.default('edit'),
+    mode: standardPermissionModeSchema.default('edit'),
     modelId: z.string().max(32).optional(),
     deny: z
       .array(z.string().regex(/^[\w.:-]+\*?$/))

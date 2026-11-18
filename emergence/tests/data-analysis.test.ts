@@ -191,10 +191,10 @@ test('project definitions require real approval, bind parameters, resist stale e
     /取消/,
   );
   assert.equal(await store.get('收入'), null);
-  const first = await store.save(definition, null, async () => true);
+  const first = await store.save(definition, null, async () => 'user-confirmed');
   assert.equal(first.status, 'user-confirmed');
   await assert.rejects(
-    store.save({ ...definition, unit: '美元' }, null, async () => true),
+    store.save({ ...definition, unit: '美元' }, null, async () => 'user-confirmed'),
     /其他窗口/,
   );
   const result = await analyzeData(
@@ -244,7 +244,7 @@ test('project definitions require real approval, bind parameters, resist stale e
     },
   );
   assert.equal(await evidenceIsCurrent(receipt), true);
-  await store.save({ ...definition, unit: '美元' }, first.version, async () => true);
+  await store.save({ ...definition, unit: '美元' }, first.version, async () => 'user-confirmed');
   assert.equal(await evidenceIsCurrent(receipt), false, '确认口径变化后，旧分析证据必须失效');
 });
 test('actual assigned Harness task returns computational receipts with tracked artifacts and independent task version invalidation', async () => {

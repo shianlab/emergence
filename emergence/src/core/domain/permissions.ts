@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { toolContract, toolPath } from './tool-contract.ts';
-export const permissionModes = ['plan', 'ask', 'edit', 'auto'] as const;
+export const standardPermissionModes = ['plan', 'ask', 'edit', 'auto'] as const;
+export const standardPermissionModeSchema = z.enum(standardPermissionModes);
+export const permissionModes = [...standardPermissionModes, 'rage'] as const;
 export const permissionModeSchema = z.enum(permissionModes);
 export type PermissionMode = z.infer<typeof permissionModeSchema>;
 export const permissionLabels: Record<PermissionMode, string> = {
@@ -8,6 +10,14 @@ export const permissionLabels: Record<PermissionMode, string> = {
   ask: '询问',
   edit: '自动编辑',
   auto: '自动执行',
+  rage: '狂暴模式',
+};
+export const permissionDescriptions: Record<PermissionMode, string> = {
+  plan: '只读分析，禁止命令和派发',
+  ask: '副作用操作需确认',
+  edit: '项目内编辑自动，命令需确认',
+  auto: '按显式规则自动执行，未知操作需确认',
+  rage: '当前窗口自动批准工具，覆盖本窗口工具规则',
 };
 export const permissionRuleSchema = z
   .object({
@@ -29,7 +39,7 @@ export const permissionRuleSchema = z
   .strict();
 export const permissionsSchema = z
   .object({
-    defaultMode: permissionModeSchema.default('edit'),
+    defaultMode: standardPermissionModeSchema.default('edit'),
     rules: z.array(permissionRuleSchema).max(100).default([]),
   })
   .strict();
@@ -46,6 +56,7 @@ export const permissionSnapshotSchema = z
 export type PermissionSnapshot = z.infer<typeof permissionSnapshotSchema>;
 export type PermissionCall = { name: string; arguments: unknown; cwd: string; actor: string };
 export type PermissionDecision = { effect: 'allow' | 'ask' | 'deny'; reason: string; explicitAsk?: boolean };
+export type ToolConfirmation = false | 'user-confirmed' | 'auto-approved';
 export function toolMatches(pattern: string, name: string) {
   return pattern.endsWith('*') ? name.startsWith(pattern.slice(0, -1)) : name === pattern;
 }
@@ -68,6 +79,7 @@ export function evaluatePermissionWithPaths(
     const matches = (pattern: string) =>
       [call.name, ...(contract.policyAliases ?? [])].some((name) => toolMatches(pattern, name));
     const path = rawPath === undefined ? undefined : paths.canonical(rawPath, call.cwd);
+    if (policy.mode === 'rage') return { effect: 'allow', reason: '狂暴模式自动批准' };
     const rules = policy.rules.filter(
       (rule) =>
         matches(rule.tool) &&
@@ -111,8 +123,12 @@ export function evaluatePermissionsWithPaths(
   paths: PermissionPaths,
 ): PermissionDecision {
   const results = policies.map((p) => evaluatePermissionWithPaths(p, call, paths));
+  const denied = results.find((result) => result.effect === 'deny');
+  if (denied) return denied;
+  // The window owner's explicit consent covers approval requests. Inherited
+  // prohibitions, including a read-only role, still cap the available tools.
+  if (policies[0]?.mode === 'rage') return results[0];
   return (
-    results.find((r) => r.effect === 'deny') ??
     results.find((r) => r.explicitAsk) ??
     results.find((r) => r.effect === 'ask') ?? { effect: 'allow', reason: '所有权限约束允许' }
   );

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { safeError } from '../core/adapters/redaction.ts';
 import { modelSchema } from '../core/domain/configuration.ts';
-import { permissionModeSchema } from '../core/domain/permissions.ts';
+import { standardPermissionModeSchema } from '../core/domain/permissions.ts';
 import { initializeData } from '../domains/data/initialize.ts';
 import { homeDirectory, loadConfig, migrateConfig, updateConfig } from './config.ts';
 import { hydrateCredentials, hydratedCredentialNames, saveCredential } from './credentials.ts';
@@ -102,7 +102,7 @@ async function main() {
     throw new Error('--template 自带各窗口模型，不能与 --resume、--print、--model 混用');
   const home = homeDirectory(values.home);
   const permissionMode =
-    values.permission === undefined ? undefined : permissionModeSchema.parse(values.permission);
+    values.permission === undefined ? undefined : standardPermissionModeSchema.parse(values.permission);
   if (positionals[0] === 'doctor') {
     if (positionals.length > 2) throw new Error('用法：emergence doctor [项目目录] [--json] [--output 文件]');
     const report = await diagnose(home, resolve(positionals[1] ?? process.cwd()));
