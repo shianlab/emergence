@@ -31,6 +31,23 @@ type Raster = {
   background: string;
 };
 
+/** The renderer needs Windows profile and module discovery, without Agent credential variables. */
+function rasterWorkerEnvironment(systemRoot: string): NodeJS.ProcessEnv {
+  const { TEMP, TMP, WINDIR, USERPROFILE, APPDATA, LOCALAPPDATA, ProgramFiles, PSModulePath } = process.env;
+  return {
+    SystemRoot: systemRoot,
+    Path: join(systemRoot, 'System32'),
+    TEMP,
+    TMP,
+    WINDIR,
+    USERPROFILE,
+    APPDATA,
+    LOCALAPPDATA,
+    ProgramFiles,
+    PSModulePath,
+  };
+}
+
 /** Sixel encodes bands of six vertical pixels, including the final partial band. */
 export function smallTextFitsSixel(y: number, pixelHeight: number, cellHeight: number, rows: number) {
   return y >= 0 && y + Math.max(2, Math.ceil((Math.ceil(pixelHeight / 6) * 6) / cellHeight)) <= rows;
@@ -160,7 +177,7 @@ export class SmallTextService {
       ['-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script],
       {
         cwd: dirname(script),
-        env: { SystemRoot: systemRoot, TEMP: process.env.TEMP, TMP: process.env.TMP },
+        env: rasterWorkerEnvironment(systemRoot),
         windowsHide: true,
         stdio: 'pipe',
       },
