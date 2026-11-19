@@ -37,7 +37,9 @@ const sync = async () => {
   await test.renderOnce();
 };
 async function ready() {
-  for (let i = 0; i < 200; i++) {
+  // Wait past the raster worker's own 10s deadline, including on cold Windows runners.
+  const deadline = performance.now() + 12_000;
+  while (performance.now() < deadline) {
     await sync();
     if (label.image.visible) return;
     await delay(40);

@@ -88,7 +88,8 @@ try {
         ? [footer]
         : [...ui.views.values()].filter((v) => v.box.visible && v.meta.visible).map((v) => v.meta);
       assert.ok(activeFooters.length > 0);
-      for (let i = 0; i < 150; i++) {
+      const deadline = performance.now() + 12_000;
+      while (performance.now() < deadline) {
         await test.renderOnce();
         if (activeFooters.every((label) => label.image.visible)) break;
         await delay(20);
