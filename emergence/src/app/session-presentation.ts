@@ -8,6 +8,7 @@ import type { ToolExecution } from '@deepseek-ai/dsh-tools';
 import type {} from '@deepseek-ai/dsh-user-questions';
 import type {} from '@deepseek-ai/dsh-working-directory';
 import { safeError } from '../core/adapters/redaction.ts';
+import { outputLimitRecoveryCode } from '../core/adapters/model-response.ts';
 import { RunDiagnostics } from '../core/application/run-diagnostics.ts';
 import { MessageProjection } from './tui/message-model.ts';
 import { SessionUsage } from './tui/session-usage.ts';
@@ -88,7 +89,7 @@ export class SessionPresentation {
         if (event.type === 'assistant/message') this.live = '';
         if (event.type === 'turn/end' && event.data.reason.kind === 'max-tokens') {
           this.host.lastError =
-            '模型输出达到 Token 上限，本轮未完成；已保留执行记录，继续前请核对任务状态和输出预算。';
+            '模型单次输出达到 Token 上限，本轮未完成。可在当前会话要求接着做、按段写入，或在 /model-config 调整模型支持的输出上限。';
           this.host.notice = this.host.lastError;
         }
         if (this.display?.sessionId === session.id) {
@@ -110,6 +111,14 @@ export class SessionPresentation {
           this.streamPhase = 'waiting';
         }
         if (frame.type === 'chunk' && frame.chunk.type === 'reasoning-delta') this.streamPhase = 'reasoning';
+        if (
+          frame.type === 'chunk' &&
+          frame.chunk.type === 'finish' &&
+          frame.chunk.reason.kind === 'error' &&
+          frame.chunk.reason.failure.code === outputLimitRecoveryCode
+        ) {
+          this.host.notice = '模型单次输出达到上限，正在缩短本步输出后继续…';
+        }
         if (
           frame.type === 'chunk' &&
           ['reasoning-delta', 'text-delta', 'tool-call-delta'].includes(frame.chunk.type)

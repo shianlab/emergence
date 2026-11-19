@@ -18,12 +18,18 @@ for (const scenario of [
   'malformed-exhausted',
   'schema',
   'schema-exhausted',
+  'output-limit',
+  'output-limit-exhausted',
+  'output-limit-text',
   '401',
 ]) {
+  const outputLimit = scenario.startsWith('output-limit');
   let requests = 0;
+  let sawRecoveryPrompt = false;
   const server = createServer(async (request, response) => {
-    for await (const _ of request) {
-      /* Drain fixture request; never save prompts or headers. */
+    let body = '';
+    for await (const chunk of request) {
+      if (outputLimit) body += chunk;
     }
     requests++;
     if (scenario === '401' || (requests === 1 && ['500', '429'].includes(scenario))) {
@@ -47,6 +53,45 @@ for (const scenario of [
           '\n\n',
       );
     emit({ role: 'assistant' });
+    const call = (id: string, name: string, argumentsJson: string) =>
+      emit({
+        tool_calls: [{ index: 0, id, type: 'function', function: { name, arguments: argumentsJson } }],
+      });
+    const finish = (reason: string) => {
+      emit({}, reason);
+      response.end('data: [DONE]\n\n');
+    };
+    if (outputLimit && requests > 1)
+      sawRecoveryPrompt ||= body.includes('输出上限恢复') && body.includes('本步工具没有执行');
+    if (scenario === 'output-limit-text') {
+      emit({ content: 'VISIBLE_PARTIAL' });
+      finish('length');
+      return;
+    }
+    if (scenario === 'output-limit-exhausted' || (scenario === 'output-limit' && requests === 3)) {
+      call('truncated-write', 'write', '{"file_path":"unexpected.txt","content":"incom');
+      finish('length');
+      return;
+    }
+    if (scenario === 'output-limit' && requests === 1) {
+      call(
+        'document-analysis',
+        'emergence_analyze',
+        JSON.stringify({ objective: '分段写入两份文档', reason: '两个明确的文件产物', route: 'focused' }),
+      );
+      finish('tool_calls');
+      return;
+    }
+    if (scenario === 'output-limit' && (requests === 2 || requests === 4)) {
+      const filePath = requests === 2 ? 'outline.md' : 'report.md';
+      call(
+        'completed-write-' + requests,
+        'write',
+        JSON.stringify({ file_path: filePath, content: 'fixture section' }),
+      );
+      finish('tool_calls');
+      return;
+    }
     if (scenario.endsWith('-exhausted') || (['malformed', 'schema'].includes(scenario) && requests === 1)) {
       // A completed first block must also be discarded when a later block is invalid.
       emit({
@@ -112,16 +157,16 @@ for (const scenario of [
     },
   ];
   await saveConfig(home, config);
-  const child = spawn(
-    process.execPath,
-    ['bin/emergence.cjs', project, '--home', home, '--print', '你好，回复一句话即可'],
-    {
-      cwd: process.cwd(),
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, R4_HTTP_FIXTURE_KEY: 'local-fixture-only' },
-    },
-  );
+  const prompt =
+    scenario === 'output-limit'
+      ? '请在当前目录写入 outline.md 和 report.md，内容为 fixture section。'
+      : '你好，回复一句话即可';
+  const child = spawn(process.execPath, ['bin/emergence.cjs', project, '--home', home, '--print', prompt], {
+    cwd: process.cwd(),
+    windowsHide: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: { ...process.env, R4_HTTP_FIXTURE_KEY: 'local-fixture-only' },
+  });
   let output = '';
   child.stdout.on('data', (chunk) => {
     output += chunk;
@@ -154,6 +199,23 @@ for (const scenario of [
       requests,
       retries: retries.map((e) => ({ code: e.data.failure.code, retry: e.data.retry })),
     });
+    if (outputLimit) {
+      const completed = scenario === 'output-limit';
+      const text = scenario === 'output-limit-text';
+      assert.equal(requests, completed ? 5 : text ? 1 : 2, JSON.stringify(results));
+      assert.equal(sawRecoveryPrompt, !text);
+      assert.equal(code, completed ? 0 : 1, output.slice(-2000));
+      assert.equal(events.filter((e) => e.type === 'turn/start').length, 1);
+      assert.equal(
+        events.find((e) => e.type === 'turn/end')?.data.reason.kind,
+        completed ? 'completed' : 'max-tokens',
+      );
+      assert.equal(events.filter((e) => e.type === 'tool/call').length, completed ? 3 : 0);
+      assert.equal(events.filter((e) => e.type === 'assistant/attempt').length, text ? 0 : 1);
+      assert.deepEqual((await readdir(project)).sort(), completed ? ['outline.md', 'report.md'] : []);
+      if (text) assert.match(output, /VISIBLE_PARTIAL/);
+      continue;
+    }
     const exhausted = scenario.endsWith('-exhausted');
     assert.equal(requests, scenario === '401' ? 1 : exhausted ? 3 : 2, JSON.stringify(results));
     assert.equal(retries.length, scenario === '401' ? 0 : exhausted ? 2 : 1, JSON.stringify(results));

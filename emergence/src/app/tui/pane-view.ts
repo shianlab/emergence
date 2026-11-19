@@ -12,6 +12,7 @@ import type { PaneState, WorkspaceController } from '../workspace.ts';
 import { mountCommandList } from './command-list.ts';
 import { mountMessages } from './message-view.ts';
 import type { View } from './pane-view-state.ts';
+import { SmallText, type SmallTextService } from './small-text.ts';
 interface ViewHost {
   menuOpen(): boolean;
   disposed(): boolean;
@@ -34,6 +35,7 @@ export function paneViewFactory(
   >,
   views: ReadonlyMap<string, View>,
   host: ViewHost,
+  smallText: SmallTextService,
 ) {
   return (pane: PaneState): View => {
     const colors = palette(workspace.launch.appConfig.ui);
@@ -60,7 +62,7 @@ export function paneViewFactory(
       position: 'absolute',
       left: 0,
       top: 0,
-      height: 2,
+      height: 1,
       minWidth: 0,
       content: '',
       fg: colors.accent,
@@ -84,6 +86,21 @@ export function paneViewFactory(
       },
     });
     titlebar.add(title);
+    const modelLabel = new SmallText(
+      renderer,
+      {
+        position: 'absolute',
+        left: 0,
+        top: 1,
+        width: '100%',
+        height: 1,
+        fg: colors.muted,
+        wrapMode: 'none',
+        truncate: true,
+      },
+      smallText,
+    );
+    titlebar.add(modelLabel);
     titlebar.add(close);
     const menuButton = new TextRenderable(renderer, {
       position: 'absolute',
@@ -131,14 +148,18 @@ export function paneViewFactory(
         }
       },
     });
-    const meta = new TextRenderable(renderer, {
-      height: 1,
-      flexShrink: 0,
-      content: '',
-      wrapMode: 'none',
-      truncate: true,
-      fg: colors.muted,
-    });
+    const meta = new SmallText(
+      renderer,
+      {
+        height: 1,
+        flexShrink: 0,
+        content: '',
+        wrapMode: 'none',
+        truncate: true,
+        fg: colors.muted,
+      },
+      smallText,
+    );
     const notice = new TextRenderable(renderer, {
       content: '',
       visible: false,
@@ -146,33 +167,41 @@ export function paneViewFactory(
       flexShrink: 0,
       fg: colors.warning,
     });
-    const sharedInfo = new TextRenderable(renderer, {
-      height: 1,
-      visible: false,
-      flexShrink: 0,
-      content: '',
-      fg: colors.muted,
-      wrapMode: 'word',
-      selectable: false,
-      onMouseDown(event) {
-        if (event.button !== 0) return;
-        event.preventDefault();
-        event.stopPropagation();
-        const view = views.get(pane.id);
-        if (view) {
-          view.sharedExpanded = !view.sharedExpanded;
-          host.renderNotice(pane, view);
-        }
+    const sharedInfo = new SmallText(
+      renderer,
+      {
+        height: 1,
+        visible: false,
+        flexShrink: 0,
+        content: '',
+        fg: colors.muted,
+        wrapMode: 'word',
+        selectable: false,
+        onMouseDown(event) {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          event.stopPropagation();
+          const view = views.get(pane.id);
+          if (view) {
+            view.sharedExpanded = !view.sharedExpanded;
+            host.renderNotice(pane, view);
+          }
+        },
       },
-    });
-    const status = new TextRenderable(renderer, {
-      height: 1,
-      flexShrink: 0,
-      content: '',
-      fg: colors.muted,
-      wrapMode: 'none',
-      truncate: true,
-    });
+      smallText,
+    );
+    const status = new SmallText(
+      renderer,
+      {
+        height: 1,
+        flexShrink: 0,
+        content: '',
+        fg: colors.muted,
+        wrapMode: 'none',
+        truncate: true,
+      },
+      smallText,
+    );
     const commands = mountCommandList(renderer, (item) => {
       const view = views.get(pane.id);
       if (view) host.chooseCommand(item, view);
@@ -210,6 +239,7 @@ export function paneViewFactory(
       });
     };
     input = new TextareaRenderable(renderer, {
+      width: '100%',
       height: 3,
       minHeight: 2,
       flexShrink: 0,
@@ -235,6 +265,23 @@ export function paneViewFactory(
       },
       onSubmit: submit,
     });
+    const composer = new BoxRenderable(renderer, {
+      width: '100%',
+      height: 'auto',
+      flexShrink: 0,
+      flexDirection: 'column',
+      border: true,
+      borderStyle: 'single',
+      borderColor: colors.border,
+      backgroundColor: colors.input,
+      paddingLeft: 1,
+      paddingRight: 1,
+      onMouseDown(event) {
+        if (event.button !== 0) return;
+        focusPane();
+      },
+    });
+    composer.add(input);
     const interaction = mountInteractionUI(
       renderer,
       (request, answer) => {
@@ -247,13 +294,23 @@ export function paneViewFactory(
       (reason) => host.error(pane.id, reason),
     );
     interaction.answer.onMouseDown = focusPane;
-    [titlebar, scroll, jump, notice, sharedInfo, commands.box, status, interaction.box, input, meta].forEach(
-      (child) => box.add(child),
-    );
+    [
+      titlebar,
+      scroll,
+      jump,
+      notice,
+      sharedInfo,
+      commands.box,
+      status,
+      interaction.box,
+      composer,
+      meta,
+    ].forEach((child) => box.add(child));
     body.add(box);
     return {
       box,
       title,
+      modelLabel,
       close,
       scroll,
       text,
@@ -271,6 +328,7 @@ export function paneViewFactory(
       status,
       commands,
       input,
+      composer,
       interaction,
       submit,
       initializedScroll: false,

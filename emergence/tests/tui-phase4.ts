@@ -72,6 +72,24 @@ try {
     mainView = ui.views.get(main.id)!;
   assert.equal(mainView.box.border, false);
   assert.ok(text(mainView.title).includes('1 会话'));
+  assert.doesNotMatch(text(mainView.modelLabel), /中文 项目/);
+  const initial = test.captureCharFrame();
+  assert.equal(initial.split(text(mainView.modelLabel)).length - 1, 1, 'model appears once');
+  assert.equal(initial.split(cwd).length - 1, 1, 'full project path appears only in footer');
+  assert.equal(ui.tabs.get(main.id)?.parent?.visible, false, 'single pane needs no duplicate tab row');
+  assert.equal(initial.trimEnd().split('\n').length <= 45, true, 'last terminal row remains empty');
+  assert.equal(mainView.composer.height, mainView.input.height + 2, 'border preserves editable rows');
+  assert.equal(mainView.input.y, mainView.composer.y + 1);
+  assert.equal(mainView.title.y, ui.heading.y + ui.heading.height, 'no empty row below brand');
+  const rows = initial.split('\n');
+  assert.match(rows[mainView.composer.y], /┌─+┐/);
+  assert.match(rows[mainView.composer.y + mainView.composer.height - 1], /└─+┘/);
+  assert.equal(
+    rows[mainView.composer.y + mainView.composer.height].trim(),
+    '',
+    'footer has a blank row above it',
+  );
+  frames.single = initial;
   checks.singleSessionUsesOpenReadingArea = true;
   await mkdir(join(root, 'other'));
   const worker = await workspace.split('row', cwd);

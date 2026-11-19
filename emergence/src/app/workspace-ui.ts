@@ -32,18 +32,27 @@ import type { View } from './tui/pane-view-state.ts';
 import { paneViewFactory } from './tui/pane-view.ts';
 import { mountTaskInspector } from './tui/task-inspector.ts';
 import { workspaceBrand } from './tui/workspace-brand.ts';
-import { fitCells, paneNumber, paneState, projectName } from './tui/workspace-chrome.ts';
+import { SmallText, SmallTextService } from './tui/small-text.ts';
+import { fitCells, paneNumber, paneState } from './tui/workspace-chrome.ts';
 import { workspaceInput, type WorkspaceModalState } from './tui/workspace-input.ts';
 import type { PaneState, WorkspaceController } from './workspace.ts';
 import { updateAction, updateHint } from './updates/presentation.ts';
 
 export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceController, exit: () => void) {
+  const smallText = new SmallTextService(renderer);
   const modal: WorkspaceModalState = {
     commandMode: false,
     commandPane: workspace.focused,
     modalSubmitUntil: 0,
   };
-  const page = new BoxRenderable(renderer, { width: '100%', height: '100%', flexDirection: 'column' });
+  // Sixel's six-pixel bands can extend past a character row and scroll the terminal
+  // if painted at the bottom edge. Keep one blank guard row below the footer.
+  const page = new BoxRenderable(renderer, {
+    width: '100%',
+    height: '100%',
+    flexDirection: 'column',
+    paddingBottom: 1,
+  });
   const heading = new BoxRenderable(renderer, { height: 3, flexShrink: 0, flexDirection: 'column' });
   const headline = new BoxRenderable(renderer, { height: 1, flexShrink: 0, flexDirection: 'row' });
   const aggregate = createAggregateImage(renderer),
@@ -101,7 +110,11 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
   const overflow = new TextRenderable(renderer, { height: 1, selectable: false, content: '' });
   navigationBar.add(overflow);
   const body = new BoxRenderable(renderer, { flexGrow: 1, position: 'relative' });
-  const footer = new TextRenderable(renderer, { height: 1, content: '', wrapMode: 'none', truncate: true });
+  const footer = new SmallText(
+    renderer,
+    { height: 1, marginTop: 1, flexShrink: 0, content: '', wrapMode: 'none', truncate: true },
+    smallText,
+  );
 
   async function applyPaneAction(target: { id: string; session?: string }, command: string) {
     if (workspace.panes.get(target.id)?.controller?.id !== target.session) return;
@@ -492,6 +505,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       en,
     );
     view.input.visible = !controller?.pending;
+    view.composer.visible = view.input.visible;
     if (
       !controller?.pending &&
       !modal.commandMode &&
@@ -507,6 +521,11 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     view.text.fg = colors.foreground;
     view.close.fg = colors.warning;
     view.input.backgroundColor = colors.input;
+    view.composer.backgroundColor = colors.input;
+    view.composer.borderColor =
+      ui.theme === 'dark' && process.env.NO_COLOR === undefined && process.env.TERM !== 'dumb'
+        ? '#606060'
+        : colors.border;
     view.input.focusedBackgroundColor = colors.input;
     view.input.textColor = colors.foreground;
     view.input.focusedTextColor = colors.foreground;
@@ -534,13 +553,11 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     const model = controller?.model ?? workspace.launch.appConfig.models.find((m) => m.id === pane.modelId);
     const actualModel = model ? `${model.provider}/${model.model}` : pane.modelId;
     const metaWidth = Math.max(10, view.columns - (en ? 5 : 4));
-    const modelWidth = Math.min(stringWidth(actualModel), Math.max(12, Math.floor(metaWidth * 0.65)));
     view.title.content = redact(
-      `${active ? '›' : ' '} ${paneNumber(workspace, pane.id)} ${role} · ${paneState(pane, en)} · ${controller ? permissionLabels[controller.permissionMode] + (controller.permissionTransitioning ? '…' : '') : ''}\n` +
-        fitCells(actualModel, modelWidth, false, redact) +
-        ' · ' +
-        fitCells(controller?.cwd ?? pane.cwd, Math.max(1, metaWidth - modelWidth - 3), true, redact),
+      `${active ? '›' : ' '} ${paneNumber(workspace, pane.id)} ${role} · ${paneState(pane, en)} · ${controller ? permissionLabels[controller.permissionMode] + (controller.permissionTransitioning ? '…' : '') : ''}`,
     );
+    view.modelLabel.fg = colors.muted;
+    view.modelLabel.content = fitCells(actualModel, metaWidth, false, redact);
     view.box.bottomTitle =
       active && workspace.taskEngine.current(pane.id)
         ? fitCells(workspace.taskEngine.current(pane.id)!.id, Math.max(8, view.columns - 3), false, redact)
@@ -584,24 +601,32 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       view.lastText = text;
     }
     view.meta.visible = !single && ui.statusBar.visible;
+    view.meta.marginTop = view.box.height >= 16 ? 1 : 0;
     view.meta.fg = colors.muted;
     view.meta.content = paneFooter(pane, view.columns - 2, en, redact);
     renderComposer(pane, view, redact);
     // The live editor owns its contents. Only a new session binding or explicit submit/error changes it.
   };
-  const createView = paneViewFactory(renderer, body, workspace, views, {
-    menuOpen: () => !!modal.paneMenuTarget,
-    disposed: () => disposed,
-    releaseFocus: () => inspector.releaseFocus(),
-    openPaneMenu,
-    closePaneMenu,
-    chooseCommand,
-    refreshHeader: () => refreshHeader(),
-    renderNotice,
-    renderComposer,
-    savedScroll,
-    error,
-  });
+  const createView = paneViewFactory(
+    renderer,
+    body,
+    workspace,
+    views,
+    {
+      menuOpen: () => !!modal.paneMenuTarget,
+      disposed: () => disposed,
+      releaseFocus: () => inspector.releaseFocus(),
+      openPaneMenu,
+      closePaneMenu,
+      chooseCommand,
+      refreshHeader: () => refreshHeader(),
+      renderNotice,
+      renderComposer,
+      savedScroll,
+      error,
+    },
+    smallText,
+  );
   const refreshHeader = (redact = createRedactor()) => {
     const updateIdle = ![...workspace.panes.values()].some(
       (pane) => pane.controller?.busy || pane.controller?.pending,
@@ -612,6 +637,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
         ? updateHint(updateState)
         : '';
     updateNotice.fg = palette(workspace.launch.appConfig.ui).muted;
+    updateNotice.visible = Boolean(updateNotice.chunks.map((chunk) => chunk.text).join(''));
     const ui = workspace.launch.appConfig.ui,
       en = ui.language === 'en',
       colors = palette(ui);
@@ -680,7 +706,8 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       stringWidth(counts) <= headerColumns
         ? counts
         : `${panes.length} ${en ? 'sessions' : '会话'} · ●${running} · ◇${pending}`;
-    heading.height = brand.height;
+    navigationBar.visible = panes.length > 1;
+    heading.height = brand.rows + (navigationBar.visible ? 1 : 0) + (updateNotice.visible ? 1 : 0);
     headline.height = brand.rows;
     headerLogo.visible = logoColumns > 0;
     headerLogo.width = logoColumns;
@@ -750,7 +777,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
         folded = !hidden && !views.get(pane.id)?.box.visible;
       const status = pane.controller?.pending ? ' ◇' : pane.controller?.busy ? ' ●' : '';
       const suffix = hidden ? (en ? ' hidden' : ' 后台') : folded ? (en ? ' folded' : ' 折叠') : '';
-      const name = `${active ? '›' : ' '} ${paneNumber(workspace, pane.id)} ${en ? 'Session' : '会话'} · ${projectName(pane.cwd)}`;
+      const name = `${active ? '›' : ' '} ${paneNumber(workspace, pane.id)} ${en ? 'Session' : '会话'}`;
       const label =
         fitCells(name, Math.max(5, available - stringWidth(status + suffix)), false, redact) +
         status +
@@ -889,6 +916,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
   };
   const frame = () => {
     if (disposed) return;
+    smallText.sync(palette(workspace.launch.appConfig.ui).background);
     for (const [id, view] of views) {
       const pane = workspace.panes.get(id);
       if (!pane || !view.box.visible || view.scroll.viewport.height <= 0) continue;
@@ -1048,6 +1076,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       renderer.keyInput.off('keypress', keypress);
       renderer.keyInput.off('paste', paste);
       terminal.dispose();
+      smallText.dispose();
       for (const view of views.values()) view.messages.dispose();
       page.destroyRecursively();
     },

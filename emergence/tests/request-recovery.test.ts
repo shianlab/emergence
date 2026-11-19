@@ -4,7 +4,7 @@ import { LlmError, ToolCallId, resolveRetryPolicy, type StreamChunk } from '@dee
 import * as Retry from '@deepseek-ai/dsh-llm-retry';
 import UserApproval from '@deepseek-ai/dsh-user-approval';
 import { defineTool } from '@deepseek-ai/dsh-tools';
-import { mountModelResponseValidation } from '../src/core/adapters/model-response.ts';
+import { mountModelResponseHandling } from '../src/core/adapters/model-response.ts';
 import { modelProviders } from '../src/app/model-config-runtime.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { executionFixture, ExecutionProvider, until } from './fixtures/core-execution.ts';
@@ -18,7 +18,7 @@ class RecoveringProvider extends ExecutionProvider {
 async function fixture() {
   const f = await executionFixture(undefined, false, new RecoveringProvider());
   await f.ctx.plugin(Retry);
-  f.ctx.effect(() => mountModelResponseValidation(f.ctx));
+  f.ctx.effect(() => mountModelResponseHandling(f.ctx));
   const master = f.w.current,
     worker = await f.w.split('row');
   return {

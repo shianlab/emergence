@@ -1,7 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-cmdline';
 import { safeError } from '../core/adapters/redaction.ts';
-import { mountModelResponseValidation } from '../core/adapters/model-response.ts';
+import { mountModelResponseHandling } from '../core/adapters/model-response.ts';
 import { acquireLease, canonicalDirectory } from '../core/storage/lease.ts';
 import { Capabilities } from './capabilities.ts';
 import { SessionController } from './controller.ts';
@@ -31,7 +31,7 @@ export const inject = [
 export async function apply(ctx: Context, config: LaunchConfig) {
   adoptHydratedCredentials(config.hydratedCredentials ?? []);
   ctx.effect(() => mountModelCredentialResolution(ctx, config.appConfig));
-  ctx.effect(() => mountModelResponseValidation(ctx));
+  ctx.effect(() => mountModelResponseHandling(ctx));
   let controller: SessionController | undefined;
   let workspace: WorkspaceController | undefined;
   let ui: { dispose(): void; refreshHome?(): void } | undefined;
