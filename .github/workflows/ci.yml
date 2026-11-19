@@ -45,4 +45,11 @@ jobs:
           .data-venv/Scripts/python.exe -I -m pip install --require-hashes --only-binary=:all: -r src/domains/data/requirements-win32-py314.txt
       - run: npm test
       - run: npm run test:independent-windows:tui
+      - name: Check terminal typography and input layout
+        run: |
+          node --experimental-ffi --import tsx tests/tui-small-text.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --experimental-ffi --import tsx tests/tui-small-text-layout.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --experimental-ffi --import tsx tests/tui-phase4.ts
       - run: npm run inspect:security

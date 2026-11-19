@@ -50,6 +50,7 @@ export function renderPaneNotice(
       : sharedLabel;
   view.sharedInfo.fg = colors.muted;
   view.sharedInfo.height = view.sharedExpanded ? 'auto' : 1;
+  view.sharedInfo.small = !view.sharedExpanded;
   view.status.visible =
     !info.mergeReady &&
     !(
@@ -63,6 +64,13 @@ export function renderPaneNotice(
   view.status.attributes =
     controller?.pending || controller?.lastError || pane.error ? TextAttributes.BOLD : 0;
   view.status.content = info.receipt || composerStatus(controller, en, pane.error, ui, redact);
+  view.status.small =
+    !controller?.pending &&
+    !controller?.lastError &&
+    !pane.error &&
+    !controller?.busy &&
+    !controller?.activity.queued;
+  if (!view.status.small) view.status.reset();
   if (controller?.pending || controller?.lastError || pane.error) view.status.fg = colors.foreground;
   else if (info.receipt) view.status.fg = colors.muted;
 }

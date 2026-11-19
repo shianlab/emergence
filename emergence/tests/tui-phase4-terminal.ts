@@ -32,19 +32,23 @@ config.models = ['first', 'second'].map((id) => ({
 }));
 await saveConfig(home, config);
 const terminal = new xterm.Terminal({ cols: 160, rows: 46, allowProposedApi: true });
-const child = spawn(process.execPath, [resolve('bin/emergence.cjs'), firstProject, '--home', home], {
-  cwd: process.cwd(),
-  cols: 160,
-  rows: 46,
-  useConptyDll: true,
-  env: {
-    ...process.env,
-    TERM: 'xterm-256color',
-    TUI_PANES_TERMINAL_KEY: 'fixture-secret-value',
-    NODE_OPTIONS: '',
-    NODE_PATH: '',
+const child = spawn(
+  process.execPath,
+  [resolve(process.env.EMERGENCE_TEST_ENTRY ?? 'bin/emergence.cjs'), firstProject, '--home', home],
+  {
+    cwd: process.cwd(),
+    cols: 160,
+    rows: 46,
+    useConptyDll: true,
+    env: {
+      ...process.env,
+      TERM: 'xterm-256color',
+      TUI_PANES_TERMINAL_KEY: 'fixture-secret-value',
+      NODE_OPTIONS: '',
+      NODE_PATH: '',
+    },
   },
-});
+);
 let bytes = '',
   ended = false;
 child.onData((value) => {

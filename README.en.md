@@ -1,9 +1,8 @@
-<p align="center"><img src="docs/media/emergence-1.04-cover.png" alt="Emergence 1.04 — Code. Data. Your terminal." width="100%"></p>
 <h1 align="center">Emergence · 涌现</h1>
 <p align="center"><strong>Turn ideas into code. Turn data into answers.</strong></p>
 <p align="center">An open-source terminal agent for coding and data analysis, with an independent Harness, a Chinese-first TUI, and a native model configuration app.</p>
 <p align="center"><a href="README.md">简体中文</a> · English</p>
-<p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.4">Release 1.04</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
+<p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.5">Release 1.05</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
 <p align="center"><a href="#install">Install</a> · <a href="#a-terminal-workspace">Workspace</a> · <a href="#work-with-code-and-data">Examples</a> · <a href="#updates-and-maintenance">Updates</a> · <a href="#develop">Develop</a></p>
 
 ## Install
@@ -32,7 +31,7 @@ Windows 11 and Windows Terminal are recommended for the Windows x64 release. The
 
 ![Home screen exported from the actual TUI renderer](docs/media/home.svg)
 
-The frame uses demo configuration and a demo project path. The cover is generated brand artwork.
+The frame uses demo configuration and a demo project path.
 
 <details>
 <summary>View the command menu</summary>
@@ -99,7 +98,7 @@ emergence update
 emergence rollback
 ```
 
-New windows use the update after the installer verifies it. Open windows can finish their current tasks. A healthy previous version is kept for rollback. Your configuration, keys, and sessions live separately from application versions. Release 1.04 adds Rage mode and includes it in the Shift+Tab permission cycle. [Release notes](docs/releases/1.0.4.md) · [Changelog](CHANGELOG.md)
+New windows use the update after the installer verifies it. Open windows can finish their current tasks. A healthy previous version is kept for rollback. Your configuration, keys, and sessions live separately from application versions. Release 1.05 updates conversation typography, frames the composer, and recovers from interrupted model output. [Release notes](docs/releases/1.0.5.md) · [Changelog](CHANGELOG.md)
 
 ## Develop
 
@@ -113,10 +112,10 @@ npm run build
 npm start
 ```
 
-Run `npm run check`, `npm test` and relevant integration checks. Data tests require the Python environment. See [CONTRIBUTING.md](CONTRIBUTING.md), [installation and upgrades](docs/installation.md), [release notes](docs/releases/1.0.4.md) and the [application manual](emergence/README.md).
+Run `npm run check`, `npm test` and relevant integration checks. Data tests require the Python environment. See [CONTRIBUTING.md](CONTRIBUTING.md), [installation and upgrades](docs/installation.md), [release notes](docs/releases/1.0.5.md) and the [application manual](emergence/README.md).
 
 ## License and support
 
 Own code is [MIT](LICENSE). Third-party code and derived assets retain their original licenses and notices. See [attributions](emergence/THIRD_PARTY_NOTICES.md).
 
-Report reproducible bugs through [GitHub Issues](https://github.com/shianlab/emergence/issues), without keys or private project data. Follow the [security policy](SECURITY.md) for vulnerabilities. macOS, Linux and ARM64 are not released or certified in 1.04.
+Report reproducible bugs through [GitHub Issues](https://github.com/shianlab/emergence/issues), without keys or private project data. Follow the [security policy](SECURITY.md) for vulnerabilities. macOS, Linux and ARM64 are not released or certified in 1.05.
