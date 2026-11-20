@@ -1,11 +1,21 @@
 import { stableURL } from './manifest.ts';
 
+const stableContentsURL =
+  'https://api.github.com/repos/shianlab/emergence/contents/releases/stable.json?ref=main';
+
 /** Metadata only. Archive transfer reuses the standalone installer transport. */
 export async function fetchManifest(signal: AbortSignal, fetcher: typeof fetch = fetch): Promise<unknown> {
   const response = await fetcher(stableURL, {
-    signal,
+    signal: AbortSignal.any([signal, AbortSignal.timeout(2500)]),
     redirect: 'manual',
     headers: { Accept: 'application/json' },
+  }).catch(() => {
+    signal.throwIfAborted();
+    return fetcher(stableContentsURL, {
+      signal,
+      redirect: 'manual',
+      headers: { Accept: 'application/vnd.github.raw+json' },
+    });
   });
   if (!response.ok || response.status >= 300 || !response.body) {
     await response.body?.cancel();

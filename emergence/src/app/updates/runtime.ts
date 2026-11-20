@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { VERSION } from '../version.ts';
 import { safeError } from '../../core/adapters/redaction.ts';
 import { replaceJsonFile } from '../../core/storage/safe-json-file.ts';
-import { childEnvironment, windowsPowerShell } from '../../platform/child-environment.ts';
+import { windowsMaintenanceEnvironment, windowsPowerShell } from '../../platform/child-environment.ts';
 import { verifyManifest } from './manifest.ts';
 import {
   hasInstallTransaction,
@@ -25,8 +25,7 @@ function runInstaller(
   timeoutMs: number,
   progress: (message: string) => void,
 ) {
-  const env = childEnvironment();
-  for (const name of Object.keys(env)) if (name.toLowerCase() === 'psmodulepath') delete env[name];
+  const env = windowsMaintenanceEnvironment();
   return new Promise<{ code: number | null; detail: string; timedOut: boolean; stopped: boolean }>(
     (done, reject) => {
       const child = spawn(

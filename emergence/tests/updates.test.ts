@@ -100,6 +100,35 @@ test('metadata transport bounds streamed responses, rejects redirects and sends 
   ])
     await assert.rejects(fetchManifest(new AbortController().signal, async () => response));
 });
+test('metadata transport retries a connection failure on the official contents endpoint', async () => {
+  const value = signed(manifest());
+  const requests: string[] = [];
+  const fetcher: typeof fetch = async (url, init) => {
+    requests.push(String(url));
+    assert.equal(init?.redirect, 'manual');
+    assert.equal(new Headers(init?.headers).has('authorization'), false);
+    if (requests.length === 1) throw new TypeError('connection reset');
+    assert.equal(new Headers(init?.headers).get('accept'), 'application/vnd.github.raw+json');
+    return new Response(JSON.stringify(value));
+  };
+  assert.equal(verify(await fetchManifest(new AbortController().signal, fetcher)).version, '1.0.2');
+  assert.deepEqual(requests, [
+    'https://raw.githubusercontent.com/shianlab/emergence/main/releases/stable.json',
+    'https://api.github.com/repos/shianlab/emergence/contents/releases/stable.json?ref=main',
+  ]);
+
+  const controller = new AbortController();
+  let attempts = 0;
+  await assert.rejects(
+    fetchManifest(controller.signal, async () => {
+      attempts++;
+      controller.abort();
+      throw new TypeError('connection reset');
+    }),
+    { name: 'AbortError' },
+  );
+  assert.equal(attempts, 1);
+});
 test('concurrent clients share installed cache; background checks are limited, preference persists', async () => {
   const f = await fixture();
   let calls = 0;

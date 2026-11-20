@@ -3,7 +3,7 @@
 <p align="center">面向编程与数据分析的开源 CLI Agent，拥有独立 Harness、中文 TUI 和原生模型配置工具。</p>
 
 <p align="center">
-  <a href="https://github.com/shianlab/emergence/releases/tag/v1.0.7"><img alt="Release 1.07" src="https://img.shields.io/badge/release-1.07-e5e5e5?style=flat-square&labelColor=181818"></a>
+  <a href="https://github.com/shianlab/emergence/releases/tag/v1.0.8"><img alt="Release 1.08" src="https://img.shields.io/badge/release-1.08-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="docs/installation.md"><img alt="Windows x64" src="https://img.shields.io/badge/platform-Windows_x64-e5e5e5?style=flat-square&labelColor=181818"></a>
   <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml"><img alt="Windows CI" src="https://github.com/shianlab/emergence/actions/workflows/ci.yml/badge.svg"></a>
@@ -141,7 +141,7 @@ emergence update
 emergence rollback
 ```
 
-更新会先验证新版本，再让新启动的窗口使用它。已打开的窗口可继续当前任务。安装器保留可用的上一版本用于回退，配置、密钥和会话由独立的用户目录保存。1.07 加强凭据隔离，修复取消与更新失败的处理，并减少空闲重绘。[1.07 发布说明](docs/releases/1.0.7.md) · [更新日志](CHANGELOG.md)
+更新会先验证新版本，再让新启动的窗口使用它。已打开的窗口可继续当前任务。安装器保留可用的上一版本用于回退，配置、密钥和会话由独立的用户目录保存。1.08 为版本检查增加官方备用入口，修复 PowerShell 7 下的安装维护。[1.08 发布说明](docs/releases/1.0.8.md) · [更新日志](CHANGELOG.md)
 
 ## 从源码开发
 
@@ -165,9 +165,9 @@ npm run inspect:full   # Harness、TUI、ConPTY 完整本机矩阵
 
 ## 版本与支持
 
-- **1.07** 支持 Windows x64，包含凭据隔离、任务与更新恢复和终端空闲优化。
+- **1.08** 支持 Windows x64，包含凭据隔离、任务与更新恢复、终端空闲优化及 Windows 更新兼容性修正。
 - 下载、校验、更新、卸载与故障排查：[安装指南](docs/installation.md)。
-- 变更与已知限制见 [CHANGELOG.md](CHANGELOG.md) · [1.07 发布说明](docs/releases/1.0.7.md)。
+- 变更与已知限制见 [CHANGELOG.md](CHANGELOG.md) · [1.08 发布说明](docs/releases/1.0.8.md)。
 - 问题反馈：[GitHub Issues](https://github.com/shianlab/emergence/issues)；安全问题请使用[私密报告流程](SECURITY.md)。
 
 欢迎复现问题、改进文档和提交聚焦的 PR。请勿把 API 密钥、真实会话或私有项目内容附到公开 issue 中。

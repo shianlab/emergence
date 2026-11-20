@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
-import { childEnvironment, windowsPowerShell } from '../platform/child-environment.ts';
+import { windowsMaintenanceEnvironment, windowsPowerShell } from '../platform/child-environment.ts';
 import { createUpdateService } from './updates/runtime.ts';
 
 /** Installer operations belong to the release manager, never the Agent execution loop. */
@@ -73,7 +73,7 @@ export async function runInstallationCommand(
   const child = spawn(windowsPowerShell(), parameters, {
     windowsHide: true,
     stdio: 'inherit',
-    env: childEnvironment(),
+    env: windowsMaintenanceEnvironment(),
   });
   const code = await new Promise<number | null>((done, reject) => {
     child.once('error', reject);

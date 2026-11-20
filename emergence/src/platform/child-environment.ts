@@ -19,6 +19,13 @@ export function windowsPowerShell() {
   return join(process.env.SystemRoot ?? 'C:/Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe');
 }
 
+/** Windows PowerShell must discover its own modules when launched by a PowerShell 7 session. */
+export function windowsMaintenanceEnvironment(): NodeJS.ProcessEnv {
+  return Object.fromEntries(
+    Object.entries(childEnvironment()).filter(([name]) => name.toUpperCase() !== 'PSMODULEPATH'),
+  );
+}
+
 /** Windows profile and system module discovery for bundled, local desktop helpers. */
 export function windowsDesktopEnvironment(): NodeJS.ProcessEnv {
   const { TEMP, TMP, WINDIR, USERPROFILE, APPDATA, LOCALAPPDATA, ProgramFiles, PSModulePath } = process.env;
