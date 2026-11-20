@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="336" viewBox="0 0 960 336" role="img" aria-labelledby="title desc">
+  <title id="title">Emergence Harness · 会话架构 / Session architecture</title>
+  <desc id="desc">Each OpenTUI pane connects to its own session. Built-in Meta_Kim governs planning. The DeepSeek Harness execution loop calls tools, including the Code and Data modules.</desc>
+  <style>
+    text { font-family: system-ui, "Microsoft YaHei", sans-serif; }
+    .section { fill: #c1c1bc; font-size: 16px; }
+    .name { fill: #f6f6f2; font-size: 25px; font-weight: 650; }
+    .detail { fill: #c1c1bc; font-size: 16px; }
+    .module { fill: #f6f6f2; font-size: 21px; font-weight: 600; }
+    .wire { fill: none; stroke: #afafaa; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <rect width="960" height="336" rx="12" fill="#151515"/>
+  <g class="section">
+    <text x="32" y="48">交互 / Interface</text>
+    <text x="288" y="48">会话内核 / Runtime</text>
+    <text x="720" y="48">专业工具 / Tools</text>
+  </g>
+  <g stroke="#52524f">
+    <path d="M32 63h195m61 0h366m66 0h208"/>
+    <rect x="32" y="130" width="195" height="116" rx="6" fill="#202020"/>
+    <rect x="288" y="84" width="366" height="219" rx="6" fill="#242424" stroke="#858581"/>
+    <rect x="720" y="87" width="208" height="96" rx="6" fill="#202020"/>
+    <rect x="720" y="207" width="208" height="96" rx="6" fill="#202020"/>
+    <path d="M311 142h320" />
+  </g>
+  <g class="wire">
+    <path d="M228 187h52m-6-5 6 5-6 5"/>
+    <path d="M655 253h56m-6-5 6 5-6 5"/>
+    <path d="M682 253V135h29m-6-5 6 5-6 5"/>
+  </g>
+  <g class="name">
+    <text x="51" y="182">OpenTUI</text>
+    <text x="311" y="123">Emergence Harness</text>
+    <text x="740" y="128">Code</text>
+    <text x="740" y="248">Data</text>
+  </g>
+  <g class="module">
+    <text x="311" y="178">Meta_Kim</text>
+    <text x="311" y="251">DeepSeek Harness</text>
+  </g>
+  <g class="detail">
+    <text x="51" y="213">独立窗口 / Pane</text>
+    <text x="311" y="203">意图与规划 / Intent and planning</text>
+    <text x="311" y="276">工具执行循环 / Tool execution loop</text>
+    <text x="740" y="158">代码检查 / Checks</text>
+    <text x="740" y="278">本地分析 / Analysis</text>
+  </g>
+</svg>

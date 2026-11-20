@@ -2,13 +2,26 @@
 
 # 涌现 · Emergence
 
-**一个在项目目录里工作的中文终端 Agent，面向编程与数据分析。**
+**面向编程与数据分析的中文终端 Agent。** 在项目目录打开涌现，你可以沿一次失败的导入追到出错的代码，也可以从一张订单表追到某个月销售额下降的原因。每个分屏有自己的项目、模型和会话。
 
-给涌现一个仓库，它可以沿调用链查找问题、修改代码，再运行项目的测试。给它一份订单表，它可以先和你确定销售额的口径，再交付图表、明细和复算脚本。你选择模型，在同一个终端查看它读了哪些文件、执行了哪些操作，以及结果如何验证。
+[![Emergence 1.08](https://img.shields.io/badge/Emergence-1.08-343434?style=flat-square)](https://github.com/shianlab/emergence/releases/tag/v1.0.8)
+[![M8ven Score](https://m8ven.ai/badge/mcp/shianlab-emergence-xrt4o4?v=82922ec33d59a1ecd4ffcaa5dfd6f102)](https://m8ven.ai/mcp/shianlab-emergence-xrt4o4?s=readme)
 
-[正式版 **1.08**](https://github.com/shianlab/emergence/releases/tag/v1.0.8) · Windows x64 · [MIT](LICENSE) · [English](README.en.md)
+[架构](#架构) · [安装](#快速开始) · [编程](#编程工作流) · [数据分析](#数据分析) · [终端操作](#终端工作台) · [English](README.en.md)
 
-[快速开始](#快速开始)　/　[编程工作流](#编程工作流)　/　[数据分析](#数据分析)　/　[终端工作台](#终端工作台)　/　[权限与扩展](#权限与扩展)　/　[更新与维护](#更新与维护)
+## 架构
+
+**Emergence Harness** 把一次请求从终端输入带到可检查的结果。OpenTUI 负责交互，内置的 Meta_Kim 负责理解任务与规划，模型调用和工具执行沿用 DeepSeek Harness 的执行循环。Code 和 Data 通过同一个会话调用，各自保存专业结果。
+
+![单个窗口的架构。OpenTUI 连接 Emergence Harness，内置 KIM 负责规划，执行循环按需调用 Code 或 Data。](docs/media/harness-architecture.svg)
+
+| 当你在窗口里… | 这个会话如何处理 | 你可以检查什么 |
+| --- | --- | --- |
+| 提出一个任务 | KIM 在请求进入时判断是直接回答、轻量规划，还是拆解为带验收条件的任务。 | 有计划时用 `/plan` 查看目标与验收条件。 |
+| 让它修改代码 | 执行循环调用当前模型和工具，按该窗口的权限处理审批。Code 记录变更和实际运行的检查。 | `/tasks` 查看进度，`/code` 查看执行目录、退出码和诊断。 |
+| 让它分析一张表 | Data 读取本地输入，按确认的指标口径计算并生成分析产物。 | 打开报告核对明细，用输入快照和 `replay.py` 复算。 |
+
+工作台分别记录计划和实际执行。比如要求“修复导入并通过测试”，计划里会列出验收条件，测试命令的退出码则来自实际运行。换到另一个分屏，可以用不同的目录、模型和权限继续自己的任务。[架构与模块职责](docs/structure/README.md) · [会话与规划](docs/structure/session-planning.md)
 
 ## 快速开始
 
@@ -112,13 +125,9 @@ emergence data-init --python "C:\Python314\python.exe"
 
 狂暴模式仍受操作系统权限、运行时校验和任务只读约束。API 密钥使用当前 Windows 用户的 DPAPI 加密。配置和会话默认保存在 `%USERPROFILE%\.emergence`。[安全说明](SECURITY.md)
 
-### Emergence Harness 如何组织一次任务
+### 接入模型、技能和外部服务
 
-- **理解任务。** 内置 Meta_Kim 根据请求选择直接处理、轻量规划或结构化规划。复杂任务可以先明确输入、所需能力和验收条件，输入 `/plan` 可查看。
-- **执行与记录。** Emergence Harness 调用当前会话的模型和工具，处理权限、取消与任务收尾。工作台把规划、工具回执和执行结果展示给你。
-- **接入自己的环境。** 模型档案支持 OpenAI Completions / Responses、Anthropic Messages 和 Google Generative AI 协议。用 `/skills` 查看发现的技能，`/mcp` 查看外部服务，`/capabilities` 查看当前会话可用的能力。
-
-Emergence Harness 基于 DeepSeek Harness 的执行底座，结合 OpenTUI、内置 Meta_Kim 和编程、数据分析模块。各组件的来源与许可可在仓库中查阅。[架构维护说明](docs/structure/README.md) · [第三方声明](emergence/THIRD_PARTY_NOTICES.md)
+模型档案支持 OpenAI Completions / Responses、Anthropic Messages 和 Google Generative AI 协议。用 `/model` 切换当前会话的模型。项目约定放在 `EMERGENCE.md`，可通过 `/init` 预览。输入 `/skills` 查看已发现的技能，`/mcp` 查看外部服务，`/capabilities` 核对当前会话可用的能力。
 
 ## 更新与维护
 
@@ -153,12 +162,6 @@ npm run inspect:full   # Harness、TUI、ConPTY 完整本机矩阵
 架构按 `app`、`core/domain`、`core/application`、`core/adapters`、`core/storage`、`domains/code` 与 `domains/data` 分层。开发约定和验证入口见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 欢迎通过 [GitHub Issues](https://github.com/shianlab/emergence/issues) 提交可复现的问题。安全问题请使用[私密报告流程](SECURITY.md)。
-
-## 第三方评测
-
-[![M8ven Score](https://m8ven.ai/badge/mcp/shianlab-emergence-xrt4o4?v=82922ec33d59a1ecd4ffcaa5dfd6f102)](https://m8ven.ai/mcp/shianlab-emergence-xrt4o4?s=readme)
-
-查看 M8ven 对仓库源码的评测记录与发布者验证状态。
 
 ## 许可与致谢
 

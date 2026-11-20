@@ -4,6 +4,7 @@
 - `emergence-1.03-cover.png`: edit of the original cover with the label updated to 1.03.
 - `emergence-1.04-cover.png`: version label updated to 1.04 using the same monochrome design.
 - `emergence-1.08-cover.png`: wide monochrome masthead generated from the original release artwork for the Chinese and English introductions. The printed release number is 1.08.
+- `harness-architecture.svg`: bilingual session diagram shared by both READMEs. Component boundaries follow the [current architecture](../structure/README.md).
 - `home.svg`, `commands.svg`: exported from current OpenTUI renderer cells with demo configuration by `emergence/scripts/capture-readme.ts`. No real API calls, credentials, or developer paths. Text uses viewer fonts; terminal font/graphics behavior can differ.
 
 Cover prompt: "Premium GitHub release cover for Emergence, an independent terminal agent for coding and data analysis. Wide 2:1. Monochrome near-black, charcoal, graphite and light grey. Restrained editorial typography. Exact text: EMERGENCE; 1.00; CODE. DATA. YOUR TERMINAL.; OPEN SOURCE / MIT. Right side: a subtle flowing field of small white/grey square cells suggesting ordered computation. Generous margins and thin rules. No new logo, Chinese calligraphy, fake screenshots, mascots, neon, or watermark."

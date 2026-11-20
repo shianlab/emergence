@@ -2,13 +2,26 @@
 
 # Emergence · 涌现
 
-**A Chinese-first terminal agent for working with code and data in your project directory.**
+**A Chinese-first terminal agent for code and data.** Trace a failed import to the line that broke, or trace a change in monthly revenue back to individual orders. Each pane has its own project, model and conversation.
 
-Trace a bug from its entry point to a failing test, or turn a local orders table into a report you can reproduce. Choose a model for each pane and follow the tools it uses, the approvals it requests, and the evidence behind the result.
+[![Emergence 1.08](https://img.shields.io/badge/Emergence-1.08-343434?style=flat-square)](https://github.com/shianlab/emergence/releases/tag/v1.0.8)
+[![M8ven Score](https://m8ven.ai/badge/mcp/shianlab-emergence-xrt4o4?v=82922ec33d59a1ecd4ffcaa5dfd6f102)](https://m8ven.ai/mcp/shianlab-emergence-xrt4o4?s=readme)
 
-[Release **1.08**](https://github.com/shianlab/emergence/releases/tag/v1.0.8) · Windows x64 · [MIT](LICENSE) · [简体中文](README.md)
+[Architecture](#architecture) · [Install](#install) · [Code and data](#work-with-code-and-data) · [Workspace](#a-terminal-workspace) · [简体中文](README.md)
 
-[Install](#install)　/　[Workspace](#a-terminal-workspace)　/　[Code and data](#work-with-code-and-data)　/　[Permissions](#stay-in-control)　/　[Updates](#updates-and-maintenance)　/　[Develop](#develop)
+## Architecture
+
+**Emergence Harness** connects a terminal request to a result you can inspect. OpenTUI handles interaction. Built-in Meta_Kim interprets the request and plans the work. The DeepSeek Harness execution loop calls the selected model and tools. Code and Data run within that session and keep their own results.
+
+![Session architecture showing OpenTUI, Meta_Kim planning, the DeepSeek Harness tool loop and the Code and Data modules](docs/media/harness-architecture.svg)
+
+| Request | Inside the session | Where to look |
+| --- | --- | --- |
+| Ask a question or describe a task | KIM selects a direct response, lightweight plan or structured plan with acceptance conditions. | Open `/plan` when a plan is available. |
+| Change code and run the tests | The tool loop applies the pane’s permission rules. Code records changes and the checks that actually ran. | Use `/tasks` for progress and `/code` for the working directory, exit code and diagnostics. |
+| Analyze a table | Data reads the local input and computes results using the agreed metric definitions. | Inspect the report and CSV breakdown, then recompute with the input snapshot and `replay.py`. |
+
+A plan and its execution record are stored separately. For a request to fix an import, the plan describes the expected behavior. The test result carries the exit code from the command that ran. [Architecture and module ownership](docs/structure/README.md) · [Session and planning lifecycle](docs/structure/session-planning.md)
 
 ## Install
 
@@ -28,34 +41,9 @@ emergence
 
 1. Enter `/model-config` to configure a provider, model, endpoint and API key. Test the connection and save. [Model configuration guide](docs/model-configuration.md)
 2. Use `/model` to select it for the current pane. Check the project directory on the home screen.
-3. Send a first task such as “Read this project and tell me how to start it and run its tests.” Type `/` to find commands. Use `Shift+Tab` to cycle permission modes, including Rage. Enter `/permission rage` to enable automatic tool approval for the current pane.
+3. Send a first task such as “Read this project and tell me how to start it and run its tests.” Type `/` to find commands. Use `Shift+Tab` to choose how the current pane handles approvals.
 
 Windows 11 and Windows Terminal are recommended for the Windows x64 release. The native configuration tool requires .NET Framework 4.8. Supply your own model API credentials. The optional data analysis tools require CPython 3.14 x64.
-
-## A terminal workspace
-
-![Home screen exported from the actual TUI renderer](docs/media/home.svg)
-
-The frame uses demo configuration and a demo project path.
-
-<details>
-<summary>View the command menu</summary>
-
-![Slash command suggestions in the terminal](docs/media/commands.svg)
-
-</details>
-
-| Capability | What it provides |
-| --- | --- |
-| Coding | Project context, change planning, file edits, checks and execution evidence |
-| Data analysis | Profiling, SQL and statistics over CSV/TSV/XLSX/Parquet, with charts and reproducible reports |
-| Built-in KIM | Requirement intake, planning, governance roles, evidence and memory within the session runtime |
-| Model choice | Configurable OpenAI Completions/Responses, Anthropic Messages and Google Generative AI protocols; gateway compatibility must be verified |
-| Independent panes | Separate projects, models, drafts and conversations; user-directed tasks in each pane |
-| Extensibility | `EMERGENCE.md`, Skills, MCP and local extensions |
-| Execution visibility | Streaming replies, live status, tool details, keyboard approvals, cancellation and history |
-
-Emergence Harness integrates the DeepSeek Harness execution foundation, OpenTUI, Meta_Kim-derived governance and specialized coding/data tools. It is an independent product; upstream attribution remains in [THIRD_PARTY_NOTICES.md](emergence/THIRD_PARTY_NOTICES.md).
 
 ## Work with code and data
 
@@ -85,11 +73,34 @@ The native analysis tools work with local CSV, TSV, XLSX and Parquet files. Read
 
 The native analysis limits are 8 MiB of input, 10,000 rows, 128 columns and 100,000 cells. Computation runs locally. Your model provider may receive conversation context and tool results. [Methods and scope](docs/code-data-phase5-report.md)
 
+## A terminal workspace
+
+![Home screen exported from the actual TUI renderer](docs/media/home.svg)
+
+The frame uses demo configuration and a demo project path.
+
+<details>
+<summary>View the command menu</summary>
+
+![Slash command suggestions in the terminal](docs/media/commands.svg)
+
+</details>
+
+Each pane keeps its own project, model, draft and conversation. For example, use one pane to fix an importer and another to examine the source data.
+
+| Action | Shortcut or command |
+| --- | --- |
+| Split side by side or stack panes | `F2` / `F3` |
+| Switch or close the active pane | `Tab` / `F6` |
+| Choose a permission mode | `Shift+Tab` / `/permission` |
+| Resume the workspace or browse sessions | `/continue` / `/sessions` |
+| Show keybindings or help | `/keys` / `/help` |
+
 ## Stay in control
 
 Permissions: `plan` is read-only; `ask` requests approval for effects; `edit` allows ordinary in-project edits; `auto` allows explicitly configured execution scopes. Auto mode respects deny rules and mandatory approval. Rage mode auto-approves tool calls in the current pane, including shell commands, out-of-project file operations and MCP tools. OS permissions and task-level read-only restrictions still apply. These controls are not an OS sandbox. See [SECURITY.md](SECURITY.md).
 
-Use `F2` / `F3` to split, `Tab` to switch and `F6` to close panes. **Panes are independent:** there is no master-pane control or cross-pane delegation. Coordinate simultaneous edits yourself, preferably with separate Git worktrees.
+Model profiles support the OpenAI Completions and Responses, Anthropic Messages, and Google Generative AI protocols. Select the active model with `/model`. Keep project instructions in `EMERGENCE.md` and inspect the session’s tools with `/capabilities`.
 
 `Enter` sends, `Shift+Enter` inserts a newline. `/help` and `Ctrl+P` discover commands; `/sessions` opens history; `/init` prepares project instructions; `/skills`, `/mcp`, `/context` and `/doctor` inspect capabilities and runtime state. Restoring a session does not replay side effects.
 
