@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { copyFile, cp, mkdir, readFile, readdir, rename, stat, writeFile } from 'node:fs/promises';
@@ -13,6 +13,17 @@ await mkdir(releases, { recursive: true });
 const pkg = JSON.parse(await readFile('package.json', 'utf8')),
   lockRaw = await readFile('package-lock.json', 'utf8'),
   lock = JSON.parse(lockRaw);
+if (lock.version !== pkg.version || lock.packages['']?.version !== pkg.version)
+  throw new Error('Package and lockfile versions must match before packing');
+const builtVersion = execFileSync(process.execPath, [resolve('bin/emergence.cjs'), '--version'], {
+  encoding: 'utf8',
+  timeout: 30_000,
+  windowsHide: true,
+}).trim();
+if (builtVersion !== pkg.version)
+  throw new Error(
+    `Built CLI version ${builtVersion} does not match package version ${pkg.version}; rebuild before packing`,
+  );
 const production = JSON.parse(await readFile(join(dir, 'production-path.json'), 'utf8'));
 if (
   production.version !== pkg.version ||

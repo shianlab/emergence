@@ -52,4 +52,6 @@ jobs:
           node --experimental-ffi --import tsx tests/tui-small-text-layout.ts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --experimental-ffi --import tsx tests/tui-phase4.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --experimental-ffi --import tsx tests/workspace-idle.ts
       - run: npm run inspect:security
