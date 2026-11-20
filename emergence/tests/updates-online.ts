@@ -21,12 +21,13 @@ const record = JSON.parse(await readFile('../artifacts/phase6/release-path.json'
 const source = join(root, 'Emergence-9.0.2-win32-x64'),
   helper = join(root, 'transport');
 await mkdir(helper);
-const manager = createRequire(import.meta.url)('../release/manage.cjs');
+const require = createRequire(import.meta.url);
+const manager = require('../release/manage.cjs');
 const files = JSON.parse(await readFile(join(record.bundle, 'manifest.sha256.json'), 'utf8'));
 const ps = join(process.env.SystemRoot!, 'System32/WindowsPowerShell/v1.0/powershell.exe');
 const environment: NodeJS.ProcessEnv = { ...process.env, LOCALAPPDATA: cache };
 delete environment.PSModulePath;
-async function run(file: string, args: string[]) {
+async function run(file: string, args: string[], expectedCode = 0) {
   const child = spawn(file, args, {
     cwd: root,
     env: environment,
@@ -41,7 +42,7 @@ async function run(file: string, args: string[]) {
     child.once('error', reject);
     child.once('close', done);
   });
-  assert.equal(code, 0, err + out);
+  assert.equal(code, expectedCode, err + out);
   return out;
 }
 const script = (file: string, args: string[] = []) =>
@@ -82,6 +83,22 @@ try {
     file.bytes = bytes.length;
   }
   await writeFile(join(source, 'manifest.sha256.json'), JSON.stringify(files));
+  console.log('Interrupting the installation before the new manager is deployed…');
+  await run(
+    process.execPath,
+    [
+      '-e',
+      `const { createInstaller } = require(${JSON.stringify(require.resolve('../release/installation/service.cjs'))});
+       createInstaller({ checkpoint(name) { if (name === 'preparing') process.exit(77); } })
+         .run(${JSON.stringify({ action: 'update', root: install, source, noPath: true })})
+         .catch((error) => { console.error(error); process.exitCode = 1; });`,
+    ],
+    77,
+  );
+  await access(join(install, 'install-transaction.json'));
+  assert.equal((await script(join(install, 'bin/emergence.ps1'), ['--version'])).trim(), record.version);
+  await assert.rejects(access(join(install, 'install-transaction.json')), { code: 'ENOENT' });
+  checks.interruptedPreparationRecoversThroughOldLauncher = true;
   console.log('Building signed local release fixture…');
   await run('tar.exe', ['-a', '-cf', archive, '-C', dirname(source), basename(source)]);
   requireStatSize = (await stat(archive)).size;

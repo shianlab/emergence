@@ -70,6 +70,68 @@ test('transaction journal excludes a second owner and fences stale commits; inco
   assert.deepEqual(await readFile(path), bytes);
 });
 
+test('journal persists reordering and deletion independently of task contents and deduplicates checkpoints', async () => {
+  const home = await mkdtemp(join(tmpdir(), 'emergence-journal-order-'));
+  const journal = new ExecutionJournal(home, 'p');
+  const [a, b, c] = ['a', 'b', 'c'].map((id) => ({ id }));
+  await journal.open();
+  try {
+    journal.commit({ tasks: [a, b, c] });
+    journal.commit({ tasks: [c, b, a] });
+    journal.commit({ tasks: [c, b] });
+    const changes = journal.events();
+    assert.deepEqual(JSON.parse(String(changes[0].body)).removed, ['a']);
+    journal.commit({ tasks: [c, b] });
+    assert.deepEqual(journal.events(), changes);
+    await journal.close();
+    await journal.open();
+    assert.deepEqual(journal.load(), { tasks: [c, b] });
+  } finally {
+    await journal.close();
+  }
+});
+
+test('cancellation during read-only handoff settles even when the first cancellation save fails', async (t) => {
+  const f = await executionFixture();
+  try {
+    const pane = f.w.panes.get(f.w.focused)!;
+    const controller = pane.controller!;
+    const engine = f.w.taskEngine;
+    const hasWrite = () => f.ctx.tools.definitions(controller.agent).some((tool) => tool.name === 'write');
+    const save = f.w.save.bind(f.w);
+    const checkpointError = Error('fixture: cancellation checkpoint failed');
+    let rejectNextSave = false;
+    t.mock.method(f.w, 'save', async () => {
+      if (!rejectNextSave) return save();
+      rejectNextSave = false;
+      throw checkpointError;
+    });
+    engine.pause(true);
+    const task = await engine.enqueue(pane.id, pane.id, 'readonly', 'fixture:write', [], {
+      role: 'reviewer',
+      scope: ['result.txt'],
+      acceptance: ['检查内容'],
+    });
+    assert.equal(hasWrite(), true);
+    let cancelled: Promise<unknown> | undefined;
+    controller.on('change', () => {
+      if (cancelled || task.cancelReason || task.status !== 'dispatching' || hasWrite()) return;
+      rejectNextSave = true;
+      cancelled = engine.cancel(task.id).catch((error) => error);
+    });
+    engine.pause(false);
+    await until(() => cancelled !== undefined);
+    assert.equal(await cancelled, checkpointError);
+    assert.equal(task.status, 'cancelled');
+    assert.equal(engine.active.has(pane.id), false);
+    assert.equal(hasWrite(), true);
+    assert.equal(f.provider.calls, 0);
+    assert.equal(taskStateSchema.parse(engine.journal.load()).tasks[0].status, 'cancelled');
+  } finally {
+    await f.close();
+  }
+});
+
 test('one-window execution graph is durable, deduplicated and advances dependencies only after evidence review', async () => {
   const f = await executionFixture();
   try {

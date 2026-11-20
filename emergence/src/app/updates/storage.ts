@@ -19,6 +19,18 @@ export async function safePath(file: string) {
     if (dirname(cursor) === cursor) break;
   }
 }
+
+export async function hasInstallTransaction(root: string) {
+  const file = join(root, 'install-transaction.json');
+  await safePath(file);
+  try {
+    if (!(await lstat(file)).isFile()) throw Error('安装事务路径无效');
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
+  }
+}
 export async function installationLocation(
   from = fileURLToPath(import.meta.url),
 ): Promise<InstallationLocation> {

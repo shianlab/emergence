@@ -48,6 +48,11 @@ export class TaskExecution {
   readonly approvals = new WeakMap<object, boolean>();
 
   constructor(private host: Host) {}
+  private releaseReadOnlyMask(task: TaskRecord) {
+    const dispose = this.readOnlyToolMasks.get(task);
+    this.readOnlyToolMasks.delete(task);
+    dispose?.();
+  }
   private dispatching(task: TaskRecord) {
     return (
       this.host.active.get(task.target) === task &&
@@ -114,8 +119,9 @@ export class TaskExecution {
     this.host.lifecycle.amend(task, { fence: this.host.journal.epoch });
     const controller = this.host.workspace.panes.get(task.target)!.controller!;
     this.host.lifecycle.amend(task, { fromSeq: controller.agent.session.snapshotEvents().at(-1)?.seq ?? 0 });
-    this.host.update(task, '已记录派发意图');
+    let handedOff = false;
     try {
+      this.host.update(task, '已记录派发意图');
       await this.host.workspace.save();
       if (!this.dispatching(task)) return;
       const issue = await this.dependencyIssue(task);
@@ -159,6 +165,7 @@ export class TaskExecution {
       controller.changed();
       if (!this.dispatching(task)) return;
       controller.agent.followup(message);
+      handedOff = true;
       void controller.agent.whenIdle().then(() => {
         if (
           this.host.active.get(task.target) === task &&
@@ -176,6 +183,8 @@ export class TaskExecution {
       });
     } catch (error) {
       if (this.dispatching(task)) await this.finishWithoutTurn(task, 'failed', bounded(error));
+    } finally {
+      if (!handedOff) this.releaseReadOnlyMask(task);
     }
   }
   async finish(task: TaskRecord, event: Extract<SessionEvent, { type: 'turn/end' }>) {
@@ -313,8 +322,7 @@ export class TaskExecution {
       await this.host.workspace.ctx.sessionPersistence.flush();
       await this.host.workspace.save();
     } finally {
-      this.readOnlyToolMasks.get(task)?.();
-      this.readOnlyToolMasks.delete(task);
+      this.releaseReadOnlyMask(task);
       if (this.host.active.get(task.target) === task) this.host.active.delete(task.target);
       this.host.changed();
       this.host.kick();
@@ -557,7 +565,6 @@ export class TaskExecution {
     return disposers;
   }
   close() {
-    for (const dispose of this.readOnlyToolMasks.values()) dispose();
-    this.readOnlyToolMasks.clear();
+    for (const task of this.readOnlyToolMasks.keys()) this.releaseReadOnlyMask(task);
   }
 }

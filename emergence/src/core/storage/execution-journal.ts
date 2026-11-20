@@ -131,7 +131,7 @@ export class ExecutionJournal {
     if (!row) return;
     return {
       ...JSON.parse(String(row.body)),
-      tasks: this.db!.prepare('SELECT body FROM tasks ORDER BY ordinal')
+      tasks: this.db!.prepare('SELECT body FROM tasks ORDER BY ordinal, rowid')
         .all()
         .map((r) => JSON.parse(String(r.body))),
     };
@@ -155,26 +155,35 @@ export class ExecutionJournal {
   commit(snapshot: Snapshot, kind = 'checkpoint') {
     const { tasks, ...meta } = snapshot;
     this.transaction((db) => {
-      const changed: string[] = [],
-        ids = new Set(tasks.map((t) => t.id));
-      for (const row of db.prepare('SELECT id FROM tasks').all())
-        if (!ids.has(String(row.id))) db.prepare('DELETE FROM tasks WHERE id=?').run(row.id!);
+      const changed: string[] = [];
+      const stored = new Map(
+        db
+          .prepare('SELECT id, ordinal, hash FROM tasks')
+          .all()
+          .map((row) => [row.id, row]),
+      );
+      const upsert = db.prepare(
+        'INSERT INTO tasks VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET ordinal=excluded.ordinal,hash=excluded.hash,body=excluded.body',
+      );
       tasks.forEach((task, index) => {
-        const hash = digest(task),
-          old = db.prepare('SELECT hash FROM tasks WHERE id=?').get(task.id);
-        if (old?.hash === hash) return;
-        db.prepare(
-          'INSERT INTO tasks VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET ordinal=excluded.ordinal,hash=excluded.hash,body=excluded.body',
-        ).run(task.id, index, hash, JSON.stringify(task));
+        const hash = digest(task);
+        const old = stored.get(task.id);
+        stored.delete(task.id);
+        if (old?.hash === hash && old.ordinal === index) return;
+        upsert.run(task.id, index, hash, JSON.stringify(task));
         changed.push(task.id);
       });
+      const removed = [...stored.keys()].map(String);
+      const remove = db.prepare('DELETE FROM tasks WHERE id=?');
+      for (const id of removed) remove.run(id);
       const body = JSON.stringify(meta),
         previous = db.prepare('SELECT body FROM metadata WHERE id=1').get()?.body;
       if (previous !== body)
         db.prepare('INSERT INTO metadata VALUES(1,?) ON CONFLICT(id) DO UPDATE SET body=excluded.body').run(
           body,
         );
-      if (changed.length || previous !== body) this.event(db, kind, { changed, hash: digest(snapshot) });
+      if (changed.length || removed.length || previous !== body)
+        this.event(db, kind, { changed, ...(removed.length ? { removed } : {}), hash: digest(snapshot) });
     });
   }
   effect(value: ExecutionEffect) {

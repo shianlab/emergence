@@ -1,10 +1,16 @@
 import { EventEmitter } from 'node:events';
 import { join } from 'node:path';
+import { safeError } from '../../core/adapters/redaction.ts';
 import { readJsonFile } from '../../core/storage/safe-json-file.ts';
 import { acquireLease } from '../../core/storage/lease.ts';
 import { compareVersions, verifyManifest, type ReleaseManifest } from './manifest.ts';
 import { fetchManifest } from './transport.ts';
-import { UpdateStore, type InstallationLocation, type UpdateState } from './storage.ts';
+import {
+  hasInstallTransaction,
+  UpdateStore,
+  type InstallationLocation,
+  type UpdateState,
+} from './storage.ts';
 
 export interface UpdateSnapshot {
   status: 'idle' | 'checking' | 'current' | 'available' | 'installing' | 'ready' | 'error' | 'unsupported';
@@ -61,23 +67,23 @@ export class UpdateService extends EventEmitter {
       this.emit('change');
     }
   }
+  private async isActiveVersion(root: string, version: string): Promise<boolean> {
+    if (await hasInstallTransaction(root)) return false;
+    const active = (await readJsonFile(join(root, 'current.json'), 16384, '安装指针无效')) as {
+      product?: string;
+      version?: string;
+    } | null;
+    return (
+      active?.product === 'emergence' && active.version === version && !(await hasInstallTransaction(root))
+    );
+  }
   private async project(saved: UpdateState): Promise<UpdateSnapshot> {
-    let release: ReleaseManifest | undefined;
-    if (saved.envelope) release = this.deps.verify(saved.envelope);
-    const available = release && compareVersions(release.version, this.currentVersion) > 0;
-    let activeVersion: string | undefined;
-    if (saved.installed && this.store) {
-      try {
-        const active = (await readJsonFile(join(this.store.root, 'current.json'), 16384, '安装指针无效')) as {
-          product?: string;
-          version?: string;
-        };
-        if (active.product === 'emergence') activeVersion = active.version;
-      } catch {
-        /* A missing or rolled-back activation never counts as an applied update. */
-      }
-    }
-    const ready = available && saved.installed === release?.version && activeVersion === release?.version;
+    const release = saved.envelope ? this.deps.verify(saved.envelope) : undefined;
+    const available = !!release && compareVersions(release.version, this.currentVersion) > 0;
+    const ready =
+      available &&
+      !!this.store &&
+      (await this.isActiveVersion(this.store.root, release.version).catch(() => false));
     return {
       status: ready
         ? 'ready'
@@ -187,64 +193,73 @@ export class UpdateService extends EventEmitter {
       if (enabled !== undefined) saved.enabled = enabled;
       if (dismiss) saved.dismissed = this.state.release?.version;
       await this.store.write(saved);
-      this.publish(await this.project(saved));
+      if (this.state.status === 'installing')
+        this.publish({ ...this.state, enabled: saved.enabled, dismissed: saved.dismissed });
+      else this.publish(await this.project(saved));
     } finally {
       await unlock();
     }
   }
+  private async recordInstallResult(
+    store: UpdateStore,
+    checked: UpdateState,
+    result: { version: string } | { error: string },
+  ) {
+    try {
+      const unlock = await acquireLease('update-check:' + store.root.toLowerCase(), '版本设置');
+      try {
+        const latest = await store.read();
+        if (latest.sequence !== checked.sequence || latest.checkedAt !== checked.checkedAt) return;
+        if ('version' in result) latest.installed = result.version;
+        latest.error = 'error' in result ? result.error : undefined;
+        await store.write(latest);
+      } finally {
+        await unlock();
+      }
+    } catch {
+      // The installer and its transaction determine the result. Cache writes are best effort.
+    }
+  }
   install(expected: string): Promise<void> {
     if (this.operation) return this.operation;
-    if (!this.store || this.closed) return Promise.reject(Error('当前安装方式不支持在线更新'));
+    const store = this.store;
+    if (!store || this.closed) return Promise.reject(Error('当前安装方式不支持在线更新'));
     this.operation = (async () => {
-      const unlock = await acquireLease('update-install:' + this.store!.root.toLowerCase(), '更新安装');
+      let unlock: (() => Promise<void>) | undefined;
+      let attempted: UpdateState | undefined;
       try {
-        const saved = await this.store!.read(),
-          release = this.deps.verify(saved.envelope);
+        await this.request;
+        if (this.closed) throw Error('更新服务已关闭');
+        unlock = await acquireLease('update-install:' + store.root.toLowerCase(), '更新安装');
+        const saved = await store.read();
+        const release = this.deps.verify(saved.envelope);
         if (
           saved.error ||
           release.version !== expected ||
           compareVersions(release.version, this.currentVersion) <= 0
         )
           throw Error('更新目标已变化，请重新检查并选择');
-        this.publish({ ...this.state, status: 'installing', message: '准备下载并校验更新…' });
-        await this.deps.install(saved.envelope, (message) =>
-          this.publish({ ...this.state, status: 'installing', message }),
-        );
-        const stateLock = await acquireLease(
-          'update-check:' + this.store!.root.toLowerCase(),
-          '版本设置',
-          6000,
-        );
-        try {
-          const latest = await this.store!.read();
-          latest.installed = release.version;
-          latest.error = undefined;
-          await this.store!.write(latest);
-          this.publish(await this.project(latest));
-        } finally {
-          await stateLock();
-        }
-      } catch (error) {
-        const stateLock = await acquireLease(
-          'update-check:' + this.store!.root.toLowerCase(),
-          '版本设置',
-          6000,
-        );
-        try {
-          const saved = await this.store!.read();
-          saved.error = '上次更新安装未完成，请检查安装状态后重试';
-          await this.store!.write(saved);
-        } finally {
-          await stateLock();
-        }
+        this.publish({ ...this.state, release, status: 'installing', message: '准备下载并校验更新…' });
+        attempted = saved;
+        await this.deps.install(saved.envelope, (message) => {
+          if (this.state.status === 'installing') this.publish({ ...this.state, message });
+        });
+        if (!(await this.isActiveVersion(store.root, release.version).catch(() => false)))
+          throw Error('未确认新版已启用，请检查安装状态后重试');
         this.publish({
           ...this.state,
-          status: 'error',
-          message: '更新未完成；请检查安装状态，旧窗口可继续使用',
+          status: 'ready',
+          message: '更新已就绪，下次启动生效；当前任务继续运行',
         });
+        await this.recordInstallResult(store, saved, { version: release.version });
+      } catch (error) {
+        const detail = safeError(error).replace(/\s+/g, ' ').trim();
+        const message = ('更新未完成，' + detail).slice(0, 500);
+        this.publish({ ...this.state, status: 'error', message });
+        if (attempted) await this.recordInstallResult(store, attempted, { error: message });
         throw error;
       } finally {
-        await unlock();
+        await unlock?.().catch(() => {});
       }
     })().finally(() => {
       this.operation = undefined;

@@ -48,6 +48,34 @@ for (const stop of ['cancel', 'close', 'late-read-failure'] as const)
     }
   });
 
+test('workspace shutdown during read-only handoff releases the mask without starting the task', async () => {
+  const f = await executionFixture();
+  try {
+    const engine = f.w.taskEngine;
+    const pane = f.w.panes.get(f.w.focused)!;
+    engine.scheduler.pump = async () => {};
+    const task = await engine.enqueue(pane.id, pane.id, 'readonly', 'fixture:write', [], {
+      role: 'reviewer',
+      scope: ['result.txt'],
+      acceptance: ['检查内容'],
+    });
+    let closing: Promise<void> | undefined;
+    pane.controller!.on('change', () => {
+      if (!engine.stopped && engine.execution.readOnlyToolMasks.has(task)) closing = f.w.close();
+    });
+    await engine.start(task);
+    assert.ok(closing);
+    await closing;
+    assert.equal(task.status, 'interrupted');
+    assert.equal(engine.active.size, 0);
+    assert.equal(engine.execution.readOnlyToolMasks.size, 0);
+    assert.equal(f.provider.calls, 0);
+    assert.equal(f.writes(), 0);
+  } finally {
+    await f.close();
+  }
+});
+
 test('late turn settlement cannot replace the authoritative cancellation receipt', async () => {
   const f = await executionFixture();
   const observed = Promise.withResolvers<void>();

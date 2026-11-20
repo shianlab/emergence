@@ -188,7 +188,6 @@ function createInstaller({ windows = W, health = checkInstallation, checkpoint =
         };
         engine = directory;
         journal.candidate = directory;
-        journal.engine = engine;
         journal.created = true;
       }
       target = { ...target, manager: engine, activatedAt: new Date().toISOString() };
@@ -204,6 +203,8 @@ function createInstaller({ windows = W, health = checkInstallation, checkpoint =
         await fs.rename(stage, F.versionPath(root, target));
         await receipt(root, identity.id, target, info);
       }
+      // Recovery must keep using the installed manager until the candidate is on disk.
+      journal.engine = engine;
       let fallback =
         action === 'rollback'
           ? await healthy(root, current)

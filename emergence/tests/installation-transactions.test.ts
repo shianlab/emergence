@@ -184,7 +184,7 @@ test('cleanup retains shared leases, unknown processes, previous version and man
   await access(join(f.root, 'versions/3.0.0'));
 });
 test('actual process death recovers an uncommitted switch and preserves a committed one', async (t) => {
-  for (const boundary of ['prepared', 'activated', 'committed']) {
+  for (const boundary of ['preparing', 'prepared', 'activated', 'committed']) {
     await t.test(boundary, async () => {
       const f = await setup();
       const helper = join(f.folder, 'crash.cjs');
@@ -210,7 +210,8 @@ test('actual process death recovers an uncommitted switch and preserves a commit
         child.once('close', done);
       });
       assert.equal(code, 77, errors);
-      await access(join(f.root, 'install-transaction.json'));
+      const journal = await f.read('install-transaction.json');
+      assert.equal(journal.engine, boundary === 'preparing' ? '1.0.0' : '2.0.0');
       await f.run()({ action: 'recover', root: f.root });
       assert.equal((await f.read()).version, boundary === 'committed' ? '2.0.0' : '1.0.0');
       await assert.rejects(access(join(f.root, 'install-transaction.json')));

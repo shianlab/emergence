@@ -712,13 +712,26 @@ export class TaskEngine extends EventEmitter {
     const task = this.task(id);
     if (terminal.has(task.status)) return;
     this.lifecycle.amend(task, { cancelReason: reason });
-    this.update(task, '正在取消：' + reason);
-    await this.workspace.save();
-    if (this.active.get(task.target) === task) {
-      await this.workspace.panes.get(task.target)?.controller?.cancel();
-      if (!terminal.has(task.status)) await this.finishWithoutTurn(task, 'cancelled', reason);
-    } else await this.finishWithoutTurn(task, 'cancelled', reason);
-    this.kick();
+    const errors: unknown[] = [];
+    try {
+      this.update(task, '正在取消：' + reason);
+      await this.workspace.save();
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
+      if (this.active.get(task.target) === task) {
+        const controller = this.workspace.panes.get(task.target)?.controller;
+        if (controller?.id === task.targetSession) await controller.cancel();
+      }
+      await this.finishWithoutTurn(task, 'cancelled', reason);
+    } catch (error) {
+      errors.push(error);
+    } finally {
+      this.kick();
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) throw new AggregateError(errors, '取消任务时发生状态保存与执行收尾错误');
   }
   async detach(pane: string) {
     for (const task of this.state.tasks)
@@ -795,7 +808,13 @@ export class TaskEngine extends EventEmitter {
     this.stopped = true;
     this.budgets.close();
     this.emit('change');
-    await Promise.allSettled([...this.jobs]);
+    await Promise.allSettled(
+      [...this.active.values()].map(async (task) => {
+        const controller = this.workspace.panes.get(task.target)?.controller;
+        if (controller?.id === task.targetSession) await controller.cancel();
+      }),
+    );
+    while (this.jobs.size) await Promise.allSettled([...this.jobs]);
     for (const task of this.state.tasks)
       if (!terminal.has(task.status)) {
         this.lifecycle.transition(task, 'interrupted');
@@ -803,6 +822,7 @@ export class TaskEngine extends EventEmitter {
         this.update(task, '应用退出，未自动重放；需要时请重新派发');
       }
     this.execution.close();
+    this.active.clear();
     this.disposers.forEach((dispose) => dispose());
     this.removeAllListeners();
   }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, sign } from 'node:crypto';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -10,6 +10,7 @@ import { acquireLease } from '../src/core/storage/lease.ts';
 import { verifyManifest, compareVersions, type ReleaseManifest } from '../src/app/updates/manifest.ts';
 import { fetchManifest } from '../src/app/updates/transport.ts';
 import { UpdateService } from '../src/app/updates/service.ts';
+import { installOnline } from '../src/app/updates/runtime.ts';
 import { updateAction, updateChoices, updateHint } from '../src/app/updates/presentation.ts';
 import { UpdateStore, installationLocation } from '../src/app/updates/storage.ts';
 
@@ -255,6 +256,115 @@ test('failed install is persisted and rollback does not leave a false ready noti
     service.dispose();
   }
 });
+
+test('a busy update cache cannot hide the installer error or block retry', async () => {
+  const f = await fixture();
+  const failure = Error('fixture: download interrupted');
+  let fail = true;
+  const service = new UpdateService(f.location, '1.0.1', {
+    verify,
+    request: async () => signed(manifest()),
+    install: async () => {
+      if (fail) throw failure;
+      await writeFile(
+        join(f.root, 'current.json'),
+        JSON.stringify({ product: 'emergence', version: '1.0.2' }),
+      );
+    },
+  });
+  try {
+    await service.check();
+    const unlock = await acquireLease('update-check:' + f.root.toLowerCase(), 'fixture');
+    try {
+      await assert.rejects(service.install('1.0.2'), (error) => error === failure);
+      assert.equal(service.snapshot.status, 'error');
+      assert.match(service.snapshot.message, /download interrupted/);
+      fail = false;
+      await service.install('1.0.2');
+      assert.equal(service.snapshot.status, 'ready');
+      assert.equal((await f.store.read()).installed, undefined);
+      assert.equal((await service.inspect()).status, 'ready');
+    } finally {
+      await unlock();
+    }
+    await writeFile(join(f.root, 'install-transaction.json'), '{}');
+    assert.equal((await service.inspect()).status, 'available');
+  } finally {
+    service.dispose();
+  }
+});
+
+test(
+  'a stalled Windows installer terminates its child tree and restores the installation through its manager',
+  {
+    skip: process.platform !== 'win32',
+  },
+  async () => {
+    const f = await fixture();
+    const previous = JSON.stringify({ product: 'emergence', version: '1.0.1' });
+    await writeFile(join(f.root, 'current.previous.json'), previous);
+    await writeFile(
+      join(f.root, 'bootstrap.ps1'),
+      [
+        'param($InstallRoot, $SignedManifest, [switch]$Update)',
+        '$ErrorActionPreference = "Stop"',
+        'Set-Content (Join-Path $InstallRoot "install-transaction.json") "{}"',
+        `Set-Content (Join-Path $InstallRoot "current.json") '{"product":"emergence","version":"1.0.2"}'`,
+        '$worker = Start-Process "$PSHOME\\powershell.exe" -ArgumentList "-NoProfile -Command Start-Sleep 60" -WindowStyle Hidden -PassThru',
+        'Set-Content (Join-Path $InstallRoot "worker.pid") $worker.Id',
+        'Start-Sleep 60',
+      ].join('\r\n'),
+    );
+    await writeFile(
+      join(f.root, 'run-manager.ps1'),
+      [
+        'param($Action, $InstallRoot, [switch]$NoPath, [switch]$Quiet)',
+        '$ErrorActionPreference = "Stop"',
+        'if ($Action -ne "recover" -or !$NoPath -or !$Quiet) { exit 1 }',
+        'Copy-Item (Join-Path $InstallRoot "current.previous.json") (Join-Path $InstallRoot "current.json") -Force',
+        'Remove-Item -LiteralPath (Join-Path $InstallRoot "install-transaction.json")',
+      ].join('\r\n'),
+    );
+    await assert.rejects(
+      installOnline(f.location, signed(manifest()), () => {}, verify, 3500),
+      /更新安装超时/,
+    );
+    const worker = Number(await readFile(join(f.root, 'worker.pid'), 'utf8'));
+    assert.throws(() => process.kill(worker, 0), { code: 'ESRCH' });
+    assert.equal(await readFile(join(f.root, 'current.json'), 'utf8'), previous);
+    const entries = await readdir(join(f.root, 'updates'));
+    assert.deepEqual(entries, ['failure.json']);
+    assert.match(await readFile(join(f.root, 'updates', 'failure.json'), 'utf8'), /更新安装超时/);
+  },
+);
+
+test(
+  'the installer exit reason survives failure to clean up its request',
+  { skip: process.platform !== 'win32' },
+  async () => {
+    const f = await fixture();
+    await writeFile(
+      join(f.root, 'bootstrap.ps1'),
+      [
+        'param($InstallRoot, $SignedManifest, [switch]$Update)',
+        '$ErrorActionPreference = "Stop"',
+        'Remove-Item -LiteralPath $SignedManifest',
+        '[IO.Directory]::CreateDirectory($SignedManifest) | Out-Null',
+        '[Console]::Error.WriteLine("fixture: download disconnected")',
+        'exit 37',
+      ].join('\r\n'),
+    );
+    await assert.rejects(
+      installOnline(f.location, signed(manifest()), () => {}, verify),
+      /退出码 37.*download disconnected/,
+    );
+    const diagnostic = JSON.parse(await readFile(join(f.root, 'updates', 'failure.json'), 'utf8'));
+    assert.equal(diagnostic.code, 37);
+    assert.match(diagnostic.detail, /download disconnected/);
+    assert.ok(diagnostic.cleanup);
+  },
+);
+
 test('uninstall and update services honor the same OS-owned leases', async () => {
   const f = await fixture();
   const windows = createRequire(import.meta.url)('../release/installation/windows.cjs');
