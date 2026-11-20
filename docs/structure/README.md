@@ -21,6 +21,7 @@
 - [第五阶段结果](phase5-report.md)：TUI 职责迁移、原生编辑/连接边界与完整验收。
 - [第五阶段迁移清单](phase5-migration-catalog.json)：17 个实现、构建和测试文件的前后哈希及归属。
 - [界面维护指南](ui-maintenance.md)：窗口/输入/模态状态、原生草稿和连接生命周期、C# 构建规则。
+- [第三阶段审查修复记录](remediation-phase3-report.md)记录工作台空闲帧、XLSX 预算和兼容性验收。
 - [第六阶段结果](phase6-report.md)：四种语言规范、隔离工具、CI 与完整验收。
 - [第六阶段迁移清单](phase6-migration-catalog.json)：排版/代码整理批次、检查入口与新增输入范围。
 - [编码规范与检查入口](coding-standards.md)：固定工具、明确排除、日常命令和审查规则。

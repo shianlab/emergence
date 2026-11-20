@@ -11,7 +11,7 @@ import { toolArguments, toolPath } from '../../core/domain/tool-contract.ts';
 import { CodeWorkflow, sourceMutation } from './workflow.ts';
 import type { CodeEvidence, CodeEvidencePort } from '../../core/application/code-evidence-port.ts';
 
-const guidance = `Emergence 原生编程闭环（已内嵌，无需 Skill）：编码任务先定位实现、调用方与测试，再用 emergence_code_work begin 记录当前任务。checks/status 从真实项目配置提供检查命令；先用普通 pwsh/bash 复现和记录基线，read 后用 write/edit 修改，再执行相关 typecheck/lint/test。检查仍需要原权限，不用 Shell 绕过文件版本保护、不弱化测试。status 展示实际退出码、诊断、失效版本；未运行不能声称通过。相同版本失败两次先调整策略。交付前 status 并说明未覆盖范围。主控按现有计划向可用窗口分配探索、实现、独立验证，传递变更路径、运行 ID、检查 callId 与诊断；复用现有权限与验收，不要求用户逐步提醒。恢复须先 preview，再以 expected_hash 调用 emergence_code_restore；仅限记录的既有文本文件，其他副作用不承诺撤销。`;
+const guidance = `Emergence 原生编程闭环（已内嵌，无需 Skill）：编码任务先定位实现、调用方与测试，再用 emergence_code_work begin 记录当前任务。checks/status 从真实项目配置提供检查命令；先用普通 pwsh/bash 复现和记录基线，read 后用 write/edit 修改，再执行相关 typecheck/lint/test。检查仍需要原权限，不用 Shell 绕过文件版本保护、不弱化测试。status 展示实际退出码、诊断、失效版本；未运行不能声称通过。相同版本失败两次先调整策略。在当前会话依次完成探索、实现与验证，关联变更路径、运行 ID、检查 callId 与诊断。交付前 status 并说明未覆盖范围。恢复须先 preview，再以 expected_hash 调用 emergence_code_restore；仅限记录的既有文本文件，其他副作用不承诺撤销。`;
 
 export class CodeWorkHarness implements CodeEvidencePort {
   private workflows = new WeakMap<Agent, Map<string, CodeWorkflow>>();

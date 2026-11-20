@@ -9,9 +9,35 @@ import json
 import pathlib
 import sys
 import zipfile
+from contextlib import ExitStack
 
 sys.stdout.reconfigure(encoding="utf-8")
 ROWS, COLS = 10000, 128
+XLSX_BYTES = 64 * 1024 * 1024
+XLSX_PARTS = 4096
+
+
+def validate_xlsx(path):
+    with zipfile.ZipFile(path) as archive:
+        parts = archive.infolist()
+        if len(parts) > XLSX_PARTS:
+            raise ValueError("Excel 文件部件数量超过预算")
+        if sum(part.file_size for part in parts) > XLSX_BYTES:
+            raise ValueError("Excel 解压大小超过预算")
+        seen = set()
+        remaining = XLSX_BYTES
+        for part in parts:
+            if part.filename in seen:
+                raise ValueError("Excel 文件包含重复部件")
+            seen.add(part.filename)
+            if part.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+                raise ValueError("Excel 文件使用了不支持的压缩方式")
+            with archive.open(part) as stream:
+                # Reading through EOF also checks ZIP integrity before XML parsing.
+                while block := stream.read(min(128 * 1024, remaining + 1)):
+                    remaining -= len(block)
+                    if remaining < 0:
+                        raise ValueError("Excel 解压大小超过预算")
 
 
 def cell(v):
@@ -57,13 +83,13 @@ def table(request):
     elif kind == ".xlsx":
         from openpyxl import load_workbook
 
-        with zipfile.ZipFile(path) as archive:
-            if sum(f.file_size for f in archive.infolist()) > 64 * 1024 * 1024:
-                raise ValueError("Excel 解压大小超过预算")
-        values = load_workbook(path, read_only=True, data_only=True, keep_links=False)
-        expressions = load_workbook(path, read_only=True, data_only=False, keep_links=False)
-        try:
-            sheets = values.sheetnames
+        validate_xlsx(path)
+        with ExitStack() as files:
+            values = load_workbook(path, read_only=True, data_only=True, keep_links=False)
+            files.callback(values.close)
+            sheets = [sheet.title for sheet in values.worksheets]
+            if not sheets:
+                raise ValueError("Excel 文件没有可分析的数据工作表")
             selected = request.get("sheet")
             if not selected and len(sheets) != 1:
                 return {
@@ -74,6 +100,8 @@ def table(request):
             selected = selected or sheets[0]
             if selected not in sheets:
                 raise ValueError("工作表不存在")
+            expressions = load_workbook(path, read_only=True, data_only=False, keep_links=False)
+            files.callback(expressions.close)
             ws, fs = values[selected], expressions[selected]
             if ws.max_column and ws.max_column > COLS or ws.max_row and ws.max_row > ROWS + 1:
                 raise ValueError("Excel 超过行列预算")
@@ -92,9 +120,6 @@ def table(request):
                     rows.append(row)
             if formulas:
                 warnings.append("公式仅读取已保存缓存，未计算或验证缓存时效；缺缓存不等于零。")
-        finally:
-            values.close()
-            expressions.close()
     elif kind == ".parquet":
         import duckdb
 

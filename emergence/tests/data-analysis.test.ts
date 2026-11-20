@@ -28,6 +28,7 @@ test('quality facts distinguish blanks from nulls and appear in exported reports
     { file_path: 'quality.csv', method: 'clean', params: {} },
     signal(),
   );
+  assert.ok('rows' in result && result.analysis);
   assert.equal(result.rows, 3);
   assert.equal(result.duplicateRows, 1);
   assert.equal(result.columns[1].missing, 1);
@@ -122,6 +123,7 @@ test('actual native analysis produces CSV, safe Chinese HTML, exact proof and re
     },
   );
   const data = result.value;
+  assert.ok('analysis' in data && data.analysis && data.definition);
   assert.equal(data.analysis.table[0].value, '20.00');
   assert.equal(data.definition.status, 'assumed');
   assert.equal(receipt.exitCode, 0);
@@ -203,6 +205,7 @@ test('project definitions require real approval, bind parameters, resist stale e
     { file_path: 'data.csv', method: 'metric', params: { value: 'amount' }, definition_name: '收入' },
     signal(),
   );
+  assert.ok('definition' in result && result.definition && 'version' in result.definition);
   assert.equal(result.definition.version, first.version);
   await assert.rejects(
     analyzeData(

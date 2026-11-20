@@ -134,6 +134,12 @@ try {
   await until('narrow input', () => screen().includes('检查期间保留') && screen().includes('Tokens'));
   assert.equal((await state())!.panes[0].draft, draft);
   frames.narrow = screen();
+  for (const [size, frame] of Object.entries(frames)) {
+    assert.match(frame, /┌─+┐/, size + ' input top border');
+    assert.match(frame, /│[^│\n]*检查期间保留[^│\n]*│/, size + ' input sides');
+    assert.match(frame, /└─+┘/, size + ' input bottom border');
+  }
+  checks.fullInputFrameOnWideAndNarrowTerminal = true;
   child.resize(160, 46);
   terminal.resize(160, 46);
   await until('wide restored', () => screen().includes('second/fixture-second'));

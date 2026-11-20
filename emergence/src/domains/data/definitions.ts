@@ -9,7 +9,7 @@ export const definitionSchema = z
   .object({
     name: z.string().min(1).max(100),
     method: z.enum(['clean', 'metric', 'reconcile', 'retention', 'funnel', 'attribution', 'ab', 'series']),
-    params: z.record(z.string(), z.unknown()),
+    params: z.record(z.string(), z.json()),
     formula: z.string().min(1).max(2000),
     grain: z.string().min(1).max(300),
     numerator: z.string().max(500),
@@ -32,6 +32,13 @@ const recordSchema = z
   })
   .strict();
 export type Definition = z.infer<typeof definitionSchema>;
+export type AnalysisDefinition =
+  | z.infer<typeof recordSchema>
+  | {
+      status: 'assumed';
+      definition: Omit<Definition, 'formula' | 'numerator' | 'denominator' | 'filters'> &
+        Partial<Pick<Definition, 'formula' | 'numerator' | 'denominator' | 'filters'>>;
+    };
 const hash = (s: string) => createHash('sha256').update(s).digest('hex');
 export class Definitions {
   constructor(

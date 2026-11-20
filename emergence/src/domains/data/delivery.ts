@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import type { AnalysisDefinition, Definition } from './definitions.ts';
+import type { DataResult } from './result.ts';
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const escape = (value: unknown) =>
   String(value ?? '')
@@ -109,13 +111,12 @@ const csvCell = (value: unknown) => {
 export async function deliverAnalysis(
   directory: string,
   worker: string,
-  _request: Record<string, unknown>,
-  result: any,
-  definition: unknown,
+  result: DataResult,
+  definition: AnalysisDefinition | null,
 ) {
+  if (result.selectSheet || !result.analysis) return [];
   const analysis = result.analysis;
-  if (!analysis) return [];
-  const rows = analysis.table as Record<string, unknown>[],
+  const rows = analysis.table,
     columns = [...new Set(rows.flatMap((row) => Object.keys(row)))];
   const csv = [
     columns.map(csvCell).join(','),
@@ -153,25 +154,22 @@ export async function deliverAnalysis(
     `输入 ${result.rows} 行；重复行 ${result.duplicateRows}；在预算内完整扫描，未以抽样代替全量。`,
     '空值与仅含空白的文本分别统计；没有自动填零、删除或去重。清理操作以显式方法参数为准。',
     ...result.columns.map(
-      (column: { name: string; missing: number; blankText?: number; distinct: number }) =>
-        `${column.name}：空值 ${column.missing}，空白文本 ${column.blankText ?? '未统计'}，非空不同值 ${column.distinct}`,
+      (column) =>
+        `${column.name}：空值 ${column.missing}，空白文本 ${column.blankText}，非空不同值 ${column.distinct}`,
     ),
   ].join('\n');
   const findings = JSON.stringify({ summary: analysis.summary, checks: analysis.checks, warnings }, null, 2);
-  const record = definition as { status?: string; definition?: Record<string, unknown> };
-  const metadata = record.definition ?? {};
+  const metadata: Partial<Definition> = definition?.definition ?? {};
   const status =
-    record.status === 'user-confirmed'
+    definition?.status === 'user-confirmed'
       ? '已保存用户确认口径'
-      : record.status === 'auto-approved'
+      : definition?.status === 'auto-approved'
         ? '口径由狂暴模式自动批准，请核对假设'
         : '本次口径尚未保存确认，请核对假设';
   const summary = Object.entries(analysis.summary)
     .map(([k, v]) => `<li><b>${escape(label(k))}</b>：${escape(display(v))}</li>`)
     .join('');
-  const checks = analysis.checks.map(
-    (c: { name: string; passed: boolean }) => `${c.passed ? '通过' : '未通过'} · ${c.name}`,
-  );
+  const checks = analysis.checks.map((check) => `${check.passed ? '通过' : '未通过'} · ${check.name}`);
   const html = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'"><title>涌现数据分析报告</title><style>body{font:16px/1.6 'Microsoft YaHei',sans-serif;color:#222;background:#fff;max-width:1000px;margin:24px auto;padding:24px}h1{font-size:28px}h2{font-size:20px;margin-top:28px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f3f3;padding:16px}.meta{color:#666}.summary{background:#f3f3f3;padding:16px 36px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left}th{background:#f5f5f5}svg{max-width:100%;height:auto}details{margin-top:24px}</style><h1>涌现 · ${escape(label(analysis.method))}</h1><p class="meta">输入 ${analysis.inputRows} 行 · 结果 ${rows.length} 行 · ${escape(status)}</p><p>来源：${escape(metadata.source)}　单位：${escape(metadata.unit)}<br>粒度：${escape(metadata.grain)}　时区：${escape(metadata.timezone)}</p><ul class="summary">${summary || '<li>结果见下表。</li>'}</ul><p>${escape(checks.join('；') || '本方法未提供额外恒等式校验；请结合输入前提审阅。')}</p>${warnings.map((w: string) => `<p class="meta">${escape(w)}</p>`).join('')}<h2>输入质量与范围</h2><pre>${escape(quality)}</pre><h2>变化与结果</h2>${svg}<table><thead><tr>${columns.map((c) => `<th>${escape(label(c))}</th>`).join('')}</tr></thead><tbody>${rows
     .slice(0, 1000)
     .map((row) => `<tr>${columns.map((c) => `<td>${escape(display(row[c]))}</td>`).join('')}</tr>`)

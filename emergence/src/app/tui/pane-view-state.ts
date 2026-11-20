@@ -25,6 +25,7 @@ export type View = {
   sharedInfo: SmallText;
   sharedExpanded?: boolean;
   receiptClock?: ReceiptClock;
+  receiptExpiresAt?: number;
   meta: SmallText;
   status: SmallText;
   commands: ReturnType<typeof mountCommandList>;

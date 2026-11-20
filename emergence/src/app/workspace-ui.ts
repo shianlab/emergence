@@ -19,7 +19,7 @@ import { geometry } from './layout.ts';
 import { terminalActions } from './terminal-actions.ts';
 import { createAggregateImage } from './tui/aggregate-image.ts';
 import { mountCommandList } from './tui/command-list.ts';
-import { activityColor, composerStatus, sizeEditor } from './tui/composer.ts';
+import { activityColor, sizeEditor } from './tui/composer.ts';
 import { headerBrandLayout } from './tui/header-brand.ts';
 import {
   navigationItems,
@@ -35,6 +35,7 @@ import { workspaceBrand } from './tui/workspace-brand.ts';
 import { SmallText, SmallTextService } from './tui/small-text.ts';
 import { fitCells, paneNumber, paneState } from './tui/workspace-chrome.ts';
 import { workspaceInput, type WorkspaceModalState } from './tui/workspace-input.ts';
+import { workspaceStatusRefresh } from './tui/workspace-refresh.ts';
 import type { PaneState, WorkspaceController } from './workspace.ts';
 import { updateAction, updateHint } from './updates/presentation.ts';
 
@@ -219,7 +220,10 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
   let measuredWidth = 0,
     measuredHeight = 0;
 
-  const paintBrand = workspaceBrand(workspace, aggregate, () => disposed);
+  const brand = workspaceBrand(workspace, aggregate);
+  const statusRefresh = workspaceStatusRefresh(workspace.panes, views, (pane, view, redact) =>
+    renderPaneNotice(workspace, pane, view, redact),
+  );
   const terminal = terminalActions(
     renderer,
     (message) => {
@@ -438,7 +442,6 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       ui,
       Boolean(controller?.busy || controller?.pending || controller?.lastError),
     );
-    view.status.content = composerStatus(controller, en, pane.error, ui, redact);
     renderNotice(pane, view, redact);
     const query = view.input.plainText;
     view.commands.box.visible =
@@ -694,9 +697,9 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
         : en
           ? counts
           : `独立  ${counts}`;
-    const brand = headerBrandLayout(renderer.width, renderer.height);
+    const brandLayout = headerBrandLayout(renderer.width, renderer.height);
     // Keep the three-line identity on capable layouts, even when graphics are unavailable.
-    const logoColumns = aggregate.supported() ? brand.columns : 0;
+    const logoColumns = aggregate.supported() ? brandLayout.columns : 0;
     const taskLabel = `[${en ? 'Tasks' : '任务'} ${cooperation.tasks.length}]`;
     const headerColumns = Math.max(
       1,
@@ -707,17 +710,19 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
         ? counts
         : `${panes.length} ${en ? 'sessions' : '会话'} · ●${running} · ◇${pending}`;
     navigationBar.visible = panes.length > 1;
-    heading.height = brand.rows + (navigationBar.visible ? 1 : 0) + (updateNotice.visible ? 1 : 0);
-    headline.height = brand.rows;
+    heading.height = brandLayout.rows + (navigationBar.visible ? 1 : 0) + (updateNotice.visible ? 1 : 0);
+    headline.height = brandLayout.rows;
     headerLogo.visible = logoColumns > 0;
     headerLogo.width = logoColumns;
-    headerLogo.height = brand.rows;
-    paintBrand();
-    header.height = brand.rows;
+    headerLogo.height = brandLayout.rows;
+    brand.sync();
+    header.height = brandLayout.rows;
     const maximized = workspace.maximized ? (en ? ' · Maximized' : ' · 最大化') : '';
-    header.content = brand.columns
+    header.content = brandLayout.columns
       ? new StyledText([
-          fg(colors.accent)(bold('\n'.repeat(Math.max(0, Math.floor((brand.rows - 3) / 2))) + 'Emergence')),
+          fg(colors.accent)(
+            bold('\n'.repeat(Math.max(0, Math.floor((brandLayout.rows - 3) / 2))) + 'Emergence'),
+          ),
           fg(colors.muted)(`\n${fitCells(mode + maximized, headerColumns, false, redact)}\n${shortCounts}`),
         ])
       : new StyledText([
@@ -893,6 +898,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
         divider.height = split.divider.height;
       }
       refreshHeader(redact);
+      statusRefresh.sync();
     } finally {
       refreshing = false;
     }
@@ -913,6 +919,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     if (pane && view) renderPane(pane, view, redact);
     if (inspector.opened) inspector.sync(Math.max(1, body.width), Math.max(1, body.height));
     refreshHeader(redact);
+    statusRefresh.sync();
   };
   const frame = () => {
     if (disposed) return;
@@ -950,17 +957,24 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       if (!reading) view.unread = false;
       view.jump.visible = reading;
       const en = workspace.launch.appConfig.ui.language === 'en';
-      view.jump.content = view.unread
+      const jumpLabel = view.unread
         ? en
           ? '↓ New content · /view latest'
           : '↓ 有新内容 · /view latest'
         : en
           ? '↓ Back to latest · /view latest'
           : '↓ 回到最新 · /view latest';
+      if (reading && view.jump.chunks[0]?.text !== jumpLabel) view.jump.content = jumpLabel;
       workspace.updateView(id, view.input.plainText, view.scroll.scrollTop);
     }
-    // Initial layout sizes are zero before the first layout frame.
-    if (body.width > 0 && (body.width !== measuredWidth || body.height !== measuredHeight)) refresh();
+    // Image decode and pixel-size discovery can complete after a capability event.
+    const logoVisible =
+      aggregate.supported() && headerBrandLayout(renderer.width, renderer.height).columns > 0;
+    if (
+      logoVisible !== headerLogo.visible ||
+      (body.width > 0 && (body.width !== measuredWidth || body.height !== measuredHeight))
+    )
+      refresh();
   };
 
   const { keypress, paste } = workspaceInput({
@@ -1019,27 +1033,10 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
   workspace.on('session-change', sessionChanged);
   workspace.on('exit', exit);
   renderer.on('resize', refresh);
+  renderer.on('capabilities', refresh);
   renderer.on('frame', frame);
   renderer.keyInput.on('keypress', keypress);
   renderer.keyInput.on('paste', paste);
-  const statusTimer = setInterval(() => {
-    if (disposed) return;
-    for (const [id, view] of views) {
-      const pane = workspace.panes.get(id);
-      if (pane && view.box.visible) {
-        if (pane.controller?.busy || pane.controller?.pending) renderComposer(pane, view);
-        else renderNotice(pane, view);
-      }
-    }
-  }, 1000);
-  const brandTimer = setInterval(() => {
-    if (
-      headerLogo.visible !==
-      (aggregate.supported() && headerBrandLayout(renderer.width, renderer.height).columns > 0)
-    )
-      refresh();
-    paintBrand();
-  }, 140);
   refresh();
   return {
     views,
@@ -1059,8 +1056,8 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
     dispose() {
       if (disposed) return;
       disposed = true;
-      clearInterval(statusTimer);
-      clearInterval(brandTimer);
+      statusRefresh.dispose();
+      brand.dispose();
       for (const [id, view] of views)
         workspace.updateView(id, view.input.plainText, savedScroll(id, view.scroll));
       workspace.off('change', refresh);
@@ -1072,6 +1069,7 @@ export function mountWorkspaceUI(renderer: CliRenderer, workspace: WorkspaceCont
       workspace.off('permission-menu', openPermissionMenu);
       workspace.off('message-view-command', messageViewCommand);
       renderer.off('resize', refresh);
+      renderer.off('capabilities', refresh);
       renderer.off('frame', frame);
       renderer.keyInput.off('keypress', keypress);
       renderer.keyInput.off('paste', paste);

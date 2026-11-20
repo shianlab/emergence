@@ -36,6 +36,7 @@ export function renderPaneNotice(
     view.receiptClock,
   );
   view.receiptClock = info.clock;
+  view.receiptExpiresAt = info.receiptExpiresAt;
   view.notice.content = redact(info.persistent);
   view.notice.visible = Boolean(info.persistent);
   view.notice.fg = colors.foreground;

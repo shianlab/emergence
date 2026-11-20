@@ -2,21 +2,39 @@ import { palette } from '../../core/domain/ui-preferences.ts';
 import type { WorkspaceController } from '../workspace.ts';
 import { type AggregateState } from './aggregate-art.ts';
 import { createAggregateImage } from './aggregate-image.ts';
+
+const frameMs = 140;
+
 export function workspaceBrand(
   workspace: Pick<WorkspaceController, 'current' | 'focused' | 'launch'>,
   aggregate: ReturnType<typeof createAggregateImage>,
-  isDisposed: () => boolean,
 ) {
-  const headerLogo = aggregate.image;
   let brandSession = '',
     brandWasBusy = false,
-    brandDoneUntil = 0,
-    brandPaint = '';
-  function paintBrand() {
-    if (isDisposed() || !headerLogo.visible) return;
+    brandDoneUntil = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let deadline: number | undefined;
+
+  function schedule(at: number | undefined, now: number) {
+    if (deadline === at) return;
+    clearTimeout(timer);
+    deadline = at;
+    timer =
+      at === undefined
+        ? undefined
+        : setTimeout(
+            () => {
+              deadline = undefined;
+              sync();
+            },
+            Math.max(1, at - now),
+          );
+  }
+
+  function sync() {
     const controller = workspace.current.controller,
       ui = workspace.launch.appConfig.ui,
-      colors = palette(ui);
+      now = Date.now();
     const session = controller?.id ?? workspace.focused;
     if (session !== brandSession) {
       brandSession = session;
@@ -30,8 +48,12 @@ export function workspaceBrand(
       !controller?.lastError &&
       controller?.notice === '本轮已完成'
     )
-      brandDoneUntil = Date.now() + 1800;
+      brandDoneUntil = now + 1800;
     brandWasBusy = Boolean(controller?.busy);
+    if (!aggregate.image.visible || !aggregate.supported()) {
+      schedule(undefined, now);
+      return;
+    }
     const state: AggregateState =
       workspace.current.error || controller?.lastError
         ? 'error'
@@ -41,18 +63,21 @@ export function workspaceBrand(
             ? controller.activity.tools.length
               ? 'tool'
               : 'thinking'
-            : Date.now() < brandDoneUntil
+            : now < brandDoneUntil
               ? 'done'
               : 'idle';
     const monochrome = process.env.NO_COLOR !== undefined || process.env.TERM === 'dumb';
-    const tick =
-      ui.reducedMotion || monochrome || process.env.EMERGENCE_REDUCED_MOTION === '1'
-        ? 0
-        : Math.floor(Date.now() / 140) % 20;
-    const signature = `${state}:${tick}:${colors.background}:${monochrome}`;
-    if (signature === brandPaint) return;
-    brandPaint = signature;
-    aggregate.paint(state, tick, colors.background, monochrome);
+    const animated =
+      state === 'thinking' &&
+      !ui.reducedMotion &&
+      !monochrome &&
+      process.env.EMERGENCE_REDUCED_MOTION !== '1';
+    const frame = Math.floor(now / frameMs);
+    aggregate.paint(state, animated ? frame % 20 : 0, palette(ui).background, monochrome);
+    schedule(
+      animated ? (frame + 1) * frameMs : state === 'done' && !monochrome ? brandDoneUntil : undefined,
+      now,
+    );
   }
-  return paintBrand;
+  return { sync, dispose: () => schedule(undefined, Date.now()) };
 }

@@ -28,12 +28,15 @@ export const templateSchema = z
       new Set(ids).size !== ids.length ||
       new Set(visible).size !== visible.length ||
       visible.some((id) => !ids.includes(id)) ||
-      !visible.includes(t.focused) ||
+      !visible.includes(t.focused)
+    )
+      ctx.addIssue({ code: 'custom', path: ['layout'], message: '模板的窗口布局或焦点无效' });
+    if (
       (t.roles.master && !ids.includes(t.roles.master)) ||
       new Set(t.roles.workers).size !== t.roles.workers.length ||
       t.roles.workers.some((id) => !ids.includes(id) || id === t.roles.master)
     )
-      ctx.addIssue({ code: 'custom', message: '模板的布局或主控/执行角色无效' });
+      ctx.addIssue({ code: 'custom', path: ['roles'], message: '旧模板的窗口角色记录无效' });
   });
 export type WorkspaceTemplate = z.infer<typeof templateSchema>;
 function path(home: string, name: string) {

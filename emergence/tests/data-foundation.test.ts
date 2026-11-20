@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { analyzeData, dataRuntime, runWorker } from '../src/domains/data/service.ts';
+import { readWorkerResponse } from '../src/domains/data/result.ts';
 import { executionFixture } from './fixtures/core-execution.ts';
 async function fixture() {
   const home = await mkdtemp(join(tmpdir(), 'emergence-data-')),
@@ -18,11 +19,20 @@ async function fixture() {
   return { home, root };
 }
 const signal = () => AbortSignal.timeout(30000);
+test('data worker distinguishes invalid JSON, invalid receipts, and ordinary failure', () => {
+  assert.throws(() => readWorkerResponse('not json'), /有效 JSON/);
+  assert.throws(() => readWorkerResponse('{"ok":true,"result":null}'), /回执格式/);
+  assert.deepEqual(readWorkerResponse('{"ok":false,"error":"invalid sheet"}'), {
+    ok: false,
+    error: 'invalid sheet',
+  });
+});
 test('CSV full profile preserves ID and long integer; SQL computes actual totals without changing source', async () => {
   const f = await fixture(),
     path = join(f.root, '样本.csv'),
     before = await readFile(path);
   const profile = await analyzeData(f.root, f.home, { file_path: '样本.csv' }, signal());
+  assert.ok('rows' in profile);
   assert.equal(profile.rows, 4);
   assert.equal(profile.duplicateRows, 1);
   assert.equal(profile.columns[1].missing, 1);
@@ -33,6 +43,7 @@ test('CSV full profile preserves ID and long integer; SQL computes actual totals
     { file_path: '样本.csv', sql: 'SELECT sum(CAST("金额" AS DECIMAL(20,2))) AS total FROM data' },
     signal(),
   );
+  assert.ok('query' in query && query.query);
   assert.deepEqual(query.query.rows, [['32.50']]);
   assert.deepEqual(await readFile(path), before);
   assert.equal(JSON.parse(await readFile(join(query.artifact, 'manifest.json'), 'utf8')).status, 'succeeded');
@@ -46,8 +57,10 @@ test('real XLSX multiple sheets, absent formula cache and exact Parquet integers
     `from openpyxl import Workbook\nimport duckdb,sys,pathlib\np=pathlib.Path(sys.argv[1]); w=Workbook();s=w.active;s.title='数据';s.append(['ID','计算']);s.append(['001','=1+1']);w.create_sheet('其他');w.save(p/'book.xlsx');c=duckdb.connect();c.execute("COPY (SELECT 9007199254740993::BIGINT AS id) TO '"+str(p/'table.parquet').replace("'","''")+"' (FORMAT PARQUET)")`,
     f.root,
   ]);
-  assert.equal((await analyzeData(f.root, f.home, { file_path: 'book.xlsx' }, signal())).selectSheet, true);
+  const selection = await analyzeData(f.root, f.home, { file_path: 'book.xlsx' }, signal());
+  assert.ok('selectSheet' in selection && selection.selectSheet);
   const sheet = await analyzeData(f.root, f.home, { file_path: 'book.xlsx', sheet: '数据' }, signal());
+  assert.ok('rows' in sheet);
   assert.equal(sheet.missingFormulaCaches, 1);
   await assert.rejects(
     analyzeData(
@@ -59,6 +72,7 @@ test('real XLSX multiple sheets, absent formula cache and exact Parquet integers
     /缓存/,
   );
   const parquet = await analyzeData(f.root, f.home, { file_path: 'table.parquet' }, signal());
+  assert.ok('rows' in parquet);
   assert.equal(parquet.sample[0][0], '9007199254740993');
 });
 test('bad rows, empty inputs, encoding ambiguity, source scope and unsafe SQL fail closed', async () => {
@@ -69,10 +83,9 @@ test('bad rows, empty inputs, encoding ambiguity, source scope and unsafe SQL fa
     await assert.rejects(analyzeData(f.root, f.home, { file_path: path }, signal()));
   await writeFile(join(f.root, 'gb.csv'), Buffer.from([0x49, 0x44, 10, 0xd6, 0xd0, 0xce, 0xc4]));
   await assert.rejects(analyzeData(f.root, f.home, { file_path: 'gb.csv' }, signal()), /编码/);
-  assert.equal(
-    (await analyzeData(f.root, f.home, { file_path: 'gb.csv', encoding: 'gb18030' }, signal())).sample[0][0],
-    '中文',
-  );
+  const encoded = await analyzeData(f.root, f.home, { file_path: 'gb.csv', encoding: 'gb18030' }, signal());
+  assert.ok('rows' in encoded);
+  assert.equal(encoded.sample[0][0], '中文');
   for (const sql of [
     'DELETE FROM data',
     'SELECT 1; SELECT 2',

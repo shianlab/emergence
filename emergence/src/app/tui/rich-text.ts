@@ -16,29 +16,33 @@ import stringWidth from 'string-width';
 import type { Palette } from '../../core/domain/ui-preferences.ts';
 import { headingStyle } from './typography.ts';
 
+const namedEntities: Readonly<Record<string, string>> = {
+  amp: '&',
+  AMP: '&',
+  lt: '<',
+  LT: '<',
+  gt: '>',
+  GT: '>',
+  quot: '"',
+  QUOT: '"',
+  apos: "'",
+};
+
 function entities(text: string) {
-  return text.replace(/&(?:amp|lt|gt|quot|apos|#39|#x[\da-f]+|#\d+);/gi, (entity) => {
-    const named: Record<string, string> = {
-      '&amp;': '&',
-      '&lt;': '<',
-      '&gt;': '>',
-      '&quot;': '"',
-      '&apos;': "'",
-      '&#39;': "'",
-    };
-    if (named[entity]) return named[entity];
-    const point =
-      entity[2]?.toLowerCase() === 'x'
-        ? parseInt(entity.slice(3, -1), 16)
-        : parseInt(entity.slice(2, -1), 10);
-    // Character references must not reintroduce terminal controls after sanitization.
-    return point >= 32 &&
-      !(point >= 127 && point <= 159) &&
-      point <= 0x10ffff &&
-      !(point >= 0xd800 && point <= 0xdfff)
-      ? String.fromCodePoint(point)
-      : entity;
-  });
+  return text.replace(
+    /&(amp|AMP|lt|LT|gt|GT|quot|QUOT|apos|#[xX][\da-fA-F]+|#\d+);/g,
+    (entity, name: string) => {
+      if (name[0] !== '#') return namedEntities[name];
+      const point = /^#[xX]/.test(name) ? parseInt(name.slice(2), 16) : parseInt(name.slice(1), 10);
+      // Character references must not reintroduce terminal controls after sanitization.
+      return point >= 32 &&
+        !(point >= 127 && point <= 159) &&
+        point <= 0x10ffff &&
+        !(point >= 0xd800 && point <= 0xdfff)
+        ? String.fromCodePoint(point)
+        : entity;
+    },
+  );
 }
 function chunk(text: string, colors: Palette, attributes = 0, extra: Partial<TextChunk> = {}): TextChunk {
   return { __isChunk: true, text, fg: RGBA.fromHex(colors.foreground), attributes, ...extra };

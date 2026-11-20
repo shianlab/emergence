@@ -9,20 +9,25 @@ import {
   attachNativeOutputs,
   attachNativeReadEvidence,
 } from '../../core/application/native-read-evidence.ts';
-import { Definitions, definitionSchema } from './definitions.ts';
+import { Definitions, definitionSchema, type AnalysisDefinition } from './definitions.ts';
 import { deliverAnalysis } from './delivery.ts';
 import { analysisMethods, type AnalysisMethod } from './methods.ts';
+import { dataPreview, readWorkerResponse } from './result.ts';
 import { dataRuntime } from './runtime.ts';
 export { dataRuntime } from './runtime.ts';
+
+const maxInputBytes = 8 * 1024 * 1024;
+const workerTimeoutMs = 30000;
+
 async function boundedInput(path: string) {
   const handle = await open(path, 'r');
   try {
-    const buffer = Buffer.alloc(8388609);
+    const buffer = Buffer.alloc(maxInputBytes + 1);
     let size = 0;
     for (;;) {
       const chunk = await handle.read(buffer, size, buffer.length - size, null);
       size += chunk.bytesRead;
-      if (size > 8388608) throw new Error('数据文件超过 8 MiB');
+      if (size > maxInputBytes) throw new Error('数据文件超过 8 MiB');
       if (!chunk.bytesRead) return buffer.subarray(0, size);
     }
   } finally {
@@ -36,12 +41,13 @@ export async function runWorker(
   request: object,
   cwd: string,
   signal: AbortSignal,
-  timeout = 30000,
+  timeout = workerTimeoutMs,
 ): Promise<{
   code: number | null;
   output: string;
 }> {
   signal.throwIfAborted();
+  const input = JSON.stringify(request);
   return new Promise((done, reject) => {
     const child = spawn(python, ['-I', '-B', '-X', 'utf8', worker], {
       cwd,
@@ -98,8 +104,12 @@ export async function runWorker(
       if (failure) reject(new Error(failure));
       else done({ code, output });
     });
-    child.stdin.on('error', () => {});
-    child.stdin.end(JSON.stringify(request));
+    child.stdin.on('error', (error: NodeJS.ErrnoException) => {
+      // Early worker exit has its own diagnostic on close.
+      if (error.code !== 'EPIPE' && error.code !== 'ERR_STREAM_DESTROYED')
+        stop('无法向数据执行进程传入请求：' + safeError(error));
+    });
+    child.stdin.end(input);
     if (signal.aborted) cancel();
   });
 }
@@ -123,17 +133,21 @@ export async function analyzeData(
 ) {
   if (args.method && !Object.hasOwn(analysisMethods, args.method)) throw new Error('未发布的分析方法');
   if (args.method && args.sql) throw new Error('分析方法与自定义 SQL 分开运行');
+  if (!args.method && (args.definition_name || args.definition))
+    throw new Error('业务口径须与分析方法一起提供');
   if (Buffer.byteLength(JSON.stringify(args)) > 20000) throw new Error('分析参数超过预算');
-  let definition: any = null;
+  let definition: AnalysisDefinition | null = null;
+  const definitions = new Definitions(home, root);
   let definitionInput: Awaited<ReturnType<Definitions['evidence']>> | undefined;
   if (args.method) {
+    const params = definitionSchema.shape.params.parse(args.params ?? {});
     if (args.definition_name) {
-      definition = await new Definitions(home, root).get(args.definition_name);
+      definition = await definitions.get(args.definition_name);
       if (!definition) throw new Error('找不到已确认口径');
-      definitionInput = await new Definitions(home, root).evidence(args.definition_name);
+      definitionInput = await definitions.evidence(args.definition_name);
       if (
         definition.definition.method !== args.method ||
-        !isDeepStrictEqual(definition.definition.params, args.params ?? {})
+        !isDeepStrictEqual(definition.definition.params, params)
       )
         throw new Error('计算方法/参数与已确认口径不一致，请重读口径，不得沿用确认状态');
     } else {
@@ -144,7 +158,7 @@ export async function analyzeData(
           : {
               name: args.method,
               method: args.method,
-              params: args.params ?? {},
+              params,
               grain: '未明确',
               unit: '未明确',
               timezone: '未明确',
@@ -155,16 +169,17 @@ export async function analyzeData(
       if (
         args.definition &&
         (definition.definition.method !== args.method ||
-          !isDeepStrictEqual(definition.definition.params, args.params ?? {}))
+          !isDeepStrictEqual(definition.definition.params, params))
       )
         throw new Error('报告口径与实际计算参数不一致');
     }
   }
+  const definitionVersion = definition && 'version' in definition ? definition.version : null;
   const base = await realpath(root),
     input = resolve(base, args.file_path),
     physical = await realpath(input),
     stat = await lstat(input);
-  if (!inside(base, physical) || stat.isSymbolicLink() || !stat.isFile() || stat.size > 8 * 1024 * 1024)
+  if (!inside(base, physical) || stat.isSymbolicLink() || !stat.isFile() || stat.size > maxInputBytes)
     throw new Error('数据源须是项目内不超过 8 MiB 的普通文件');
   const extension = extname(input).toLowerCase();
   if (!['.csv', '.tsv', '.xlsx', '.parquet'].includes(extension))
@@ -172,7 +187,6 @@ export async function analyzeData(
   if (args.sql && args.sql.length > 8000) throw new Error('SQL 超过长度预算');
   if (!valid()) throw new Error('数据读取权限已变化');
   const source = await boundedInput(physical);
-  if (source.length > 8 * 1024 * 1024) throw new Error('数据文件在读取期间超过预算');
   const sourceHash = hash(source),
     runtime = await dataRuntime(home);
   let directory = await realpath(home);
@@ -202,24 +216,23 @@ export async function analyzeData(
   const startedAt = new Date().toISOString();
   try {
     const response = await runWorker(runtime.python, runtime.worker, request, directory, signal);
-    let value;
-    try {
-      value = JSON.parse(response.output);
-    } catch {
-      throw new Error('数据执行未返回有效 JSON');
-    }
-    if (response.code !== 0 || !value.ok) throw new Error(safeError(value.error ?? '数据执行失败'));
+    const value = readWorkerResponse(response.output);
+    if (!value.ok) throw new Error(safeError(value.error || '数据执行失败'));
+    if (response.code !== 0) throw new Error(`数据执行失败（退出码 ${response.code ?? '未知'}）`);
+    if (
+      !value.result.selectSheet &&
+      (value.result.analysis?.method !== args.method || value.result.query?.sql !== (args.sql || undefined))
+    )
+      throw new Error('数据执行回执与本次请求不一致');
     signal.throwIfAborted();
     if (!valid() || hash(await boundedInput(physical)) !== sourceHash || (await realpath(input)) !== physical)
       throw new Error('数据源、目录或权限已变化，本次结果失效');
     if (workerHash !== hash(Buffer.concat(await Promise.all(engineFiles.map((file) => readFile(file))))))
       throw new Error('分析引擎在运行期间变化');
-    if (
-      args.definition_name &&
-      definition.version !== (await new Definitions(home, root).get(args.definition_name))?.version
-    )
+    if (args.definition_name && definitionVersion !== (await definitions.get(args.definition_name))?.version)
       throw new Error('业务口径在计算期间变化');
-    const artifacts = await deliverAnalysis(directory, runtime.worker, request, value.result, definition);
+    const artifacts = await deliverAnalysis(directory, runtime.worker, value.result, definition);
+    const result = dataPreview(value.result, { artifact: directory, sourceHash }, definition, artifacts);
     await writeFile(join(directory, 'result.json'), JSON.stringify(value.result, null, 2), {
       flag: 'wx',
       mode: 0o600,
@@ -239,12 +252,12 @@ export async function analyzeData(
           environment: value.result.runtime,
           resultHash: hash(JSON.stringify(value.result)),
           artifacts,
-          definitionVersion: definition?.version ?? null,
+          definitionVersion,
           definitionStatus: definition?.status ?? null,
           startedAt,
           endedAt: new Date().toISOString(),
           exitCode: response.code,
-          limits: { bytes: 8388608, rows: 10000, columns: 128, timeoutMs: 30000 },
+          limits: { bytes: maxInputBytes, rows: 10000, columns: 128, timeoutMs: workerTimeoutMs },
           remote: 'not-configured',
         },
         null,
@@ -252,33 +265,7 @@ export async function analyzeData(
       ),
       { flag: 'wx', mode: 0o600 },
     );
-    const result = {
-      ...value.result,
-      ...(value.result.analysis
-        ? {
-            exitCode: response.code,
-            analysis: {
-              ...value.result.analysis,
-              table: value.result.analysis.table.slice(0, 20),
-              totalRows: value.result.analysis.table.length,
-              previewOmitted: value.result.analysis.table.length > 20,
-            },
-            definition,
-            artifacts,
-          }
-        : {}),
-      artifact: directory,
-      sourceHash,
-      remote: '未配置远程数据源；没有使用模拟数据替代',
-    };
-    if (Buffer.byteLength(JSON.stringify(result)) > 24000) {
-      result.sample = [];
-      if (result.query) result.query = { ...result.query, rows: [], previewOmitted: true };
-      result.previewOmitted = true;
-    }
-    if (Buffer.byteLength(JSON.stringify(result)) > 24000)
-      throw new Error('画像摘要超过预算，请缩小数据列范围');
-    if (args.method)
+    if ('analysis' in result && result.analysis)
       attachNativeOutputs(
         await Promise.all(
           [...artifacts.map((a) => a.name), 'result.json', 'request.json', 'manifest.json'].map(
@@ -299,17 +286,24 @@ export async function analyzeData(
       ...(definitionInput ? [definitionInput] : []),
     ]);
   } catch (error) {
-    await writeFile(
-      join(directory, 'manifest.json'),
-      JSON.stringify({
-        status: signal.aborted ? 'cancelled' : 'failed',
-        sourceHash,
-        workerHash,
-        startedAt,
-        error: safeError(error),
-      }),
-      { mode: 0o600 },
-    );
+    try {
+      await writeFile(
+        join(directory, 'manifest.json'),
+        JSON.stringify({
+          status: signal.aborted ? 'cancelled' : 'failed',
+          sourceHash,
+          workerHash,
+          startedAt,
+          error: safeError(error),
+        }),
+        { flag: 'wx', mode: 0o600 },
+      );
+    } catch (receiptError) {
+      if ((receiptError as NodeJS.ErrnoException).code !== 'EEXIST')
+        throw new Error(safeError(error) + '；数据运行记录写入失败：' + safeError(receiptError), {
+          cause: error,
+        });
+    }
     throw error;
   }
 }

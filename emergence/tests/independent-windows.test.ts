@@ -9,6 +9,7 @@ import { defineTool } from '@deepseek-ai/dsh-tools';
 import { WorkspaceController } from '../src/app/workspace.ts';
 import { commandHelp, workspaceCommands } from '../src/app/commands.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
+import { templateSchema } from '../src/app/templates.ts';
 import { harness } from './fixtures/harness.ts';
 import { taskSchema } from '../src/core/domain/task.ts';
 import { ExecutionProvider, until } from './fixtures/core-execution.ts';
@@ -84,6 +85,9 @@ test('shipped multi-window sessions keep projects/models and conversation input 
       assert.ok(call);
       assert.match(JSON.stringify(call.messages), new RegExp(own));
       assert.doesNotMatch(JSON.stringify(call.messages), new RegExp(foreign));
+      const system = JSON.stringify(call.messages.filter((message) => message.role === 'system'));
+      assert.match(system, /在当前会话依次完成探索、实现与验证/);
+      assert.doesNotMatch(system, /主控按现有计划|向可用窗口分配/);
       const inventory = await pane.controller!.planning.inventory();
       assert.deepEqual(
         inventory.windows.map((window) => window.id),
@@ -246,7 +250,7 @@ test('old workspace/journal and role templates restore history without restoring
       restored.taskEngine.recover(task.id, first.id, '不得恢复历史跨窗任务'),
       /历史跨窗口/,
     );
-    await restored.applyTemplate({
+    const template = templateSchema.parse({
       version: 1,
       name: 'old-roles',
       focused: 'a',
@@ -264,6 +268,17 @@ test('old workspace/journal and role templates restore history without restoring
       ],
       roles: { master: 'a', workers: ['b'] },
     });
+    const invalid = templateSchema.safeParse({
+      ...template,
+      focused: 'missing',
+      roles: { workers: ['missing'] },
+    });
+    assert.equal(invalid.success, false);
+    assert.deepEqual(
+      invalid.error?.issues.map((issue) => issue.path),
+      [['layout'], ['roles']],
+    );
+    await restored.applyTemplate(template);
     assert.equal('master' in restored.taskEngine.state, false);
     assert.equal('workers' in restored.taskEngine.state, false);
     assert.equal(restored.panes.size, 2);

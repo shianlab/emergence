@@ -3,12 +3,14 @@ import { scopeTarget } from '@deepseek-ai/dsh-scope';
 import type { SessionEvent } from '@deepseek-ai/dsh-session';
 import { ScrollBoxRenderable, TextAttributes } from '@opentui/core';
 import { createTestRenderer } from '@opentui/core/testing';
+import { Lexer } from 'marked';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { MessageProjection } from '../src/app/tui/message-model.ts';
 import { mountMessages } from '../src/app/tui/message-view.ts';
+import { inlineText } from '../src/app/tui/rich-text.ts';
 import { mountWorkspaceUI } from '../src/app/workspace-ui.ts';
 import { WorkspaceController } from '../src/app/workspace.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
@@ -40,6 +42,14 @@ let context: Awaited<ReturnType<typeof harness>> | undefined;
 const previousKey = process.env.TUI_PHASE2_KEY;
 process.env.TUI_PHASE2_KEY = 'local-model-fixture';
 try {
+  const references = inlineText(
+    Lexer.lexInline('&AMP; &LT; &GT; &QUOT; &apos; &#39; &#X4E2D; &Amp; &APOS; &#x1b; &#127; `&AMP;`'),
+    palettes.dark,
+  )
+    .map((chunk) => chunk.text)
+    .join('');
+  assert.equal(references, "& < > \" ' ' 中 &Amp; &APOS; &#x1b; &#127; &AMP;");
+  checks.standardAliasesAndLiteralControls = true;
   feed.update(projection, '', palettes.dark, 116, false);
   await test.flush();
   let frame = test.captureCharFrame();

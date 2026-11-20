@@ -33,7 +33,8 @@ export function auxiliaryInfo(
       : { session: input.session, value, since: input.now };
   const routine = Object.hasOwn(receipts, value) ? receipts[value] : undefined;
   const active = input.busy || input.pending || input.queued > 0 || Boolean(input.error);
-  const receipt = routine && !active && input.now - clock.since < 4000 ? routine[input.en ? 1 : 0] : '';
+  const expiresAt = clock.since + 4000;
+  const receipt = routine && !active && input.now < expiresAt ? routine[input.en ? 1 : 0] : '';
   // Initial placeholder is already in the input; queued/submitted state is represented by the live status.
   const redundant = new Set(['输入任务开始工作，/help 查看命令', '已加入队列，当前任务结束后处理']);
   const persistent = [
@@ -60,6 +61,7 @@ export function auxiliaryInfo(
   return {
     clock,
     receipt,
+    receiptExpiresAt: receipt ? expiresAt : undefined,
     persistent,
     shared: shared + details,
     mergeReady: Boolean(shared) && !active && !receipt && !persistent && !input.expanded,
