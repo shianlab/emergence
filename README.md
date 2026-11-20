@@ -172,6 +172,12 @@ npm run inspect:full   # Harness、TUI、ConPTY 完整本机矩阵
 
 欢迎复现问题、改进文档和提交聚焦的 PR。请勿把 API 密钥、真实会话或私有项目内容附到公开 issue 中。
 
+## 第三方评测
+
+[![M8ven Score](https://m8ven.ai/badge/mcp/shianlab-emergence-xrt4o4?v=82922ec33d59a1ecd4ffcaa5dfd6f102)](https://m8ven.ai/mcp/shianlab-emergence-xrt4o4?s=readme)
+
+查看 M8ven 对仓库源码的评测记录与发布者验证状态。
+
 ## 许可与致谢
 
 自有代码采用 [MIT](LICENSE)。感谢 DeepSeek Harness、OpenTUI 与 Meta_Kim 等开源项目。第三方组件与派生资料继续遵循各自许可，完整来源见 [THIRD_PARTY_NOTICES.md](emergence/THIRD_PARTY_NOTICES.md)。
