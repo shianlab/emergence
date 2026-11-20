@@ -1,6 +1,7 @@
 import { LlmAdapter, type StreamChunk } from '@deepseek-ai/dsh-llm';
 import { createTestRenderer } from '@opentui/core/testing';
 import assert from 'node:assert/strict';
+import { once } from 'node:events';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -94,7 +95,10 @@ try {
   await delay(400);
   await ui.home!.submit('/update');
   await flush();
+  assert.match(t.captureCharFrame(), /检查更新/);
+  const dismissal = once(updates, 'change', { signal: AbortSignal.timeout(7000) });
   t.mockInput.pressEscape();
+  await dismissal;
   await flush();
   assert.equal(updates.snapshot.dismissed, '1.0.2');
   checks.push('home menu, notes and Esc defer without model requests');
