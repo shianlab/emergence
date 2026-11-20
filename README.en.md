@@ -1,9 +1,14 @@
-<h1 align="center">Emergence · 涌现</h1>
-<p align="center"><strong>Turn ideas into code. Turn data into answers.</strong></p>
-<p align="center">An open-source terminal agent for coding and data analysis, with an independent Harness, a Chinese-first TUI, and a native model configuration app.</p>
-<p align="center"><a href="README.md">简体中文</a> · English</p>
-<p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.8">Release 1.08</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
-<p align="center"><a href="#install">Install</a> · <a href="#a-terminal-workspace">Workspace</a> · <a href="#work-with-code-and-data">Examples</a> · <a href="#updates-and-maintenance">Updates</a> · <a href="#develop">Develop</a></p>
+![Emergence 1.08 · Code / Data / Terminal](docs/media/emergence-1.08-cover.png)
+
+# Emergence · 涌现
+
+**A Chinese-first terminal agent for working with code and data in your project directory.**
+
+Trace a bug from its entry point to a failing test, or turn a local orders table into a report you can reproduce. Choose a model for each pane and follow the tools it uses, the approvals it requests, and the evidence behind the result.
+
+[Release **1.08**](https://github.com/shianlab/emergence/releases/tag/v1.0.8) · Windows x64 · [MIT](LICENSE) · [简体中文](README.md)
+
+[Install](#install)　/　[Workspace](#a-terminal-workspace)　/　[Code and data](#work-with-code-and-data)　/　[Permissions](#stay-in-control)　/　[Updates](#updates-and-maintenance)　/　[Develop](#develop)
 
 ## Install
 
@@ -54,33 +59,35 @@ Emergence Harness integrates the DeepSeek Harness execution foundation, OpenTUI,
 
 ## Work with code and data
 
-```text
-Understand the authentication flow and propose a fix before editing any files.
-```
+### Investigate an empty-file import
 
-```text
-Fix the boundary condition, run the relevant tests, and explain the verification results.
-```
+Start in **Plan** mode to locate the failure. For example, ask:
 
-Use `/init` to preview `EMERGENCE.md`. Add your project's build commands, test entry points, and editing conventions so future sessions in that project can reuse them.
+> Trace an empty file from the file picker through the first row of the parser. Show where the failure happens and which tests cover that path.
 
-For data tools, install CPython 3.14 x64 and initialize the managed environment:
+After reviewing the plan, switch to **Auto edit** and ask for the change:
+
+> Return “No data to import” for an empty file. Preserve the existing behavior for populated files. Add tests for both cases and run the relevant checks.
+
+Use `/plan` to inspect the acceptance conditions and `/tasks` to see execution progress. Open `/code` to check the working directory, exit code, diagnostics and changed files. Put recurring build commands and editing conventions in `EMERGENCE.md`. Use `/init` to preview it.
+
+### Explain a change in monthly revenue
+
+Install CPython 3.14 x64 and initialize the data environment with the path to your interpreter:
 
 ```powershell
 emergence data-init --python "C:\Python314\python.exe"
 ```
 
-Use the actual interpreter path. Dependencies are version-pinned and hash-checked. The environment is separate from application versions.
+> Read orders.csv. Check for duplicate order IDs and missing dates or amounts. Group paid amounts by payment month and channel, account for refunds separately, and show each channel’s contribution to the month-over-month change. Ask about missing fields before calculating.
 
-```text
-Profile sales.csv, check missing values and outliers, compare monthly revenue, and produce a report with explicit assumptions.
-```
+The native analysis tools work with local CSV, TSV, XLSX and Parquet files. Read the input-quality section before interpreting the totals. Check the CSV breakdown against the report, export the SVG chart, or use the input snapshot and `replay.py` to recompute the result. Artifacts are stored under `core/data-runs/<run ID>/` in the configuration directory.
 
-Computation runs locally; task context and tool results may be sent to your configured model provider. Review that provider's data policy before processing sensitive data.
+The native analysis limits are 8 MiB of input, 10,000 rows, 128 columns and 100,000 cells. Computation runs locally. Your model provider may receive conversation context and tool results. [Methods and scope](docs/code-data-phase5-report.md)
 
 ## Stay in control
 
-Permissions: `plan` is read-only; `ask` requests approval for effects; `edit` allows ordinary in-project edits; `auto` allows explicitly configured execution scopes. Deny rules and mandatory approval still apply. These controls are not an OS sandbox. See [SECURITY.md](SECURITY.md).
+Permissions: `plan` is read-only; `ask` requests approval for effects; `edit` allows ordinary in-project edits; `auto` allows explicitly configured execution scopes. Auto mode respects deny rules and mandatory approval. Rage mode auto-approves tool calls in the current pane, including shell commands, out-of-project file operations and MCP tools. OS permissions and task-level read-only restrictions still apply. These controls are not an OS sandbox. See [SECURITY.md](SECURITY.md).
 
 Use `F2` / `F3` to split, `Tab` to switch and `F6` to close panes. **Panes are independent:** there is no master-pane control or cross-pane delegation. Coordinate simultaneous edits yourself, preferably with separate Git worktrees.
 
