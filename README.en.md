@@ -2,7 +2,7 @@
 <p align="center"><strong>Turn ideas into code. Turn data into answers.</strong></p>
 <p align="center">An open-source terminal agent for coding and data analysis, with an independent Harness, a Chinese-first TUI, and a native model configuration app.</p>
 <p align="center"><a href="README.md">简体中文</a> · English</p>
-<p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.6">Release 1.06</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
+<p align="center"><a href="https://github.com/shianlab/emergence/releases/tag/v1.0.7">Release 1.07</a> · <a href="LICENSE">MIT</a> · Windows x64 · <a href="https://github.com/shianlab/emergence/actions/workflows/ci.yml">CI</a></p>
 <p align="center"><a href="#install">Install</a> · <a href="#a-terminal-workspace">Workspace</a> · <a href="#work-with-code-and-data">Examples</a> · <a href="#updates-and-maintenance">Updates</a> · <a href="#develop">Develop</a></p>
 
 ## Install
@@ -98,7 +98,7 @@ emergence update
 emergence rollback
 ```
 
-New windows use the update after the installer verifies it. Open windows can finish their current tasks. A healthy previous version is kept for rollback. Your configuration, keys, and sessions live separately from application versions. Release 1.06 updates conversation typography, frames the composer, and recovers from interrupted model output. [Release notes](docs/releases/1.0.6.md) · [Changelog](CHANGELOG.md)
+New windows use the update after the installer verifies it. Open windows can finish their current tasks. The installer keeps a healthy previous version for rollback. Configuration, keys, and sessions live separately from application versions. Release 1.07 strengthens credential isolation, improves task cancellation and update recovery, and stops idle workspace redraws. [Release notes](docs/releases/1.0.7.md) · [Changelog](CHANGELOG.md)
 
 ## Develop
 
@@ -112,10 +112,10 @@ npm run build
 npm start
 ```
 
-Run `npm run check`, `npm test` and relevant integration checks. Data tests require the Python environment. See [CONTRIBUTING.md](CONTRIBUTING.md), [installation and upgrades](docs/installation.md), [release notes](docs/releases/1.0.6.md) and the [application manual](emergence/README.md).
+Run `npm run check`, `npm test` and relevant integration checks. Data tests require the Python environment. See [CONTRIBUTING.md](CONTRIBUTING.md), [installation and upgrades](docs/installation.md), [release notes](docs/releases/1.0.7.md) and the [application manual](emergence/README.md).
 
 ## License and support
 
 Own code is [MIT](LICENSE). Third-party code and derived assets retain their original licenses and notices. See [attributions](emergence/THIRD_PARTY_NOTICES.md).
 
-Report reproducible bugs through [GitHub Issues](https://github.com/shianlab/emergence/issues), without keys or private project data. Follow the [security policy](SECURITY.md) for vulnerabilities. macOS, Linux and ARM64 are not released or certified in 1.06.
+Report reproducible bugs through [GitHub Issues](https://github.com/shianlab/emergence/issues), without keys or private project data. Follow the [security policy](SECURITY.md) for vulnerabilities. The official 1.07 package targets Windows x64.

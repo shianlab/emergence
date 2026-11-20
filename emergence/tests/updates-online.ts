@@ -18,7 +18,7 @@ import { phase6Server } from './fixtures/phase6-model-server.ts';
 
 const output = resolve(process.argv[3] ?? '../artifacts/install-phase3-20261117');
 await mkdir(output, { recursive: true });
-const record = JSON.parse(await readFile('../artifacts/phase6/release-path.json', 'utf8'));
+const record = JSON.parse(await readFile(process.argv[4] ?? '../artifacts/phase6/release-path.json', 'utf8'));
 const candidate = process.argv[2]
   ? (JSON.parse(await readFile(resolve(process.argv[2]), 'utf8')) as {
       version: string;

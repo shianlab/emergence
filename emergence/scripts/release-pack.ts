@@ -79,7 +79,14 @@ if (
   throw new Error('Recheck the HMR glob dependency exclusion for this lockfile');
 await cp(runtimeModules, join(app, 'node_modules'), {
   recursive: true,
-  filter: (source) => source !== unusedGlob,
+  filter: (source) => {
+    if (source === unusedGlob || source.toLowerCase().endsWith('.pdb')) return false;
+    // The release uses only the Windows x64 node-pty prebuild.
+    const target = /(?:^|\/)node-pty\/prebuilds\/([^/]+)/.exec(
+      relative(runtimeModules, source).replaceAll('\\', '/'),
+    );
+    return !target || target[1] === 'win32-x64';
+  },
 });
 await writeFile(join(app, 'package.json'), JSON.stringify({ ...pkg, emergencePortable: true }, null, 2));
 await mkdir(join(bundle, 'runtime'));
@@ -233,6 +240,8 @@ const inputHashes = Object.fromEntries(
     [
       'package.json',
       'package-lock.json',
+      'src/app/version.ts',
+      'scripts/release-pack.ts',
       'bin/emergence.cjs',
       'dist/cli.mjs',
       'dist/plugin.mjs',

@@ -77,6 +77,12 @@ try {
   const source = join(extracted, basename(record.bundle));
   await assert.rejects(access(join(source, 'app/node_modules/picomatch')), { code: 'ENOENT' });
   checks.disabledHmrGlobDependencyExcluded = true;
+  const files = JSON.parse(await readFile(join(source, 'manifest.sha256.json'), 'utf8')) as {
+    path: string;
+  }[];
+  assert.ok(files.some(({ path }) => /\/node-pty\/prebuilds\/win32-x64\/.*\.node$/.test(path)));
+  assert.ok(files.every(({ path }) => !/\.pdb$|\/node-pty\/prebuilds\/(?!win32-x64\/)/i.test(path)));
+  checks.onlyWindowsX64NativePrebuildsAndNoDebugSymbols = true;
   const entry = join(source, 'emergence.ps1');
   const portable = await ps(entry, ['--version']);
   assert.equal(portable.code, 0, portable.stderr);
