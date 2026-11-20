@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { childEnvironment } from '../platform/child-environment.ts';
 
 export interface ConfigurationWindow {
   closed: Promise<void>;
@@ -51,7 +52,11 @@ export async function openConfigurationWindow(url: string) {
   } catch {
     throw new Error('缺少原生模型配置工具，请运行 npm run build 或使用完整发行包');
   }
-  const child = spawn(executable, ['--attach'], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: false });
+  const child = spawn(executable, ['--attach'], {
+    stdio: ['pipe', 'pipe', 'pipe'],
+    windowsHide: false,
+    env: childEnvironment(),
+  });
   let exited = false;
   const closed = new Promise<void>((resolve) => {
     child.once('exit', () => {

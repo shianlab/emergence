@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { promisify } from 'node:util';
+import { childEnvironment } from '../platform/child-environment.ts';
 import type { dataRuntime } from '../domains/data/service.ts';
 
 const execute = promisify(execFile);
@@ -18,7 +19,7 @@ export async function checkGit(cwd: string): Promise<HealthCheck> {
       windowsHide: true,
       timeout: 5000,
       maxBuffer: 16384,
-      env: { ...process.env, GIT_OPTIONAL_LOCKS: '0' },
+      env: { ...childEnvironment(), GIT_OPTIONAL_LOCKS: '0' },
     });
     return { name: 'git', status: 'ok', detail: '已识别 Git 仓库，可使用版本与工作树功能。' };
   } catch (error) {

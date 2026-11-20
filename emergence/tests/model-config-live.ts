@@ -5,7 +5,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials, resolveCredential } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { testModelConnection } from '../src/app/model-configuration.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 
@@ -15,10 +15,6 @@ const home = homeDirectory(),
   config = await loadConfig(home),
   reportDirectory = resolve('../artifacts/model-configuration');
 await mkdir(reportDirectory, { recursive: true });
-await hydrateCredentials(
-  home,
-  config.models.map((model) => model.apiKeyEnv),
-);
 const results: Array<{
   id: string;
   model: string;
@@ -70,7 +66,12 @@ for (const model of config.models.slice(0, 4)) {
         '--print',
         '请只回复 EMERGENCE_MODEL_CONFIG_VERIFIED，不调用任何工具。',
       ],
-      { cwd: process.cwd(), env: process.env, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
+      {
+        cwd: process.cwd(),
+        env: { ...process.env, [model.apiKeyEnv]: secret },
+        stdio: ['ignore', 'pipe', 'pipe'],
+        windowsHide: true,
+      },
     );
     let stdout = '',
       stderr = '';

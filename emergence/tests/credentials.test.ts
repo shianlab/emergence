@@ -3,7 +3,14 @@ import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { hydrateCredentials, readCredentials, saveCredential } from '../src/app/credentials.ts';
+import {
+  credentialSource,
+  prepareModelCredentials,
+  readCredentials,
+  resolveCredential,
+  saveCredential,
+} from '../src/app/credentials.ts';
+import { safeError } from '../src/core/adapters/redaction.ts';
 
 test(
   'Windows credentials are encrypted, round-trip, and do not replace explicit environment values',
@@ -25,11 +32,13 @@ test(
       assert.equal(merged.CONCURRENT_A, 'concurrent-a');
       assert.equal(merged.CONCURRENT_B, 'concurrent-b');
       delete process.env[name];
-      await hydrateCredentials(home, [name]);
-      assert.equal(process.env[name], 'credential-unit-test-value');
+      await prepareModelCredentials(home, [name]);
+      assert.equal(process.env[name], undefined);
+      assert.equal(credentialSource(home, name), 'encrypted');
+      assert.equal(await resolveCredential(home, name), 'credential-unit-test-value');
+      assert.equal(safeError('credential-unit-test-value'), '[已隐藏]');
       process.env[name] = 'explicit-override';
-      await hydrateCredentials(home, [name]);
-      assert.equal(process.env[name], 'explicit-override');
+      assert.equal(await resolveCredential(home, name), 'explicit-override');
     } finally {
       if (original === undefined) delete process.env[name];
       else process.env[name] = original;

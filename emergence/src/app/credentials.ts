@@ -1,25 +1,95 @@
 import { spawn } from 'node:child_process';
 import { mkdir, readFile } from 'node:fs/promises';
 import { replaceJsonFile } from '../core/storage/safe-json-file.ts';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { z } from 'zod';
-import { registerSecretNames } from '../core/adapters/redaction.ts';
+import { registerSecretNames, registerSecretSource } from '../core/adapters/redaction.ts';
 import { canonicalDirectory, withLease } from '../core/storage/lease.ts';
+import {
+  registerModelEnvironmentNames,
+  windowsDesktopEnvironment,
+  windowsPowerShell,
+} from '../platform/child-environment.ts';
+import { pathIdentity } from '../platform/path-policy.ts';
 
 const envelopeSchema = z.object({ version: z.literal(1), encrypted: z.string().min(1) }).strict();
 const secretsSchema = z.record(z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/), z.string().min(1));
 const filename = 'credentials.dpapi.json';
-const hydrated = new Map<string, string>();
-export function hydratedCredentialNames() {
-  return [...hydrated.keys()].filter((name) => process.env[name] === hydrated.get(name));
+const stores = new Map<string, Record<string, string>>();
+const loading = new Map<string, Promise<void>>();
+const shellOverrides = new Map<string, string>();
+let isolated = false;
+const homeKey = (home: string) => pathIdentity(resolve(home));
+const environmentKey = (name: string) => (process.platform === 'win32' ? name.toUpperCase() : name);
+const shellValue = (name: string) =>
+  shellOverrides.get(environmentKey(name)) || process.env[name] || undefined;
+const storedValue = (home: string, name: string) => {
+  const saved = stores.get(homeKey(home));
+  return saved && Object.hasOwn(saved, name) ? saved[name] : undefined;
+};
+registerSecretSource(function* () {
+  yield* shellOverrides.values();
+  for (const stored of stores.values()) yield* Object.values(stored);
+});
+
+export function registerModelCredentials(names: readonly string[]) {
+  registerSecretNames(names);
+  registerModelEnvironmentNames(names);
+  if (isolated)
+    for (const name of names) {
+      const value = process.env[name];
+      if (!value) continue;
+      shellOverrides.set(environmentKey(name), value);
+      delete process.env[name];
+    }
 }
-/** The launcher passes names only, so the child can distinguish injected DPAPI keys from shell overrides. */
-export function adoptHydratedCredentials(names: readonly string[]) {
-  for (const name of names) if (process.env[name]) hydrated.set(name, process.env[name]!);
+export function credentialSource(home: string, name: string): 'encrypted' | 'environment' | 'missing' {
+  return shellValue(name) ? 'environment' : storedValue(home, name) ? 'encrypted' : 'missing';
 }
-export function credentialSource(name: string): 'encrypted' | 'environment' | 'missing' {
-  const value = process.env[name];
-  return !value ? 'missing' : hydrated.get(name) === value ? 'encrypted' : 'environment';
+
+/** The launcher uses its existing private Node IPC channel for explicit shell overrides. */
+export function receiveShellCredentials(names: readonly string[]): Promise<void> {
+  const send = process.send?.bind(process);
+  if (!send || !process.connected) return Promise.reject(new Error('模型凭据通道未连接'));
+  const allowed = new Set(names);
+  return new Promise((done, reject) => {
+    const cleanup = () => {
+      clearTimeout(timer);
+      process.off('message', receive);
+      process.off('disconnect', disconnected);
+    };
+    const fail = () => {
+      cleanup();
+      reject(new Error('无法从启动进程接收模型凭据'));
+    };
+    const disconnected = () => fail();
+    const receive = (message: unknown) => {
+      if (
+        !message ||
+        typeof message !== 'object' ||
+        !('type' in message) ||
+        message.type !== 'emergence-model-credentials'
+      )
+        return;
+      const parsed = secretsSchema.safeParse('values' in message ? message.values : undefined);
+      if (!parsed.success || Object.keys(parsed.data).some((name) => !allowed.has(name))) {
+        fail();
+        return;
+      }
+      cleanup();
+      isolated = true;
+      for (const [name, value] of Object.entries(parsed.data))
+        shellOverrides.set(environmentKey(name), value);
+      registerModelCredentials(names);
+      done();
+    };
+    const timer = setTimeout(fail, 10000);
+    process.on('message', receive);
+    process.once('disconnect', disconnected);
+    send({ type: 'emergence-model-credentials-request' }, (error) => {
+      if (error) fail();
+    });
+  });
 }
 
 /** DPAPI binds the ciphertext to the current Windows user; secrets travel only through pipes. */
@@ -36,8 +106,9 @@ $result = [Security.Cryptography.ProtectedData]::${mode}($bytes, $null, [Securit
 [Console]::Out.Write(${mode === 'Protect' ? '[Convert]::ToBase64String($result)' : '[Text.Encoding]::UTF8.GetString($result)'})
 `;
   return new Promise<string>((resolve, reject) => {
+    const executable = windowsPowerShell();
     const child = spawn(
-      'powershell.exe',
+      executable,
       [
         '-NoLogo',
         '-NoProfile',
@@ -45,7 +116,12 @@ $result = [Security.Cryptography.ProtectedData]::${mode}($bytes, $null, [Securit
         '-EncodedCommand',
         Buffer.from(script, 'utf16le').toString('base64'),
       ],
-      { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true },
+      {
+        cwd: dirname(executable),
+        env: windowsDesktopEnvironment(),
+        stdio: ['pipe', 'pipe', 'pipe'],
+        windowsHide: true,
+      },
     );
     const chunks: Buffer[] = [];
     child.stdout.on('data', (chunk) => chunks.push(chunk));
@@ -94,32 +170,28 @@ export async function saveCredential(home: string, name: string, value: string):
         newline: true,
       },
     );
-    if ((hydrated.has(name) && process.env[name] === hydrated.get(name)) || !process.env[name]) {
-      process.env[name] = value;
-      hydrated.set(name, value);
-    }
+    stores.set(homeKey(home), validated);
   });
 }
 
-export async function hydrateCredentials(home: string, names: readonly string[]): Promise<void> {
-  registerSecretNames(names);
-  if (names.every((name) => process.env[name])) return;
-  const secrets = await readCredentials(home);
-  for (const name of names)
-    if (!process.env[name] && secrets[name]) {
-      process.env[name] = secrets[name];
-      hydrated.set(name, secrets[name]);
-    }
+export async function prepareModelCredentials(home: string, names: readonly string[]): Promise<void> {
+  registerModelCredentials(names);
+  const key = homeKey(home);
+  if (stores.has(key) || names.every((name) => shellValue(name))) return;
+  let pending = loading.get(key);
+  if (!pending) {
+    pending = readCredentials(home)
+      .then((stored) => {
+        if (!stores.has(key)) stores.set(key, stored);
+      })
+      .finally(() => loading.delete(key));
+    loading.set(key, pending);
+  }
+  await pending;
 }
 
-/** Explicit shell values win; values injected from DPAPI can be refreshed after an edit. */
+/** Explicit shell values win. DPAPI values stay in the process-local store. */
 export async function resolveCredential(home: string, name: string): Promise<string | undefined> {
-  const value = process.env[name];
-  if (value && value !== hydrated.get(name)) return value;
-  const stored = (await readCredentials(home))[name];
-  if (stored) {
-    process.env[name] = stored;
-    hydrated.set(name, stored);
-  }
-  return stored;
+  await prepareModelCredentials(home, [name]);
+  return shellValue(name) ?? storedValue(home, name);
 }

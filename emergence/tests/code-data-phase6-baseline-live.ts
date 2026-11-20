@@ -6,7 +6,7 @@ import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { runInNewContext } from 'node:vm';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { SessionUsage } from '../src/app/tui/session-usage.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 import { digest } from '../src/core/storage/execution-journal.ts';
@@ -25,8 +25,8 @@ await mkdir(output, { recursive: true });
 const originalHome = homeDirectory(),
   config = await loadConfig(originalHome);
 const model = config.models.find((m) => m.id === config.defaultModel)!;
-await hydrateCredentials(originalHome, [model.apiKeyEnv]);
-if (!process.env[model.apiKeyEnv]) throw new Error('Configured credential unavailable; no request sent');
+const credential = await resolveCredential(originalHome, model.apiKeyEnv);
+if (!credential) throw new Error('Configured credential unavailable; no request sent');
 const root = await mkdtemp(join(output, 'live-baseline-'));
 const nodeCommand = (script: string) => `& '${process.execPath.replaceAll("'", "''")}' '${script}'`;
 const scenarios = [
@@ -107,7 +107,11 @@ async function execute(scenario: (typeof scenarios)[number]) {
         '--print',
         prompt,
       ],
-      { env: { ...process.env }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
+      {
+        env: { ...process.env, [model.apiKeyEnv]: credential },
+        stdio: ['ignore', 'pipe', 'pipe'],
+        windowsHide: true,
+      },
     );
   let stdout = '',
     stderr = '',

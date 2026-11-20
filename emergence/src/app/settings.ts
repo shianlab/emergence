@@ -1,4 +1,5 @@
 import { createUserMessage } from '@deepseek-ai/dsh-llm';
+import { credentialSource } from './credentials.ts';
 import { SessionId } from '@deepseek-ai/dsh-session';
 import { renderSkillContent } from '@deepseek-ai/dsh-skill';
 import type {} from '@deepseek-ai/dsh-subagent';
@@ -663,7 +664,7 @@ export class Settings {
             w.launch.appConfig.models
               .map(
                 (m) =>
-                  `${m.id} · ${m.provider}/${m.model}\n${m.api} · context ${m.contextWindow} · output ${m.maxTokens}\ntools: ${m.capabilities?.tools ?? 'unspecified'} · vision: ${m.capabilities?.vision ?? 'unspecified'}\nKey: ${process.env[m.apiKeyEnv] ? 'configured' : 'missing'}`,
+                  `${m.id} · ${m.provider}/${m.model}\n${m.api} · context ${m.contextWindow} · output ${m.maxTokens}\ntools: ${m.capabilities?.tools ?? 'unspecified'} · vision: ${m.capabilities?.vision ?? 'unspecified'}\nKey: ${credentialSource(w.launch.home, m.apiKeyEnv) !== 'missing' ? 'configured' : 'missing'}`,
               )
               .join('\n\n') + '\n能力为用户声明，未声明时交由适配器处理；切换保留历史，新配置路由重启生效。',
           );

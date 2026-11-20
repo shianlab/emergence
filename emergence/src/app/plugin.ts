@@ -6,7 +6,7 @@ import { acquireLease, canonicalDirectory } from '../core/storage/lease.ts';
 import { Capabilities } from './capabilities.ts';
 import { SessionController } from './controller.ts';
 import type { LaunchConfig } from './session-config.ts';
-import { adoptHydratedCredentials } from './credentials.ts';
+import { prepareModelCredentials, receiveShellCredentials } from './credentials.ts';
 import { configurationHost, mountModelCredentialResolution } from './model-config-runtime.ts';
 import { startModelConfiguration } from './model-config.ts';
 import { startEntryUI } from './tui/entry.ts';
@@ -29,8 +29,10 @@ export const inject = [
 ];
 
 export async function apply(ctx: Context, config: LaunchConfig) {
-  adoptHydratedCredentials(config.hydratedCredentials ?? []);
-  ctx.effect(() => mountModelCredentialResolution(ctx, config.appConfig));
+  const names = config.appConfig.models.map((model) => model.apiKeyEnv);
+  if (config.credentialsFromLauncher) await receiveShellCredentials(names);
+  await prepareModelCredentials(config.home, names);
+  ctx.effect(() => mountModelCredentialResolution(ctx, config.home, config.appConfig));
   ctx.effect(() => mountModelResponseHandling(ctx));
   let controller: SessionController | undefined;
   let workspace: WorkspaceController | undefined;

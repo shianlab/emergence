@@ -25,6 +25,7 @@ export interface SessionPort extends Pick<EventEmitter, 'on' | 'off'> {
   readonly agent: Agent;
   readonly cwd: string;
   readonly model: ModelConfig;
+  hasModelCredential(ref?: string): boolean;
   executionModel(agent: Agent): ModelConfig | undefined;
   readonly busy: boolean;
   readonly pending: { readonly id: string; readonly version: number } | undefined;

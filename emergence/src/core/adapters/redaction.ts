@@ -1,7 +1,11 @@
 import { stripVTControlCharacters } from 'node:util';
 const credentialNames = new Set<string>();
+const credentialSources = new Set<() => Iterable<string>>();
 export function registerSecretNames(names: readonly string[]) {
-  names.forEach((name) => credentialNames.add(name));
+  names.forEach((name) => credentialNames.add(name.toUpperCase()));
+}
+export function registerSecretSource(source: () => Iterable<string>) {
+  credentialSources.add(source);
 }
 
 /** Diagnostics must not include environment values or credential-bearing URLs. */
@@ -11,16 +15,27 @@ export function safeError(error: unknown): string {
 
 /** One synchronous presentation pass only; never retain across events or awaits. */
 export function createRedactor(): typeof safeError {
-  const secrets: string[] = [];
+  const secrets = new Set<string>();
+  const include = (value: string) => {
+    if (value.length < 4) return;
+    secrets.add(value);
+    try {
+      secrets.add(encodeURIComponent(value));
+    } catch {
+      /* Invalid Unicode in an environment value still gets literal redaction. */
+    }
+  };
   // On Windows every environment value lookup crosses the native boundary.
   // Enumerate once per pass, reading only possible credentials. Independent
   // safeError calls and subsequent passes always observe current credentials.
   for (const key of Object.keys(process.env)) {
-    if (!/(KEY|TOKEN|SECRET|PASSWORD)/i.test(key) && !credentialNames.has(key)) continue;
+    if (!/(KEY|TOKEN|SECRET|PASSWORD)/i.test(key) && !credentialNames.has(key.toUpperCase())) continue;
     const value = process.env[key];
-    if (value && value.length >= 4) secrets.push(value);
+    if (value) include(value);
   }
-  return (error) => redact(error, secrets);
+  for (const source of credentialSources) for (const value of source()) include(value);
+  const ordered = [...secrets].sort((a, b) => b.length - a.length);
+  return (error) => redact(error, ordered);
 }
 
 function redact(error: unknown, secrets: readonly string[]): string {
@@ -38,7 +53,7 @@ function redact(error: unknown, secrets: readonly string[]): string {
       }
       for (const name of [...url.searchParams.keys()]) {
         if (
-          /^(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|secret|password|signature|sig|x-amz-signature)$/i.test(
+          /^(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|key|auth|credential|client[_-]?secret|jwt|secret|password|signature|sig|x-amz-signature)$/i.test(
             name,
           )
         ) {

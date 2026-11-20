@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 const dir = resolve('../artifacts/phase6');
 await mkdir(dir, { recursive: true });
@@ -12,8 +12,8 @@ const originalHome = homeDirectory(),
   config = await loadConfig(originalHome);
 const model = config.models.find((m) => new URL(m.baseURL).hostname.endsWith('deepseek.com'));
 if (!model) throw new Error('No configured DeepSeek route; no request was sent');
-await hydrateCredentials(originalHome, [model.apiKeyEnv]);
-if (!process.env[model.apiKeyEnv]) throw new Error('No configured credential; no request was sent');
+const credential = await resolveCredential(originalHome, model.apiKeyEnv);
+if (!credential) throw new Error('No configured credential; no request was sent');
 const root = await mkdtemp(join(dir, 'live-local-')),
   home = join(root, 'home'),
   cwd = join(root, 'project');
@@ -36,7 +36,7 @@ const child = spawn(
     '--print',
     '请只回复 EMERGENCE_LOCAL_READY，不调用工具，不修改文件。',
   ],
-  { env: { ...process.env }, stdio: ['ignore', 'pipe', 'pipe'] },
+  { env: { ...process.env, [model.apiKeyEnv]: credential }, stdio: ['ignore', 'pipe', 'pipe'] },
 );
 let stdout = '',
   stderr = '';

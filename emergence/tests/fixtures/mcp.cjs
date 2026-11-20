@@ -1,5 +1,7 @@
 // Local, deterministic MCP peer used only by integration tests.
 const readline = require('node:readline');
+const expectedAbsent = process.argv.find((argument) => argument.startsWith('--absent-env='))?.slice(13);
+if (expectedAbsent && Object.hasOwn(process.env, expectedAbsent)) process.exit(2);
 readline.createInterface({ input: process.stdin }).on('line', (line) => {
   const request = JSON.parse(line);
   if (request.id === undefined) return;

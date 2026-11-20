@@ -2,10 +2,11 @@ import { constants } from 'node:fs';
 import { access, readFile, stat } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { registerSecretNames, safeError } from '../core/adapters/redaction.ts';
+import { safeError } from '../core/adapters/redaction.ts';
 import { configSchema } from '../core/domain/configuration.ts';
 import { dataRuntime } from '../domains/data/service.ts';
 import { checkDataRuntime, checkGit, type HealthCheck } from './runtime-health.ts';
+import { registerModelCredentials } from './credentials.ts';
 import { MIN_NODE, VERSION } from './version.ts';
 import { createUpdateService } from './updates/runtime.ts';
 
@@ -29,7 +30,7 @@ export async function diagnose(home: string, cwd: string) {
   let models: Array<{ id: string; api: string; credential: string }> = [];
   try {
     const config = configSchema.parse(JSON.parse(await readFile(join(home, 'config.json'), 'utf8')));
-    registerSecretNames(config.models.map((m) => m.apiKeyEnv));
+    registerModelCredentials(config.models.map((m) => m.apiKeyEnv));
     let encryptedStore = false;
     try {
       const encrypted = JSON.parse(await readFile(join(home, 'credentials.dpapi.json'), 'utf8'));

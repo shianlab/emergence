@@ -7,9 +7,8 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { loadConfig, saveConfig, updateConfig } from '../src/app/config.ts';
 import {
-  adoptHydratedCredentials,
   credentialSource,
-  hydrateCredentials,
+  prepareModelCredentials,
   resolveCredential,
   saveCredential,
 } from '../src/app/credentials.ts';
@@ -299,7 +298,7 @@ test('local JSON APIs require a session and same-origin requests; no web interfa
   }
 });
 test(
-  'replacing a DPAPI credential refreshes injected values and never stores a plaintext key in configuration',
+  'replacing a DPAPI credential refreshes the private store without environment injection',
   { skip: process.platform !== 'win32' },
   async () => {
     const home = await fixture(),
@@ -307,15 +306,15 @@ test(
     delete process.env[name];
     try {
       await saveCredential(home, name, 'first-fixture-secret');
-      await hydrateCredentials(home, [name]);
+      await prepareModelCredentials(home, [name]);
       await saveCredential(home, name, 'second-fixture-secret');
       assert.equal(await resolveCredential(home, name), 'second-fixture-secret');
+      assert.equal(process.env[name], undefined);
       process.env[name] = 'explicit-shell-secret';
       await saveCredential(home, name, 'third-fixture-secret');
       assert.equal(await resolveCredential(home, name), 'explicit-shell-secret');
-      adoptHydratedCredentials([name]);
-      await saveCredential(home, name, 'launcher-injected-replacement');
-      assert.equal(await resolveCredential(home, name), 'launcher-injected-replacement');
+      delete process.env[name];
+      assert.equal(await resolveCredential(home, name), 'third-fixture-secret');
       assert.ok(!(await readFile(join(home, 'credentials.dpapi.json'), 'utf8')).includes('fixture-secret'));
       assert.ok(!(await readFile(join(home, 'config.json'), 'utf8')).includes('fixture-secret'));
     } finally {
@@ -344,7 +343,7 @@ test(
       assert.ok(!JSON.stringify(saved).includes('saved-encrypted-secret'));
       delete process.env[name];
       assert.equal(await resolveCredential(home, name), 'saved-encrypted-secret');
-      assert.equal(credentialSource(name), 'encrypted');
+      assert.equal(credentialSource(home, name), 'encrypted');
       const refreshed = await service.save({
         revision: saved.revision,
         model: { ...defaultConfig.models[0], apiKeyEnv: name },

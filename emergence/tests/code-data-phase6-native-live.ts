@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { SessionUsage } from '../src/app/tui/session-usage.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 if (!process.argv.includes('--live')) throw new Error('Explicit --live required');
@@ -63,7 +63,8 @@ async function sample(repetition: number) {
   await writeFile(join(cwd, 'sales.csv'), csv);
   const config = await loadConfig(homeDirectory()),
     model = config.models.find((m) => m.id === config.defaultModel)!;
-  await hydrateCredentials(homeDirectory(), [model.apiKeyEnv]);
+  const credential = await resolveCredential(homeDirectory(), model.apiKeyEnv);
+  if (!credential) throw new Error('No configured credential; no request sent');
   await saveConfig(home, {
     ...config,
     models: [{ ...model, maxTokens: 8192 }],
@@ -93,7 +94,11 @@ async function sample(repetition: number) {
         '--print',
         '请用 sales.csv 分析前期到后期的收入变化，按渠道拆解贡献并对账。生成中文报告、结果表和图表，附可重放产物。粒度为渠道与时期，单位元，仅说明组成变化，不推断因果；不保存长期口径，不修改原文件。',
       ],
-      { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] },
+      {
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, [model.apiKeyEnv]: credential },
+      },
     );
     let output = '',
       error = '';

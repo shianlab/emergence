@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 
 const dir = resolve('../artifacts/review-2026-10-30');
@@ -13,9 +13,8 @@ await mkdir(dir, { recursive: true });
 const originalHome = homeDirectory(),
   config = await loadConfig(originalHome);
 const model = config.models.find((m) => m.id === config.defaultModel)!;
-await hydrateCredentials(originalHome, [model.apiKeyEnv]);
-if (!process.env[model.apiKeyEnv])
-  throw new Error('Configured provider credential unavailable; no request sent');
+const credential = await resolveCredential(originalHome, model.apiKeyEnv);
+if (!credential) throw new Error('Configured provider credential unavailable; no request sent');
 const root = await mkdtemp(join(dir, 'live-')),
   home = join(root, 'home'),
   cwd = join(root, 'project');
@@ -34,7 +33,11 @@ async function run(args: string[]) {
   const child = spawn(
     process.execPath,
     ['bin/emergence.cjs', cwd, '--home', home, '--permission', 'plan', ...args],
-    { env: { ...process.env }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
+    {
+      env: { ...process.env, [model.apiKeyEnv]: credential },
+      stdio: ['ignore', 'pipe', 'pipe'],
+      windowsHide: true,
+    },
   );
   let stdout = '',
     stderr = '';

@@ -10,9 +10,10 @@ import {
   type ColorInput,
 } from '@opentui/core';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
+import { windowsDesktopEnvironment, windowsPowerShell } from '../../platform/child-environment.ts';
 
 type LabelOptions = BoxOptions & {
   content?: string;
@@ -30,23 +31,6 @@ type Raster = {
   foreground: string;
   background: string;
 };
-
-/** The renderer needs Windows profile and module discovery, without Agent credential variables. */
-function rasterWorkerEnvironment(systemRoot: string): NodeJS.ProcessEnv {
-  const { TEMP, TMP, WINDIR, USERPROFILE, APPDATA, LOCALAPPDATA, ProgramFiles, PSModulePath } = process.env;
-  return {
-    SystemRoot: systemRoot,
-    Path: join(systemRoot, 'System32'),
-    TEMP,
-    TMP,
-    WINDIR,
-    USERPROFILE,
-    APPDATA,
-    LOCALAPPDATA,
-    ProgramFiles,
-    PSModulePath,
-  };
-}
 
 /** Sixel encodes bands of six vertical pixels, including the final partial band. */
 export function smallTextFitsSixel(y: number, pixelHeight: number, cellHeight: number, rows: number) {
@@ -171,13 +155,12 @@ export class SmallTextService {
   }
   private start() {
     const script = fileURLToPath(new URL('./small-text.ps1', import.meta.url));
-    const systemRoot = process.env.SystemRoot ?? 'C:/Windows';
     const worker = spawn(
-      join(systemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'),
+      windowsPowerShell(),
       ['-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script],
       {
         cwd: dirname(script),
-        env: rasterWorkerEnvironment(systemRoot),
+        env: windowsDesktopEnvironment(),
         windowsHide: true,
         stdio: 'pipe',
       },

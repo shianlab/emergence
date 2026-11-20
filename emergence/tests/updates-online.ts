@@ -10,6 +10,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { verifyManifest, type ReleaseManifest } from '../src/app/updates/manifest.ts';
 import { installOnline } from '../src/app/updates/runtime.ts';
 import { UpdateService } from '../src/app/updates/service.ts';
+import { registerModelEnvironmentNames } from '../src/platform/child-environment.ts';
 
 const output = resolve('../artifacts/install-phase3-20261117');
 await mkdir(output, { recursive: true });
@@ -58,6 +59,9 @@ await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
 const address = server.address();
 assert.ok(address && typeof address !== 'string');
 const savedLocal = process.env.LOCALAPPDATA;
+const modelRef = 'UPDATE_FIXTURE_AUTH';
+const savedModelRef = process.env[modelRef];
+registerModelEnvironmentNames([modelRef]);
 try {
   console.log('Installing current candidate in isolation…');
   await script(join(record.bundle, 'install.ps1'), ['-InstallRoot', install, '-NoPath']);
@@ -132,6 +136,7 @@ try {
         'param([string]$InstallRoot,[string]$SignedManifest,[switch]$Update)',
         '$targetInstall=$InstallRoot;$targetMetadata=$SignedManifest',
         "[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'",
+        `if (Test-Path Env:${modelRef}) { throw 'Update worker inherited a model credential' }`,
         '. ' + quote(join(helper, 'transport.ps1')),
         '$script:transport=(Get-Command Receive-EmergenceFile).ScriptBlock',
         'function Receive-EmergenceFile { param([uri]$Uri,[string]$Destination,[long]$MaximumBytes=1GB,[int]$TotalSeconds=900,[string]$ExpectedHash="")',
@@ -160,6 +165,7 @@ try {
       ),
   });
   process.env.LOCALAPPDATA = cache;
+  process.env[modelRef] = 'update-test-value';
   try {
     await service.check(true);
     assert.equal(service.snapshot.status, 'available');
@@ -168,6 +174,7 @@ try {
     assert.equal(service.snapshot.status, 'ready');
     assert.equal(downloads, 1);
     checks.signedDownloadAndSharedTransaction = true;
+    checks.updateWorkerOmitsModelCredentials = true;
     assert.equal((await script(join(install, 'bin/emergence.ps1'), ['--version'])).trim(), '9.0.2');
     assert.ok(progress.some((line) => /下载|校验/.test(line)));
     checks.realProgressAndActivatedVersion = true;
@@ -202,6 +209,8 @@ try {
 } finally {
   if (savedLocal === undefined) delete process.env.LOCALAPPDATA;
   else process.env.LOCALAPPDATA = savedLocal;
+  if (savedModelRef === undefined) delete process.env[modelRef];
+  else process.env[modelRef] = savedModelRef;
   server.closeAllConnections();
   await new Promise<void>((done) => server.close(() => done()));
 }

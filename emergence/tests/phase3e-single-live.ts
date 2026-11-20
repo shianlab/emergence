@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 import { checkLiveBudget, liveLimits, liveMetrics } from './fixtures/live-budget.ts';
 import { diagnosticSnapshots, observeUntil, stopOwnedProcess } from './fixtures/observation.ts';
@@ -17,8 +17,8 @@ await mkdir(project, { recursive: true });
 const config = await loadConfig(homeDirectory());
 const model = config.models.find((m) => m.id === process.env.EMERGENCE_LIVE_MASTER);
 if (!model) throw new Error('Live model not configured');
-await hydrateCredentials(homeDirectory(), [model.apiKeyEnv]);
-assert.ok(process.env[model.apiKeyEnv], 'Live credentials unavailable');
+const credential = await resolveCredential(homeDirectory(), model.apiKeyEnv);
+assert.ok(credential, 'Live credentials unavailable');
 const data = process.env.EMERGENCE_LIVE_SAMPLE === 'data';
 const input = data
   ? 'channel,revenue\nA,100\nB,200\nA,50\n'
@@ -61,7 +61,11 @@ const started = Date.now();
 const child = spawn(
   process.execPath,
   ['bin/emergence.cjs', project, '--home', home, '--approve-command', command, '--print', prompt],
-  { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] },
+  {
+    windowsHide: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: { ...process.env, [model.apiKeyEnv]: credential },
+  },
 );
 let ended = false,
   code: number | null = null,

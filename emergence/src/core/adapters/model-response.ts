@@ -1,8 +1,33 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { isAgentLoopRequest, type GenerateOptions, type StreamChunk } from '@deepseek-ai/dsh-llm';
 import { assertSupportedJsonSchema, validateJsonSchemaValue } from '@deepseek-ai/dsh-tools';
+import { createRedactor } from './redaction.ts';
 
 export const outputLimitRecoveryCode = 'EMERGENCE_OUTPUT_LIMIT';
+
+/** Provider failures belong to diagnostics and are persisted by the native request executor. */
+async function* redactProviderFailures(stream: AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk> {
+  for await (const chunk of stream) {
+    if (chunk.type !== 'finish' || (chunk.reason.kind !== 'error' && chunk.reason.kind !== 'aborted')) {
+      yield chunk;
+      continue;
+    }
+    const { kind, failure } = chunk.reason;
+    const { requestId, ...facts } = failure;
+    const redact = createRedactor();
+    yield {
+      type: 'finish',
+      reason: {
+        kind,
+        failure: {
+          ...facts,
+          message: redact(failure.message),
+          ...(requestId && redact(requestId) === requestId ? { requestId } : {}),
+        },
+      },
+    };
+  }
+}
 
 /** Validate the exact advertised schema before the loop commits a response or asks for approval. */
 export async function* validateModelResponse(
@@ -87,8 +112,9 @@ export function mountModelResponseHandling(ctx: Context) {
   }
   const disposers = [
     ctx.on('llm/stream', (options, next) => {
-      if (!isAgentLoopRequest(options)) return next();
-      const stream = validateModelResponse(options, next());
+      const response = redactProviderFailures(next());
+      if (!isAgentLoopRequest(options)) return response;
+      const stream = validateModelResponse(options, response);
       return options.signal && options.sessionId
         ? recoverClippedResponse(stream, options.signal, options.sessionId)
         : stream;

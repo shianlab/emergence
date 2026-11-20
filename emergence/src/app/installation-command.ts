@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
+import { childEnvironment, windowsPowerShell } from '../platform/child-environment.ts';
 import { createUpdateService } from './updates/runtime.ts';
 
 /** Installer operations belong to the release manager, never the Agent execution loop. */
@@ -69,11 +70,11 @@ export async function runInstallationCommand(
     root,
   ];
   if (source) parameters.push('-Source', resolve(source));
-  const child = spawn(
-    join(process.env.SystemRoot ?? 'C:/Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe'),
-    parameters,
-    { windowsHide: true, stdio: 'inherit' },
-  );
+  const child = spawn(windowsPowerShell(), parameters, {
+    windowsHide: true,
+    stdio: 'inherit',
+    env: childEnvironment(),
+  });
   const code = await new Promise<number | null>((done, reject) => {
     child.once('error', reject);
     child.once('exit', done);

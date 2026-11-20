@@ -19,6 +19,7 @@ export interface PlanningWindow {
   readonly planning: { snapshot(agent?: Agent): PlanningState | undefined };
 }
 export interface PlanningHost extends PlanningWindow {
+  hasModelCredential(ref: string): boolean;
   readonly core: Pick<CoreObserver, 'enabled' | 'catalog'>;
   readonly diagnostics: Pick<RunDiagnostics, 'snapshot'>;
   readonly permissionMode: PermissionMode;

@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { SessionUsage } from '../src/app/tui/session-usage.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 import { digest } from '../src/core/storage/execution-journal.ts';
@@ -27,8 +27,8 @@ for (const [path, text] of Object.entries(unchanged)) await writeFile(join(cwd, 
 await writeFile(join(cwd, '计算.js'), 'export const add = (a, b) => a - b;\r\n');
 const config = await loadConfig(homeDirectory()),
   model = config.models.find((m) => m.id === config.defaultModel)!;
-await hydrateCredentials(homeDirectory(), [model.apiKeyEnv]);
-if (!process.env[model.apiKeyEnv]) throw new Error('No configured credential; no request sent');
+const credential = await resolveCredential(homeDirectory(), model.apiKeyEnv);
+if (!credential) throw new Error('No configured credential; no request sent');
 await saveConfig(home, {
   ...config,
   models: [{ ...model, maxTokens: 1400 }],
@@ -67,7 +67,11 @@ try {
     ],
     {
       windowsHide: true,
-      env: { ...process.env, PATH: dirname(process.execPath) + ';' + process.env.PATH },
+      env: {
+        ...process.env,
+        [model.apiKeyEnv]: credential,
+        PATH: dirname(process.execPath) + ';' + process.env.PATH,
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     },
   );

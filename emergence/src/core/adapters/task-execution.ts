@@ -141,8 +141,7 @@ export class TaskExecution {
         this.host.update(task, '派发暂停或窗口忙碌，尚未执行');
         return;
       }
-      if (!process.env[controller.model.apiKeyEnv])
-        throw new Error(`模型密钥未配置：${controller.model.apiKeyEnv}`);
+      if (!controller.hasModelCredential()) throw new Error(`模型密钥未配置：${controller.model.apiKeyEnv}`);
       controller.lastError = undefined;
       if (isReadOnlyTask(task)) {
         // The read-only audit menu must agree with its inherited permission policy.

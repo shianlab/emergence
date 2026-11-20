@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { SessionUsage } from '../src/app/tui/session-usage.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 import { digest } from '../src/core/storage/execution-journal.ts';
@@ -30,8 +30,8 @@ const files = {
 for (const [path, text] of Object.entries(files)) await writeFile(join(cwd, path), text);
 const config = await loadConfig(homeDirectory()),
   model = config.models.find((m) => m.id === config.defaultModel)!;
-await hydrateCredentials(homeDirectory(), [model.apiKeyEnv]);
-if (!process.env[model.apiKeyEnv]) throw new Error('No configured credential; no requests sent');
+const credential = await resolveCredential(homeDirectory(), model.apiKeyEnv);
+if (!credential) throw new Error('No configured credential; no requests sent');
 await saveConfig(home, {
   ...config,
   models: [{ ...model, maxTokens: 1400 }],
@@ -58,7 +58,11 @@ async function run(prompt: string, resume?: string) {
       '--print',
       prompt,
     ],
-    { windowsHide: true, env: { ...process.env }, stdio: ['ignore', 'pipe', 'pipe'] },
+    {
+      windowsHide: true,
+      env: { ...process.env, [model.apiKeyEnv]: credential },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
   );
   let stdout = '',
     stderr = '';

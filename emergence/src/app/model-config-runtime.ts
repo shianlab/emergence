@@ -2,6 +2,7 @@ import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-credentials';
 import type {} from '@deepseek-ai/dsh-settings';
 import type { AppConfig } from '../core/domain/configuration.ts';
+import { prepareModelCredentials, resolveCredential } from './credentials.ts';
 import type { LaunchConfig } from './session-config.ts';
 import { assertModelHistory } from './session-model.ts';
 import type { ModelConfigurationHost } from './model-configuration.ts';
@@ -13,12 +14,14 @@ import type { WorkspaceController } from './workspace.ts';
  * model refs so DPAPI edits reach the next request without writing its plaintext store.
  * Other refs and all record/OAuth methods remain owned by the existing provider.
  */
-export function mountModelCredentialResolution(ctx: Context, config: AppConfig) {
+export function mountModelCredentialResolution(ctx: Context, home: string, config: AppConfig) {
   const credentials = ctx.credentials,
     original = credentials.resolve;
   const resolve: typeof original = async (ref) => {
-    if (config.models.some((model) => model.apiKeyEnv === ref) && process.env[ref])
-      return { value: process.env[ref]!, source: 'emergence-process' };
+    if (config.models.some((model) => model.apiKeyEnv === ref)) {
+      const value = await resolveCredential(home, ref);
+      if (value) return { value, source: 'emergence-process' };
+    }
     return original.call(credentials, ref);
   };
   credentials.resolve = resolve;
@@ -122,6 +125,10 @@ export function configurationHost(
       }
     },
     async apply(config) {
+      await prepareModelCredentials(
+        launch.home,
+        config.models.map((model) => model.apiKeyEnv),
+      );
       const previous = structuredClone(launch.appConfig),
         w = workspace();
       const routesChanged = JSON.stringify(previous.models) !== JSON.stringify(config.models);

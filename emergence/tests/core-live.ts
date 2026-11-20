@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 import { liveFileEvidence } from './fixtures/live-tool-evidence.ts';
 
@@ -13,15 +13,12 @@ const dir = resolve('../artifacts/core-phase6');
 await mkdir(dir, { recursive: true });
 const originalHome = homeDirectory(),
   original = await loadConfig(originalHome);
-await hydrateCredentials(
-  originalHome,
-  original.models.map((m) => m.apiKeyEnv),
-);
 const results: unknown[] = [];
 for (const route of original.models.slice(0, 4)) {
   const endpoint = new URL(route.baseURL),
     base = { id: route.id, model: route.model, protocol: route.api, host: endpoint.hostname };
-  if (!process.env[route.apiKeyEnv]) {
+  const credential = await resolveCredential(originalHome, route.apiKeyEnv);
+  if (!credential) {
     results.push({ ...base, status: 'not-configured', reason: 'credential absent' });
     continue;
   }
@@ -56,7 +53,12 @@ for (const route of original.models.slice(0, 4)) {
           '--print',
           prompt,
         ],
-        { cwd: process.cwd(), windowsHide: true, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] },
+        {
+          cwd: process.cwd(),
+          windowsHide: true,
+          env: { ...process.env, [route.apiKeyEnv]: credential },
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
       );
     let stdout = '',
       stderr = '';

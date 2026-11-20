@@ -7,11 +7,18 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { safeError } from '../core/adapters/redaction.ts';
-import { modelSchema } from '../core/domain/configuration.ts';
+import { configSchema, modelSchema } from '../core/domain/configuration.ts';
 import { standardPermissionModeSchema } from '../core/domain/permissions.ts';
+import { readJsonFile } from '../core/storage/safe-json-file.ts';
+import { childEnvironment } from '../platform/child-environment.ts';
 import { initializeData } from '../domains/data/initialize.ts';
 import { homeDirectory, loadConfig, migrateConfig, updateConfig } from './config.ts';
-import { hydrateCredentials, hydratedCredentialNames, saveCredential } from './credentials.ts';
+import {
+  credentialSource,
+  prepareModelCredentials,
+  registerModelCredentials,
+  saveCredential,
+} from './credentials.ts';
 import { diagnose, formatDiagnosis } from './doctor.ts';
 import { modelProviders } from './model-config-runtime.ts';
 import { startModelConfiguration } from './model-config.ts';
@@ -94,13 +101,21 @@ async function main() {
     console.log(VERSION);
     return;
   }
+  const home = homeDirectory(values.home);
   if (['update', 'repair', 'rollback', 'installation'].includes(positionals[0])) {
+    try {
+      const config = configSchema.parse(
+        await readJsonFile(join(home, 'config.json'), 4 * 1024 * 1024, '模型配置无效'),
+      );
+      registerModelCredentials(config.models.map((model) => model.apiKeyEnv));
+    } catch {
+      /* Repair and update also work when model configuration is missing or damaged. */
+    }
     await runInstallationCommand(appRoot, positionals, values.source, values.check);
     return;
   }
   if (values.template && (values.resume || values.print || values.model))
     throw new Error('--template 自带各窗口模型，不能与 --resume、--print、--model 混用');
-  const home = homeDirectory(values.home);
   const permissionMode =
     values.permission === undefined ? undefined : standardPermissionModeSchema.parse(values.permission);
   if (positionals[0] === 'doctor') {
@@ -134,6 +149,8 @@ async function main() {
     return;
   }
   const config = await loadConfig(home);
+  const credentialNames = config.models.map((model) => model.apiKeyEnv);
+  registerModelCredentials(credentialNames);
   if (positionals[0] === 'auth') {
     if (!values['key-file'])
       throw new Error('用法：emergence auth --key-file <密钥文件路径> [--model <配置名称>]');
@@ -145,10 +162,6 @@ async function main() {
     console.log(`已为 ${model.id} 加密保存凭据；以后直接运行 emergence 即可`);
     return;
   }
-  await hydrateCredentials(
-    home,
-    config.models.map((model) => model.apiKeyEnv),
-  );
   if (positionals[0] === 'model-config' || (positionals[0] === 'config' && positionals[1] === 'ui')) {
     const service = await startModelConfiguration(home);
     const stop = () => {
@@ -208,9 +221,10 @@ async function main() {
     return;
   }
   if (positionals[0] === 'models') {
+    await prepareModelCredentials(home, credentialNames);
     for (const m of config.models)
       console.log(
-        `${m.id}  ${m.provider}/${m.model}  ${m.apiKeyEnv}: ${process.env[m.apiKeyEnv] ? '已配置' : '未配置'}`,
+        `${m.id}  ${m.provider}/${m.model}  ${m.apiKeyEnv}: ${credentialSource(home, m.apiKeyEnv) !== 'missing' ? '已配置' : '未配置'}`,
       );
     return;
   }
@@ -272,7 +286,7 @@ async function main() {
             resume: values.resume,
             prompt: values.print,
             approvedCommands: values['approve-command'] ?? [],
-            hydratedCredentials: hydratedCredentialNames(),
+            credentialsFromLauncher: true,
             appConfig: config,
           },
         },
@@ -304,7 +318,7 @@ async function main() {
     {
       cwd,
       stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-      env: { ...process.env, DSH_HOME: join(home, 'harness') },
+      env: { ...childEnvironment({ harness: true }), DSH_HOME: join(home, 'harness') },
     },
   );
   const marked = markProfile(profileDir, child.pid).catch((error) => {
@@ -315,14 +329,21 @@ async function main() {
     console.error('涌现应用启动超时，请查看上方插件诊断');
     child.kill();
   }, 30000);
+  let credentialsSent = false;
   child.on('message', (message) => {
-    if (
-      typeof message === 'object' &&
-      message !== null &&
-      'type' in message &&
-      message.type === 'emergence-ready'
-    )
-      clearTimeout(startupTimeout);
+    if (!message || typeof message !== 'object' || !('type' in message)) return;
+    if (message.type === 'emergence-ready') clearTimeout(startupTimeout);
+    if (message.type !== 'emergence-model-credentials-request' || credentialsSent) return;
+    credentialsSent = true;
+    const overrides = Object.fromEntries(
+      credentialNames.flatMap((name) => (process.env[name] ? [[name, process.env[name]]] : [])),
+    );
+    child.send({ type: 'emergence-model-credentials', values: overrides }, (error) => {
+      if (error) {
+        console.error('无法向工作台传递模型凭据');
+        child.kill();
+      }
+    });
   });
   process.on('SIGINT', () => {
     if (process.platform !== 'win32') child.kill('SIGINT');

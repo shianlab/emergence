@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { VERSION } from '../version.ts';
 import { safeError } from '../../core/adapters/redaction.ts';
 import { replaceJsonFile } from '../../core/storage/safe-json-file.ts';
+import { childEnvironment, windowsPowerShell } from '../../platform/child-environment.ts';
 import { verifyManifest } from './manifest.ts';
 import { installationLocation, safePath, type InstallationLocation } from './storage.ts';
 import { UpdateService } from './service.ts';
@@ -23,10 +24,11 @@ export async function installOnline(
   const file = join(folder, 'request-' + randomUUID() + '.json');
   await writeFile(file, JSON.stringify(envelope), { flag: 'wx', mode: 0o600 });
   try {
-    const environment = { ...process.env };
-    delete environment.PSModulePath;
+    const environment = childEnvironment();
+    for (const name of Object.keys(environment))
+      if (name.toLowerCase() === 'psmodulepath') delete environment[name];
     const child = spawn(
-      join(process.env.SystemRoot!, 'System32/WindowsPowerShell/v1.0/powershell.exe'),
+      windowsPowerShell(),
       [
         '-NoLogo',
         '-NoProfile',

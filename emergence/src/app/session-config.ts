@@ -11,6 +11,6 @@ export interface LaunchConfig {
   template?: string;
   prompt?: string;
   approvedCommands?: string[];
-  hydratedCredentials?: string[];
+  credentialsFromLauncher?: boolean;
   appConfig: AppConfig;
 }

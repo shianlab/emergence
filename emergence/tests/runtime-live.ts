@@ -5,7 +5,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { homeDirectory, loadConfig, saveConfig } from '../src/app/config.ts';
-import { hydrateCredentials } from '../src/app/credentials.ts';
+import { resolveCredential } from '../src/app/credentials.ts';
 import { safeError } from '../src/core/adapters/redaction.ts';
 import {
   diagnosticSnapshots,
@@ -17,7 +17,8 @@ if (!process.argv.includes('--live')) throw new Error('Explicit --live required'
 const originalHome = homeDirectory(),
   config = await loadConfig(originalHome),
   model = config.models.find((m) => m.id === config.defaultModel)!;
-await hydrateCredentials(originalHome, [model.apiKeyEnv]);
+const credential = await resolveCredential(originalHome, model.apiKeyEnv);
+if (!credential) throw new Error('No configured credential; no request sent');
 const root = await mkdtemp(join(tmpdir(), 'emergence-runtime-live-')),
   home = join(root, 'home'),
   project = join(root, 'project');
@@ -36,6 +37,7 @@ await saveConfig(home, {
 async function run(prompt: string) {
   const child = spawn(process.execPath, ['bin/emergence.cjs', project, '--home', home, '--print', prompt], {
     windowsHide: true,
+    env: { ...process.env, [model.apiKeyEnv]: credential },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let out = '',

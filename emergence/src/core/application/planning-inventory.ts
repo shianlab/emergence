@@ -102,16 +102,18 @@ export async function collectPlanningInventory(
       capabilityFacts: facts,
     });
   }
-  for (const model of c.launch.appConfig.models)
+  for (const model of c.launch.appConfig.models) {
+    const hasCredential = c.hasModelCredential(model.apiKeyEnv);
     capabilities.set('model:' + model.id, {
       id: 'model:' + model.id,
       kind: 'model',
       registered: true,
       connected: null,
-      callable: Boolean(process.env[model.apiKeyEnv]),
+      callable: hasCredential,
       verified: false,
-      detail: `配置存在；凭据${process.env[model.apiKeyEnv] ? '已提供' : '缺失'}；连通性未经本清单验证`,
+      detail: `配置存在；凭据${hasCredential ? '已提供' : '缺失'}；连通性未经本清单验证`,
     });
+  }
   for (const role of roles(c.launch.appConfig.orchestration))
     capabilities.set('role:' + role.id, {
       id: 'role:' + role.id,

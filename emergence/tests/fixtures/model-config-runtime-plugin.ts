@@ -38,7 +38,7 @@ export function apply(
             appConfig: config,
             fresh: true,
           };
-        ctx.effect(() => mountModelCredentialResolution(ctx, config));
+        ctx.effect(() => mountModelCredentialResolution(ctx, options.home, config));
         const workspace = new WorkspaceController(ctx, launch);
         await workspace.initialize();
         const host = configurationHost(
@@ -120,6 +120,9 @@ export function apply(
           await workspace.send(first.id, 'hello with rotated key');
           await first.controller!.agent.whenIdle();
           assert.ok(first.controller!.transcript().join('\n').includes('CONFIG_REPLY:fixture-key-rotated'));
+          const inventory = await first.controller!.planning.inventory();
+          assert.equal(inventory.capabilities.find((item) => item.id === 'model:key-test')?.callable, true);
+          assert.equal(process.env.MODEL_CONFIGURATION_NEW_KEY, undefined);
           await service.configuration.assign({
             revision: state.revision,
             windowId: first.id,

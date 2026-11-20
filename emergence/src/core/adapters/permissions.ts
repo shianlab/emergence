@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { realpathSync } from 'node:fs';
 import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { unsupportedFilePath } from '../../platform/path-policy.ts';
 
 import {
   evaluatePermissionWithPaths,
@@ -10,13 +11,7 @@ import {
 } from '../domain/permissions.ts';
 /** Resolve the nearest existing ancestor too, so a new file behind a junction is not treated as in-project. */
 export function canonicalPermissionPath(path: string, cwd: string): string {
-  if (
-    /\x00/.test(path) ||
-    (process.platform === 'win32' &&
-      (/^\\\\[?.]\\/.test(path) ||
-        /:/.test(path.replace(/^[A-Za-z]:/, '')) ||
-        path.split(/[\\/]/).some((p) => /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(p))))
-  )
+  if (unsupportedFilePath(path) || unsupportedFilePath(cwd))
     throw new Error('路径包含不支持的设备名或数据流');
   const absolute = resolve(cwd, path);
   const physical = (p: string): string => {

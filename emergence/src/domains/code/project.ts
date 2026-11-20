@@ -5,6 +5,7 @@ import { basename, delimiter, extname, isAbsolute, join, relative, resolve } fro
 import { boundedText } from '../../platform/text-file.ts';
 import { digest } from '../../platform/content-hash.ts';
 import { inside } from '../../platform/path-policy.ts';
+import { childEnvironment } from '../../platform/child-environment.ts';
 
 export const codeLimits = Object.freeze({
   files: 256,
@@ -90,7 +91,7 @@ export async function hostProcess(
       shell: false,
       signal,
       env: {
-        ...process.env,
+        ...childEnvironment(),
         GIT_OPTIONAL_LOCKS: '0',
         GIT_TERMINAL_PROMPT: '0',
         PYTHONDONTWRITEBYTECODE: '1',

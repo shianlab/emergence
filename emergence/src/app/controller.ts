@@ -9,7 +9,8 @@ import { randomUUID } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import { createCoreObserver, mountCoreObservation } from '../core/adapters/harness.ts';
 import { CoreMemory } from '../core/adapters/memory.ts';
-import { registerSecretNames, safeError } from '../core/adapters/redaction.ts';
+import { safeError } from '../core/adapters/redaction.ts';
+import { credentialSource, registerModelCredentials } from './credentials.ts';
 import { CorePlanning } from '../core/application/planning-service.ts';
 import { RunDiagnostics } from '../core/application/run-diagnostics.ts';
 import { type ModelConfig } from '../core/domain/configuration.ts';
@@ -192,7 +193,7 @@ export class SessionController extends EventEmitter {
     );
     this.instructions = new AgentInstructions(this);
     this.disposers.push(...this.instructions.mount());
-    registerSecretNames(launch.appConfig.models.map((model) => model.apiKeyEnv));
+    registerModelCredentials(launch.appConfig.models.map((model) => model.apiKeyEnv));
     if (launch.appConfig.shellMode === 'ask-local') this.disposers.push(registerLocalOwner(ctx, this));
     this.disposers.push(
       ...this.permissions.mount(),
@@ -282,6 +283,9 @@ export class SessionController extends EventEmitter {
   cancel() {
     return this.lifecycle.cancel();
   }
+  hasModelCredential(ref = this.model.apiKeyEnv) {
+    return credentialSource(this.launch.home, ref) !== 'missing';
+  }
   close() {
     return this.lifecycle.close(
       {
@@ -350,7 +354,7 @@ export class SessionController extends EventEmitter {
       await this.command(text);
       return;
     }
-    if (!process.env[this.model.apiKeyEnv])
+    if (!this.hasModelCredential())
       throw new Error(`请先设置环境变量 ${this.model.apiKeyEnv}，密钥不要填入聊天框`);
     this.lastError = undefined;
     const wasBusy = this.busy;

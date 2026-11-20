@@ -11,7 +11,7 @@ import UserApproval from '@deepseek-ai/dsh-user-approval';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -23,6 +23,9 @@ import { createRedactor, registerSecretNames, safeError } from '../src/core/adap
 import { fitCells, sessionFooter } from '../src/app/tui/workspace-chrome.ts';
 import { defaultConfig } from '../src/core/domain/configuration.ts';
 import { acquireLease } from '../src/core/storage/lease.ts';
+import { canonicalPermissionPath } from '../src/core/adapters/permissions.ts';
+import { hostProcess } from '../src/domains/code/project.ts';
+import { registerModelEnvironmentNames } from '../src/platform/child-environment.ts';
 import { harness } from './fixtures/harness.ts';
 
 class Provider extends LlmAdapter {
@@ -127,6 +130,58 @@ test('presentation passes redact all fields and pick up credential rotation on t
     delete process.env[key];
   }
 });
+test('redaction covers overlapping credentials, encoded values and sensitive URL fields', () => {
+  const a = 'AUDIT_OVERLAP_KEY_A',
+    b = 'AUDIT_OVERLAP_KEY_B';
+  const short = 'fixture-overlapping',
+    long = short + '/private+suffix';
+  process.env[a] = short;
+  process.env[b] = long;
+  try {
+    assert.equal(safeError(`${long} ${short} ${encodeURIComponent(long)}`), '[已隐藏] [已隐藏] [已隐藏]');
+    const url = new URL(
+      safeError('https://example.test/?client_secret=one&jwt=two&credential=three&keep=four'),
+    );
+    assert.deepEqual([...url.searchParams.values()], ['[已隐藏]', '[已隐藏]', '[已隐藏]', 'four']);
+  } finally {
+    delete process.env[a];
+    delete process.env[b];
+  }
+});
+test('read-only Code subprocesses keep regular settings but omit a registered custom credential', async () => {
+  const name = 'AUDIT_PROCESS_AUTH',
+    marker = 'AUDIT_PROCESS_MARKER';
+  registerModelEnvironmentNames([name.toLowerCase()]);
+  process.env[name] = 'process-fixture-value';
+  process.env[marker] = 'expected';
+  try {
+    const output = await hostProcess(
+      process.execPath,
+      ['-e', `console.log(JSON.stringify([Object.hasOwn(process.env, '${name}'), process.env.${marker}]))`],
+      process.cwd(),
+      new AbortController().signal,
+    );
+    assert.deepEqual(JSON.parse(output), [false, 'expected']);
+  } finally {
+    delete process.env[name];
+    delete process.env[marker];
+  }
+});
+test(
+  'Windows permission paths reject reserved names and preserve normal filenames',
+  {
+    skip: process.platform !== 'win32',
+  },
+  async () => {
+    const root = await realpath(await mkdtemp(join(tmpdir(), 'emergence-permission-path-')));
+    for (const name of ['CON .txt', 'LPT¹.log', 'COM0', 'document.md:metadata'])
+      assert.throws(() => canonicalPermissionPath(name, root), /设备名或数据流/);
+    assert.equal(
+      canonicalPermissionPath('console/report.md', root),
+      join(root, 'console', 'report.md').toLowerCase(),
+    );
+  },
+);
 test('OS lease rejects a second owner and releases for the next owner', async () => {
   const key = 'audit-' + randomUUID(),
     release = await acquireLease(key, '测试租约');

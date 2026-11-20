@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { registerSecretNames } from '../core/adapters/redaction.ts';
 import { configSchema, modelSchema, type AppConfig, type ModelConfig } from '../core/domain/configuration.ts';
 import { loadConfig, updateConfig } from './config.ts';
-import { credentialSource, resolveCredential, saveCredential } from './credentials.ts';
+import {
+  credentialSource,
+  prepareModelCredentials,
+  resolveCredential,
+  saveCredential,
+} from './credentials.ts';
 import { modelWireConfig } from './model-endpoint.ts';
 import { modelPresets } from './model-presets.ts';
 
@@ -82,6 +87,10 @@ export class ModelConfiguration {
   ) {}
   async state() {
     const config = await loadConfig(this.home);
+    await prepareModelCredentials(
+      this.home,
+      config.models.map((model) => model.apiKeyEnv),
+    );
     return {
       revision: configurationRevision(config),
       defaultModel: config.defaultModel,
@@ -89,8 +98,8 @@ export class ModelConfiguration {
       presets: modelPresets,
       models: config.models.map((model) => ({
         ...model,
-        credentialConfigured: Boolean(process.env[model.apiKeyEnv]),
-        credentialSource: credentialSource(model.apiKeyEnv),
+        credentialConfigured: credentialSource(this.home, model.apiKeyEnv) !== 'missing',
+        credentialSource: credentialSource(this.home, model.apiKeyEnv),
       })),
       windows: this.host?.windows() ?? [],
       live: Boolean(this.host),
@@ -169,7 +178,7 @@ export class ModelConfiguration {
     return {
       ...state,
       credentialWarning:
-        secret && credentialSource(value.model.apiKeyEnv) === 'environment'
+        secret && credentialSource(this.home, value.model.apiKeyEnv) === 'environment'
           ? `密钥已加密保存，但当前进程设置了 ${value.model.apiKeyEnv} 环境变量，实际请求仍使用环境变量。取消该变量并重启涌现后，才会使用新保存的密钥。`
           : undefined,
     };

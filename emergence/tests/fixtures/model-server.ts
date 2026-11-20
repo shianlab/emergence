@@ -18,7 +18,7 @@ const requestSchema = z
   })
   .passthrough();
 
-export async function modelServer() {
+export async function modelServer(credentialProof?: { command: string; value: string }) {
   const calls: Array<{ model: string; protocol: string; tools: string[]; scenario: string }> = [];
   let cancelled = 0;
   const server = createServer(async (req, res) => {
@@ -53,6 +53,15 @@ export async function modelServer() {
         tools: names,
         scenario,
       });
+      if (
+        credentialProof &&
+        (anthropic ? req.headers['x-api-key'] : req.headers.authorization) !==
+          (anthropic ? credentialProof.value : 'Bearer ' + credentialProof.value)
+      ) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { message: 'Fixture credential mismatch' } }));
+        return;
+      }
       if (scenario === 'error') {
         res.writeHead(401, { 'Content-Type': 'application/json' });
         res.end(
@@ -102,7 +111,7 @@ export async function modelServer() {
           {
             name: 'pwsh',
             args: {
-              command: "Get-Content -LiteralPath 'stage2-output.txt'",
+              command: credentialProof?.command ?? "Get-Content -LiteralPath 'stage2-output.txt'",
               description: 'Verify the stage two project file',
               timeout_ms: 10000,
             },
